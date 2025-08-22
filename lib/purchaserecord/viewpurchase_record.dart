@@ -12,6 +12,8 @@ class _ViewpurchaseRecordState extends State<ViewpurchaseRecord> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color(0xFF008000),
+      appBar: AppBar(title: const Text('View Purchase Record')),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

@@ -25,28 +25,7 @@ class PharmacySoftware extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       initialRoute: '/dashboard',
-      // builder:
-      //     (context, widget) => ResponsiveBreakpoints.builder(
-      //       child: widget!,
-      //       breakpoints: [
-      //         const Breakpoint(
-      //           start: 0,
-      //           end: 450,
-      //           name: MOBILE,
-      //         ), // small phones
-      //         const Breakpoint(start: 451, end: 800, name: TABLET), // tablets
-      //         const Breakpoint(
-      //           start: 801,
-      //           end: 1200,
-      //           name: DESKTOP,
-      //         ), // desktops
-      //         const Breakpoint(
-      //           start: 1201,
-      //           end: double.infinity,
-      //           name: 'XL',
-      //         ), // large screens
-      //       ],
-      //  ),
+
       routes: {
         '/dashboard': (context) => const Dashboard(),
         '/schedule': (context) => const Schedule(),

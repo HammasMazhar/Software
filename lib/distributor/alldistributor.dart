@@ -10,17 +10,7 @@ class Alldistributor extends StatefulWidget {
 class _AlldistributorState extends State<Alldistributor> {
   static const String routeName = '/alldistributor';
   List<Map<String, dynamic>> distributor = [
-    // {
-    //   "Name": "Distributor1",
-    //   "ManagerName": "Manager1",
-    //   "ManagerNumber": "1234567890",
-    //   "BookingMan1": "BookingMan1",
-    //   "BookingMan1Number": "0987654321",
-    //   "BookingMan2": "BookingMan2",
-    //   "BookingMan2Number": "1122334455",
-    //   "SupplyManName": "SupplyMan1",
-    //   "SupplyManNumber": "5566778899",
-    // },
+   
   ];
   void _adddDistributor() {
     showDialog(
@@ -318,7 +308,7 @@ class _AlldistributorState extends State<Alldistributor> {
                                   ),
                                   onPressed: () {
                                     setState(() {
-                                      distributor.remove(distributor);
+                                     this. distributor.remove(distributor);
                                     });
                                   },
                                 ),

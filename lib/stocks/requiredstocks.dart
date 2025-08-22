@@ -9,9 +9,7 @@ class Requiredstocks extends StatefulWidget {
 
 class _RequiredstocksState extends State<Requiredstocks> {
   static const String routeName = '/requiredstocks';
-  List<Map<String, dynamic>> sales = [
-    //{"Name": "panadol", "Quantitiy": "1500", "Distributor": "sameel"},
-  ];
+  List<Map<String, dynamic>> sales = [];
 
   void _addStocks() {
     showDialog(
@@ -66,14 +64,14 @@ class _RequiredstocksState extends State<Requiredstocks> {
     );
   }
 
-  void _editStocks(Map<String, dynamic> sale) {
-    final nameController = TextEditingController(text: sale["Name"]);
+  void _editStocks(Map<String, dynamic> stocks) {
+    final nameController = TextEditingController(text: stocks["Name"]);
     final quantityController = TextEditingController(
-      text: sale["Quantitiy"].toString(),
+      text: stocks["Quantitiy"].toString(),
     );
 
     final distributorController = TextEditingController(
-      text: sale["Distributor"],
+      text: stocks["Distributor"],
     );
     showDialog(
       context: context,
@@ -106,11 +104,11 @@ class _RequiredstocksState extends State<Requiredstocks> {
             ElevatedButton(
               onPressed: () {
                 setState(() {
-                  sale["Name"] = nameController.text;
-                  sale["Quantitiy"] =
+                  stocks["Name"] = nameController.text;
+                  stocks["Quantitiy"] =
                       int.tryParse(quantityController.text) ?? 0;
 
-                  sale["Distributor"] = distributorController.text;
+                  stocks["Distributor"] = distributorController.text;
                 });
                 Navigator.pop(context);
               },

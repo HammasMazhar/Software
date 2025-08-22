@@ -14,10 +14,8 @@ class InvoiceScreen extends StatefulWidget {
 }
 
 class _InvoiceScreenState extends State<InvoiceScreen> {
-  // Cart structure: {name: String, qty: int, price: double}
   final List<Map<String, dynamic>> cart = [];
 
-  // Input controllers
   final TextEditingController nameController = TextEditingController();
   final TextEditingController qtyController = TextEditingController();
   final TextEditingController priceController = TextEditingController();
@@ -26,10 +24,8 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
       TextEditingController();
   final TextEditingController discountAmountController =
       TextEditingController();
-  final TextEditingController counterPersonController =
-      TextEditingController(); // NEW
+  final TextEditingController counterPersonController = TextEditingController();
 
-  // Header details
   final String ntnNo = '#1234677';
   final String licenseNo = 'LIC-987654';
 
@@ -78,7 +74,6 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
     final double discountPercentInput =
         double.tryParse(discountPercentController.text.trim()) ?? 0;
 
-    // Apply discount: if manual amount > 0, use it; else use percent.
     double discount = 0;
     if (discountAmountInput > 0) {
       discount = discountAmountInput.clamp(0, subtotal);
@@ -95,7 +90,6 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ====== Top Header (Paper bill style) ======
             Row(
               children: [
                 // English (left)
@@ -131,7 +125,6 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
             ),
             const SizedBox(height: 8),
 
-            // NTN, License, Customer, Time row(s)
             Wrap(
               spacing: 16,
               runSpacing: 8,
@@ -156,7 +149,6 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
 
             const Divider(height: 24, thickness: 1),
 
-            // ====== Input fields to add medicines ======
             Row(
               children: [
                 Expanded(
@@ -177,7 +169,7 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
                 ),
                 const SizedBox(width: 10),
                 Expanded(
-                  flex: 2,
+                  flex: 1,
                   child: TextField(
                     controller: priceController,
                     decoration: const InputDecoration(labelText: 'Rate'),
@@ -194,7 +186,6 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
 
             const SizedBox(height: 16),
 
-            // ====== Medicines table ======
             Expanded(
               child: SingleChildScrollView(
                 scrollDirection: Axis.vertical,
@@ -205,6 +196,7 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
                     DataColumn(label: Text('Qty')),
                     DataColumn(label: Text('Rate')),
                     DataColumn(label: Text('Total')),
+                    DataColumn(label: Icon(Icons.delete, color: Colors.red)),
                   ],
                   rows: [
                     for (int i = 0; i < cart.length; i++)
@@ -225,6 +217,16 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
                                   .toStringAsFixed(2),
                             ),
                           ),
+                          DataCell(
+                            IconButton(
+                              icon: const Icon(Icons.delete, color: Colors.red),
+                              onPressed: () {
+                                setState(() {
+                                  cart.removeAt(i);
+                                });
+                              },
+                            ),
+                          ),
                         ],
                       ),
                   ],
@@ -234,7 +236,6 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
 
             const SizedBox(height: 8),
 
-            // ====== Discount controls ======
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
@@ -296,7 +297,6 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
 
             const SizedBox(height: 12),
 
-            // Counter person (on-screen) + Thank you (preview)
             Row(
               children: [
                 SizedBox(
@@ -320,7 +320,6 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
 
             const SizedBox(height: 12),
 
-            // Terms & Conditions (on-screen preview)
             const Text(
               'Terms & Conditions',
               style: TextStyle(fontWeight: FontWeight.bold),
@@ -330,19 +329,19 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: const [
                 Text(
-                  '1. Without bill, no medicine and other items will return/change.',
+                  ' بغیر بل کے کوئی دوا اور دیگر اشیاء واپس یا تبدیل نہیں کی جائیں گی۔',
                 ),
                 Text(
-                  '2. Purchase medicine only: return/change within 15 days; after that not possible.',
+                  'واپسی/تبدیلی صرف 15 دن کے اندر ممکن ہے، اس کے بعد ممکن نہیں ہوگی۔',
                 ),
                 Text(
-                  '3. Insulins, vaccines, fridge items, cosmetics, children grooming items, damaged medicine, seal-open syrup, test strips, sugar strips are not returnable.',
+                  ' انسولین، ویکسین، فریج کی اشیاء، کاسمیٹکس ، شوگر اسٹرپس واپس یا تبدیل نہیں کی جائیں گی۔',
                 ),
                 Text(
-                  '4. Check medicine and money at counter; after that no claim will be accepted.',
+                  ' دوا اور بقایا جات کاونٹر پر چیک کریں، بعد میں کوئی دعویٰ قبول نہیں کیا جائے گا۔',
                 ),
                 Text(
-                  '5. Use medicine with doctor’s advice; in case of misuse we are not responsible.',
+                  'دوا ڈاکٹر کے مشورے سے استعمال کریں؛ دوا کے غلط استعمال یا سائیڈ ایفیکٹس کی صورت میں ہم ذمہ دار نہیں ہوں گے۔',
                 ),
               ],
             ),
@@ -523,7 +522,6 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
 
               pw.SizedBox(height: 14),
 
-              // Terms & Conditions (exact points, numbered with dots)
               pw.Text(
                 'Terms & Conditions',
                 style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
@@ -533,26 +531,25 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
                 crossAxisAlignment: pw.CrossAxisAlignment.start,
                 children: [
                   pw.Text(
-                    '١۔ بغیر بل کے کوئی دوا اور دیگر اشیاء واپس یا تبدیل نہیں کی جائیں گی۔',
+                    ' بغیر بل کے کوئی دوا اور دیگر اشیاء واپس یا تبدیل نہیں کی جائیں گی۔',
                   ),
                   pw.Text(
-                    '٢۔ واپسی/تبدیلی صرف 15 دن کے اندر ممکن ہے، اس کے بعد ممکن نہیں ہوگی۔',
+                    ' واپسی/تبدیلی صرف 15 دن کے اندر ممکن ہے، اس کے بعد ممکن نہیں ہوگی۔',
                   ),
                   pw.Text(
-                    '٣۔ انسولین، ویکسین، فریج کی اشیاء، کاسمیٹکس ، شوگر اسٹرپس واپس یا تبدیل نہیں کی جائیں گی۔',
+                    ' انسولین، ویکسین، فریج کی اشیاء، کاسمیٹکس ، شوگر اسٹرپس واپس یا تبدیل نہیں کی جائیں گی۔',
                   ),
                   pw.Text(
                     '٤۔ دوا اور پیسے کاونٹر پر چیک کریں، بعد میں کوئی دعویٰ قبول نہیں کیا جائے گا۔',
                   ),
                   pw.Text(
-                    '٥۔ دوا ڈاکٹر کے مشورے سے استعمال کریں؛ دوا کے غلط استعمال یا سائیڈ ایفیکٹس کی صورت میں ہم ذمہ دار نہیں ہوں گے۔',
+                    ' دوا ڈاکٹر کے مشورے سے استعمال کریں؛ دوا کے غلط استعمال یا سائیڈ ایفیکٹس کی صورت میں ہم ذمہ دار نہیں ہوں گے۔',
                   ),
                 ],
               ),
 
               pw.SizedBox(height: 14),
 
-              // Footer row: left counter person, right big thank you
               pw.Row(
                 crossAxisAlignment: pw.CrossAxisAlignment.end,
                 children: [
@@ -579,22 +576,6 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
                   ),
                 ],
               ),
-
-              //  pw.SizedBox(height: 10),
-
-              // Urdu footer note (kept from your original)
-              // urduFont == null
-              //     ? pw.Text(
-              //       'ایک بار فروخت شدہ ادویات واپس نہیں ہوتیں۔ براہِ کرم ڈاکٹر کے مشورے کے مطابق استعمال کریں.',
-              //       style: const pw.TextStyle(fontSize: 10),
-              //     )
-              //     : pw.Directionality(
-              //       textDirection: pw.TextDirection.rtl,
-              //       child: pw.Text(
-              //         'ایک بار فروخت شدہ ادویات واپس نہیں ہوتیں۔ براہِ کرم ڈاکٹر کے مشورے کے مطابق استعمال کریں۔',
-              //         style: pw.TextStyle(font: urduFont, fontSize: 10),
-              //       ),
-              //     ),
             ],
           );
         },

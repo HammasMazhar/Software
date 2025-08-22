@@ -32,24 +32,14 @@ class _DashboardState extends State<Dashboard> {
   bool _isHoveredinvoiced = false;
   bool _isHovereddetailed = false;
   bool __isHoveredschedule = false;
-  // bool _isExpandedSale = false;
-  // bool _isExpandedPurchase = false;
-  // bool _isExpandedStock = false;
-  // bool _isExpandedDistributor = false;
-  // bool _onTapeedSale = true;
-  // bool _onTapeedPurchase = false;
-  // bool _onTapeedStock = false;
-  // bool _onTapeedDistributor = false;
-  // bool _ontappedInvoice = true;
+
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      //backgroundColor: const Color(0xFFfce7e7),
       backgroundColor: Color(0xFF008000),
       body: Row(
         children: [
-          // ✅ Left Permanent Sidebar with Text + Menu
           Container(
             width: 220,
             color: Colors.white,
@@ -93,11 +83,7 @@ class _DashboardState extends State<Dashboard> {
                     borderRadius: BorderRadius.circular(15),
                   ),
 
-                  // onExpansionChanged: (expanded) {
-                  //   setState(() {
-                  //     _isExpandedSale = expanded;
-                  //   });
-                  // },
+                 
                   title: const Text("Sale Record"),
                   leading: Icon(Icons.point_of_sale),
                   children: [
@@ -146,8 +132,7 @@ class _DashboardState extends State<Dashboard> {
                                 ? Color(0xFF008000)
                                 : Colors.white,
                         child: ListTile(
-                          // tileColor:
-                          //     _isHovered ? Color(0xFF008000) : Colors.white,
+                          
                           title: const Text("Current Sale"),
                           onTap: () {
                             Navigator.push(
@@ -170,11 +155,7 @@ class _DashboardState extends State<Dashboard> {
                   collapsedShape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(15),
                   ),
-                  // onExpansionChanged: (expanded) {
-                  //   setState(() {
-                  //     _isExpandedPurchase = expanded;
-                  //   });
-                  // },
+                 
                   title: const Text("Purchase Record"),
                   leading: Icon(Icons.shopping_bag),
 
@@ -224,10 +205,7 @@ class _DashboardState extends State<Dashboard> {
                                 ? Color(0xFF008000)
                                 : Colors.white,
                         child: ListTile(
-                          // tileColor:
-                          //     _isExpandedPurchase
-                          //         ? Color(0xFF008000)
-                          //         : Colors.white,
+                          
                           title: const Text("Current Purchase"),
                           onTap: () {
                             Navigator.push(
@@ -249,11 +227,7 @@ class _DashboardState extends State<Dashboard> {
                   collapsedShape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(15),
                   ),
-                  // onExpansionChanged: (expanded) {
-                  //   setState(() {
-                  //     _isExpandedStock = expanded;
-                  //   });
-                  // },
+                 
                   title: const Text("Stocks"),
                   leading: Icon(Icons.inventory_rounded),
                   children: [
@@ -272,8 +246,6 @@ class _DashboardState extends State<Dashboard> {
                                 ? Color(0xFF008000)
                                 : Colors.white,
                         child: ListTile(
-                          // tileColor:
-                          //     _isExpandedStock ? Color(0xFF008000) : Colors.white,
                           title: const Text("Available Stock"),
                           onTap: () {
                             Navigator.push(
@@ -352,11 +324,7 @@ class _DashboardState extends State<Dashboard> {
                   collapsedShape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(15),
                   ),
-                  // onExpansionChanged: (expanded) {
-                  //   setState(() {
-                  //     _isExpandedDistributor = expanded;
-                  //   });
-                  // },
+                 
                   title: const Text("Distributor"),
                   leading: Icon(Icons.local_shipping),
 
@@ -376,10 +344,7 @@ class _DashboardState extends State<Dashboard> {
                                 ? Color(0xFF008000)
                                 : Colors.white,
                         child: ListTile(
-                          // tileColor:
-                          //     _isExpandedDistributor
-                          //         ? Color(0xFF008000)
-                          //         : Colors.white,
+                         
                           title: const Text("All Distributors"),
                           onTap: () {
                             Navigator.push(
@@ -485,7 +450,6 @@ class _DashboardState extends State<Dashboard> {
             ),
           ),
 
-          // ✅ Right side main content (your UI)
           Expanded(
             child: Column(
               children: [
@@ -562,87 +526,7 @@ class _DashboardState extends State<Dashboard> {
                   ],
                 ),
 
-                // Padding(
-                //   padding: const EdgeInsets.only(top: 125.0),
-                //   child: Row(
-                //     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-
-                //     children: [
-                //       const SizedBox(width: 320),
-                //       Container(
-                //         width: 440,
-                //         height: 340,
-                //         decoration: BoxDecoration(
-                //           borderRadius: BorderRadius.circular(20),
-                //           gradient: const LinearGradient(
-                //             stops: [0.3, 0.3],
-                //             begin: Alignment.centerLeft,
-                //             end: Alignment.centerRight,
-                //             colors: [Color(0xFFe64340), Color(0xFFFFFFFF)],
-                //           ),
-                //         ),
-                //       ),
-                //       Container(
-                //         width: 440,
-                //         height: 340,
-                //         decoration: BoxDecoration(
-                //           borderRadius: BorderRadius.circular(20),
-                //           gradient: const LinearGradient(
-                //             stops: [0.3, 0.3],
-                //             begin: Alignment.centerLeft,
-                //             end: Alignment.centerRight,
-                //             colors: [Color(0xFFe64340), Color(0xFFFFFFFF)],
-                //           ),
-                //         ),
-                //       ),
-                //     ],
-                //   ),
-                // ),
-                // Padding(
-                //   padding: const EdgeInsets.only(top: 100.0),
-                //   child: Container(
-                //     width: 440,
-                //     height: 340,
-                //     decoration: BoxDecoration(
-                //       color: Colors.white,
-                //       borderRadius: BorderRadius.circular(20),
-                //     ),
-                //     child: Column(
-                //       children: [
-                //         Center(
-                //           child: const Text(
-                //             'Owner :  Mazhar Hussain',
-                //             style: TextStyle(
-                //               fontSize: 20,
-                //               fontWeight: FontWeight.bold,
-                //             ),
-                //           ),
-                //         ),
-                //         Text(
-                //           'License No:123456789',
-                //           style: TextStyle(
-                //             fontSize: 20,
-                //             fontWeight: FontWeight.bold,
-                //           ),
-                //         ),
-                //         Text(
-                //           'lincense expiry date: 12/12/2024',
-                //           style: TextStyle(
-                //             fontSize: 20,
-                //             fontWeight: FontWeight.bold,
-                //           ),
-                //         ),
-                //         Text(
-                //           '   NTN: 123456789',
-                //           style: TextStyle(
-                //             fontSize: 20,
-                //             fontWeight: FontWeight.bold,
-                //           ),
-                //         ),
-                //       ],
-                //     ),
-                //   ),
-                // ),
+             
               ],
             ),
           ),

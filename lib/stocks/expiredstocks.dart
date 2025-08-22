@@ -9,17 +9,7 @@ class Expiredstocks extends StatefulWidget {
 
 class _ExpiredstocksState extends State<Expiredstocks> {
   static const String routeName = '/view_sale';
-  List<Map<String, dynamic>> sales = [
-    // {
-    //   "id": 1,
-    //   "Batch": "001",
-    //   "Name": "panadol",
-    //   "Quantitiy": "1500",
-    //   "Price": "1500",
-    //   "ExpiryDate": "2023-10-01",
-    //   "Distributor": "sameel",
-    // },
-  ];
+  List<Map<String, dynamic>> sales = [];
 
   void _addSale() {
     showDialog(
