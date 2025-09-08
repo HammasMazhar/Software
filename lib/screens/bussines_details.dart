@@ -8,32 +8,28 @@ class BussinesDetails extends StatefulWidget {
 }
 
 class _BussinesDetailsState extends State<BussinesDetails> {
-  static const String routeName = '/bussines_details';
+  //static const String routeName = '/bussines_details';
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color(0xFF008000),
+      appBar: AppBar(
+        title: const Text("Bussiness Details"),
+        backgroundColor: const Color(0xFF008000),
+        elevation: 0,
+      ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text(
-              'Business Details',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
+            // SizedBox(height: 20),
+            // ElevatedButton(
+            //   onPressed: () {
+            //     Navigator.pushNamed(context, '/dashboard');
+            //   },
+            //   child: const Text('Go to Dashboard'),
+            // ),
             SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pushNamed(context, '/dashboard');
-              },
-              child: const Text('Go to Dashboard'),
-            ),
-            SizedBox(height: 20),
-
             Container(
               width: 350,
               height: 35,
@@ -43,7 +39,7 @@ class _BussinesDetailsState extends State<BussinesDetails> {
               ),
               child: Center(
                 child: Text(
-                  'Business Name: ABC Distributors',
+                  'Al-Shifa-Medical-Store',
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
               ),
@@ -58,13 +54,12 @@ class _BussinesDetailsState extends State<BussinesDetails> {
               ),
               child: Center(
                 child: Text(
-                  'Owner: ---------',
+                  'Owner license :121121212121212',
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
               ),
             ),
             SizedBox(height: 10),
-
             Container(
               width: 350,
               height: 35,
@@ -74,13 +69,12 @@ class _BussinesDetailsState extends State<BussinesDetails> {
               ),
               child: Center(
                 child: Text(
-                  'License No: 123456789',
+                  'Shop License No: 123456789',
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
               ),
             ),
             SizedBox(height: 10),
-
             Container(
               width: 350,
               height: 35,
@@ -96,7 +90,6 @@ class _BussinesDetailsState extends State<BussinesDetails> {
               ),
             ),
             SizedBox(height: 10),
-
             Container(
               width: 350,
               height: 35,

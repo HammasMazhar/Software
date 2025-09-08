@@ -1,110 +1,94 @@
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:software/reuseable_widget/dynamic_form.dart';
 
-class Schedule extends StatefulWidget {
-  const Schedule({super.key});
+class SchedulePage extends StatefulWidget {
+  const SchedulePage({super.key});
 
   @override
-  State<Schedule> createState() => _AddScheduleState();
+  State<SchedulePage> createState() => _SchedulePageState();
 }
 
-class _AddScheduleState extends State<Schedule> {
-  static const String routeName = '/schedule';
-  List<Map<String, dynamic>> schedule = [];
-  void _adddSchedule() {
+class _SchedulePageState extends State<SchedulePage> {
+  late Box scheduleBox;
+  String searchQuery = "";
+
+  @override
+  void initState() {
+    super.initState();
+    scheduleBox = Hive.box('scheduleBox');
+  }
+
+  void _addSchedule() {
+    final fieldNames = ["Distributor Name", "Day"];
+
     showDialog(
       context: context,
       builder: (context) {
-        final nameController = TextEditingController();
-        final dayController = TextEditingController();
-
         return AlertDialog(
           title: const Text('Add Schedule'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-
-            children: [
-              TextField(
-                controller: nameController,
-                decoration: const InputDecoration(
-                  labelText: 'Distributor Name',
-                ),
-              ),
-              TextField(
-                controller: dayController,
-                decoration: const InputDecoration(labelText: 'Day'),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  setState(() {
-                    schedule.add({
-                      "Name": nameController.text,
-                      "Day": dayController.text,
-                    });
-                  });
-                  Navigator.pop(context);
-                },
-                child: Text('Add '),
-              ),
-            ],
+          content: DynamicForm(
+            fieldNames: fieldNames,
+            onSubmit: (values) {
+              final newSchedule = {
+                'name': values["Distributor Name"] ?? "",
+                'day': values["Day"] ?? "",
+              };
+              scheduleBox.add(newSchedule);
+            },
           ),
         );
       },
     );
   }
 
-  void editSchedule(Map<String, dynamic> schedule) {
-    final nameController = TextEditingController(text: schedule['Name']);
-    final dayController = TextEditingController(text: schedule['Day']);
+  void _editSchedule(int key, Map schedule) {
+    final fieldNames = ["Distributor Name", "Day"];
 
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text("Edit Schedule "),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: nameController,
-                decoration: const InputDecoration(labelText: 'Schedule Name'),
-              ),
-
-              TextField(
-                controller: dayController,
-                decoration: InputDecoration(labelText: "Day"),
-              ),
-              SizedBox(height: 15),
-
-              Row(
-                children: [
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    child: Text("Cancel"),
-                  ),
-                  SizedBox(width: 15),
-                  ElevatedButton(
-                    onPressed: () {
-                      schedule["Name"] =
-                          nameController.text.isEmpty
-                              ? null
-                              : nameController.text;
-
-                      schedule["Day"] =
-                          dayController.text.isEmpty
-                              ? null
-                              : dayController.text;
-
-                      setState(() {});
-                      Navigator.pop(context);
-                    },
-                    child: Text("Update"),
-                  ),
-                ],
-              ),
-            ],
+          title: const Text("Edit Schedule"),
+          content: DynamicForm(
+            fieldNames: fieldNames,
+            initialValues: {
+              "Distributor Name": schedule['name'] ?? "",
+              "Day": schedule['day'] ?? "",
+            },
+            onSubmit: (values) {
+              final updatedSchedule = {
+                'name': values["Distributor Name"] ?? "",
+                'day': values["Day"] ?? "",
+              };
+              scheduleBox.put(key, updatedSchedule);
+            },
           ),
+        );
+      },
+    );
+  }
+
+  void _deleteSchedule(int key) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text("Are you sure?"),
+          content: const Text("This schedule will be deleted permanently."),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("Cancel"),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                scheduleBox.delete(key);
+                Navigator.pop(context);
+              },
+              child: const Text("Delete"),
+            ),
+          ],
         );
       },
     );
@@ -114,66 +98,109 @@ class _AddScheduleState extends State<Schedule> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(" Booking Schedule"),
+        title: const Text("Booking Schedule"),
+        centerTitle: true,
         backgroundColor: Colors.green,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            ElevatedButton(
-              onPressed: () {
-                _adddSchedule();
+            TextField(
+              decoration: InputDecoration(
+                labelText: "Search Distributor or Day",
+                prefixIcon: const Icon(Icons.search),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              onChanged: (value) {
+                setState(() {
+                  searchQuery = value.toLowerCase();
+                });
               },
-
-              child: const Text("+ Add schedule"),
             ),
+            const SizedBox(height: 10),
+            ElevatedButton(
+              onPressed: _addSchedule,
+              child: const Text("+ Add Schedule"),
+            ),
+            const SizedBox(height: 10),
             Expanded(
               child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: DataTable(
-                  columns: const [
-                    DataColumn(label: Text("Name")),
-                    DataColumn(label: Text("Day")),
+                scrollDirection: Axis.vertical,
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: ValueListenableBuilder(
+                    valueListenable: scheduleBox.listenable(),
+                    builder: (context, Box box, _) {
+                      if (box.isEmpty) {
+                        return const Padding(
+                          padding: EdgeInsets.all(16.0),
+                          child: Center(child: Text("No schedules available")),
+                        );
+                      }
 
-                    DataColumn(label: Text("Actions")),
-                  ],
-                  rows: [
-                    ...schedule.map(
-                      (schedule) => DataRow(
-                        cells: [
-                          DataCell(Text(schedule["Name"] ?? "")),
-                          DataCell(Text(schedule["Day"] ?? "")),
-                          DataCell(
-                            Row(
-                              children: [
-                                IconButton(
-                                  icon: const Icon(
-                                    Icons.edit,
-                                    color: Colors.blue,
-                                  ),
-                                  onPressed: () {
-                                    editSchedule(schedule);
-                                  },
-                                ),
-                                IconButton(
-                                  icon: const Icon(
-                                    Icons.delete,
-                                    color: Colors.red,
-                                  ),
-                                  onPressed: () {
-                                    setState(() {
-                                      this.schedule.remove(schedule);
-                                    });
-                                  },
-                                ),
-                              ],
-                            ),
-                          ),
+                      final filteredKeys = box.keys.where((key) {
+                        final data = box.get(key);
+
+                        if (data is! Map) return false;
+
+                        final schedule = Map<String, dynamic>.from(data);
+
+                        final name =
+                            (schedule['name'] ?? "").toString().toLowerCase();
+                        final day =
+                            (schedule['day'] ?? "").toString().toLowerCase();
+
+                        return name.contains(searchQuery) ||
+                            day.contains(searchQuery);
+                      }).toList();
+
+                      if (filteredKeys.isEmpty) {
+                        return const Padding(
+                          padding: EdgeInsets.all(16.0),
+                          child: Center(child: Text("No matching schedules")),
+                        );
+                      }
+
+                      return DataTable(
+                        columns: const [
+                          DataColumn(label: Text("Distributor Name")),
+                          DataColumn(label: Text("Day")),
+                          DataColumn(label: Text("Actions")),
                         ],
-                      ),
-                    ),
-                  ],
+                        rows: filteredKeys.map((key) {
+                          final schedule =
+                              Map<String, dynamic>.from(box.get(key));
+
+                          return DataRow(
+                            cells: [
+                              DataCell(Text(schedule['name'] ?? "")),
+                              DataCell(Text(schedule['day'] ?? "")),
+                              DataCell(
+                                Row(
+                                  children: [
+                                    IconButton(
+                                      icon: const Icon(Icons.edit,
+                                          color: Colors.blue),
+                                      onPressed: () =>
+                                          _editSchedule(key, schedule),
+                                    ),
+                                    IconButton(
+                                      icon: const Icon(Icons.delete,
+                                          color: Colors.red),
+                                      onPressed: () => _deleteSchedule(key),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          );
+                        }).toList(),
+                      );
+                    },
+                  ),
                 ),
               ),
             ),

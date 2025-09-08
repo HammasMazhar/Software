@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:software/reuseable_widget/dynamic_form.dart'; // import your widget
 
 class Requiredstocks extends StatefulWidget {
   const Requiredstocks({super.key});
@@ -8,94 +10,75 @@ class Requiredstocks extends StatefulWidget {
 }
 
 class _RequiredstocksState extends State<Requiredstocks> {
-  static const String routeName = '/requiredstocks';
-  List<Map<String, dynamic>> sales = [];
+//  static const String routeName = '/requiredstocks';
+  late Box requiredBox;
+
+  final List<String> fieldNames = [
+    "Name",
+    "Quantity",
+    "Distributor",
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    requiredBox = Hive.box('requiredBox');
+  }
 
   void _addStocks() {
     showDialog(
       context: context,
       builder: (context) {
-        final nameController = TextEditingController();
-        final quantityController = TextEditingController();
-
-        final distributorController = TextEditingController();
         return AlertDialog(
-          title: const Text("Add Expired Stock"),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: nameController,
-                decoration: const InputDecoration(labelText: "Name"),
-              ),
-              TextField(
-                controller: quantityController,
-                decoration: const InputDecoration(labelText: "Quantity"),
-              ),
-
-              TextField(
-                controller: distributorController,
-                decoration: const InputDecoration(labelText: "Distributor"),
-              ),
-            ],
+          title: const Text("Add Required Stock"),
+          content: DynamicForm(
+            fieldNames: fieldNames,
+            onSubmit: (values) {
+              requiredBox.add({
+                "Name": values["Name"] ?? "",
+                "Quantity": int.tryParse(values["Quantity"] ?? "0") ?? 0,
+                "Distributor": values["Distributor"] ?? "",
+              });
+            },
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text("Cancel"),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                setState(() {
-                  sales.add({
-                    "Name": nameController.text,
-                    "Quantitiy": int.tryParse(quantityController.text) ?? 0,
-
-                    "Distributor": distributorController.text,
-                  });
-                });
-                Navigator.pop(context);
-              },
-              child: const Text("Add"),
-            ),
-          ],
         );
       },
     );
   }
 
-  void _editStocks(Map<String, dynamic> stocks) {
-    final nameController = TextEditingController(text: stocks["Name"]);
-    final quantityController = TextEditingController(
-      text: stocks["Quantitiy"].toString(),
-    );
-
-    final distributorController = TextEditingController(
-      text: stocks["Distributor"],
-    );
+  void _editStocks(int index, Map stock) {
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text("Edit Expired Stock"),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: nameController,
-                decoration: const InputDecoration(labelText: "Name"),
-              ),
-              TextField(
-                controller: quantityController,
-                decoration: const InputDecoration(labelText: "Quantity"),
-              ),
-
-              TextField(
-                controller: distributorController,
-                decoration: const InputDecoration(labelText: "Distributor"),
-              ),
-            ],
+          title: const Text("Edit Required Stock"),
+          content: DynamicForm(
+            fieldNames: fieldNames,
+            initialValues: {
+              "Name": stock["Name"] ?? "",
+              "Quantity": stock["Quantity"].toString(),
+              "Distributor": stock["Distributor"] ?? "",
+            },
+            onSubmit: (values) {
+              requiredBox.putAt(index, {
+                "Name": values["Name"] ?? "",
+                "Quantity": int.tryParse(values["Quantity"] ?? "0") ?? 0,
+                "Distributor": values["Distributor"] ?? "",
+              });
+            },
           ),
+        );
+      },
+    );
+  }
+
+  void _deleteStocks(int index) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text("Are you sure?"),
+          content: const Text("This stock will be deleted permanently."),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
@@ -103,27 +86,18 @@ class _RequiredstocksState extends State<Requiredstocks> {
             ),
             ElevatedButton(
               onPressed: () {
-                setState(() {
-                  stocks["Name"] = nameController.text;
-                  stocks["Quantitiy"] =
-                      int.tryParse(quantityController.text) ?? 0;
-
-                  stocks["Distributor"] = distributorController.text;
-                });
+                requiredBox.deleteAt(index);
                 Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Stock deleted')),
+                );
               },
-              child: const Text("Update"),
+              child: const Text("Delete"),
             ),
           ],
         );
       },
     );
-  }
-
-  void _deleteStocks(Map<String, dynamic> sale) {
-    setState(() {
-      sales.remove(sale);
-    });
   }
 
   @override
@@ -132,6 +106,7 @@ class _RequiredstocksState extends State<Requiredstocks> {
       appBar: AppBar(
         title: const Text("Required Stocks"),
         backgroundColor: Colors.green,
+        centerTitle: true,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -141,49 +116,60 @@ class _RequiredstocksState extends State<Requiredstocks> {
               onPressed: _addStocks,
               child: const Text("+ Add Required Stock"),
             ),
+            const SizedBox(height: 10),
             Expanded(
-              child: DataTable(
-                columns: const [
-                  DataColumn(label: Text("Name")),
-                  DataColumn(label: Text("Quantity")),
-                  DataColumn(label: Text("Distributor")),
-                  DataColumn(label: Text("Actions")),
-                ],
-                rows:
-                    sales
-                        .map(
-                          (sale) => DataRow(
-                            cells: [
-                              DataCell(Text(sale["Name"] ?? "")),
-                              DataCell(
-                                Text(sale["Quantitiy"]?.toString() ?? "0"),
-                              ),
+              child: ValueListenableBuilder(
+                valueListenable: requiredBox.listenable(),
+                builder: (context, Box box, _) {
+                  if (box.isEmpty) {
+                    return const Center(child: Text("No Required Stocks"));
+                  }
 
-                              DataCell(Text(sale["Distributor"] ?? "")),
-                              DataCell(
-                                Row(
-                                  children: [
-                                    IconButton(
-                                      icon: const Icon(
-                                        Icons.edit,
-                                        color: Colors.blue,
+                  return SingleChildScrollView(
+                    scrollDirection: Axis.vertical,
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: DataTable(
+                        columns: const [
+                          DataColumn(label: Text("Name")),
+                          DataColumn(label: Text("Quantity")),
+                          DataColumn(label: Text("Distributor")),
+                          DataColumn(label: Text("Actions")),
+                        ],
+                        rows: List.generate(
+                          box.length,
+                          (index) {
+                            final stock = box.getAt(index) as Map;
+                            return DataRow(
+                              cells: [
+                                DataCell(Text(stock["Name"] ?? "")),
+                                DataCell(Text(stock["Quantity"].toString())),
+                                DataCell(Text(stock["Distributor"] ?? "")),
+                                DataCell(
+                                  Row(
+                                    children: [
+                                      IconButton(
+                                        icon: const Icon(Icons.edit,
+                                            color: Colors.blue),
+                                        onPressed: () =>
+                                            _editStocks(index, stock),
                                       ),
-                                      onPressed: () => _editStocks(sale),
-                                    ),
-                                    IconButton(
-                                      icon: const Icon(
-                                        Icons.delete,
-                                        color: Colors.red,
+                                      IconButton(
+                                        icon: const Icon(Icons.delete,
+                                            color: Colors.red),
+                                        onPressed: () => _deleteStocks(index),
                                       ),
-                                      onPressed: () => _deleteStocks(sale),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
-                              ),
-                            ],
-                          ),
-                        )
-                        .toList(),
+                              ],
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                  );
+                },
               ),
             ),
           ],

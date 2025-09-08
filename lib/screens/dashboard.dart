@@ -1,15 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:software/distributor/schedule.dart';
+import 'package:software/screens/medicine_invoices.dart';
 import 'package:software/purchaserecord/currentpurchase.dart';
+import 'package:software/screens/reports.dart';
 import 'package:software/salerecord/currentsale.dart';
 import 'package:software/salerecord/viewsale.dart';
 import 'package:software/screens/bussines_details.dart';
 import 'package:software/distributor/alldistributor.dart';
-import 'package:software/invoice.dart';
+import 'package:software/screens/invoice.dart';
+import 'package:software/screens/discount.dart';
 import 'package:software/stocks/availablestocks.dart';
 import 'package:software/stocks/expiredstocks.dart';
-import 'package:software/purchaserecord/viewpurchase_record.dart';
+import 'package:software/purchaserecord/addpurchase.dart';
 import 'package:software/stocks/requiredstocks.dart';
+import 'package:software/screens/tasks_to_do.dart';
 
 class Dashboard extends StatefulWidget {
   const Dashboard({super.key});
@@ -19,7 +23,7 @@ class Dashboard extends StatefulWidget {
 }
 
 class _DashboardState extends State<Dashboard> {
-  static const String routeName = '/dashboard';
+//  static const String routeName = '/dashboard';
   TextEditingController searchController = TextEditingController();
   bool _isHoveredViewSale = false;
   bool _isHoveredCurrentSale = false;
@@ -32,8 +36,10 @@ class _DashboardState extends State<Dashboard> {
   bool _isHoveredinvoiced = false;
   bool _isHovereddetailed = false;
   bool __isHoveredschedule = false;
-
-
+  bool __isHoveredReport = false;
+  bool __isHoveredTasks = false;
+  bool _isHoveredMedicineInvoiced = false;
+  bool _isDiscount = false;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -82,25 +88,20 @@ class _DashboardState extends State<Dashboard> {
                   collapsedShape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(15),
                   ),
-
-                 
                   title: const Text("Sale Record"),
                   leading: Icon(Icons.point_of_sale),
                   children: [
                     MouseRegion(
-                      onEnter:
-                          (_) => setState(() {
-                            _isHoveredViewSale = true;
-                          }),
-                      onExit:
-                          (_) => setState(() {
-                            _isHoveredViewSale = false;
-                          }),
+                      onEnter: (_) => setState(() {
+                        _isHoveredViewSale = true;
+                      }),
+                      onExit: (_) => setState(() {
+                        _isHoveredViewSale = false;
+                      }),
                       child: Container(
-                        color:
-                            _isHoveredViewSale
-                                ? Color(0xFF008000)
-                                : Colors.white,
+                        color: _isHoveredViewSale
+                            ? Color(0xFF008000)
+                            : Colors.white,
                         child: ListTile(
                           // tileColor:
                           //     _isHovered ? Color(0xFF008000) : Colors.white,
@@ -118,21 +119,17 @@ class _DashboardState extends State<Dashboard> {
                     ),
                     SizedBox(height: 5),
                     MouseRegion(
-                      onEnter:
-                          (_) => setState(() {
-                            _isHoveredCurrentSale = true;
-                          }),
-                      onExit:
-                          (_) => setState(() {
-                            _isHoveredCurrentSale = false;
-                          }),
+                      onEnter: (_) => setState(() {
+                        _isHoveredCurrentSale = true;
+                      }),
+                      onExit: (_) => setState(() {
+                        _isHoveredCurrentSale = false;
+                      }),
                       child: Container(
-                        color:
-                            _isHoveredCurrentSale
-                                ? Color(0xFF008000)
-                                : Colors.white,
+                        color: _isHoveredCurrentSale
+                            ? Color(0xFF008000)
+                            : Colors.white,
                         child: ListTile(
-                          
                           title: const Text("Current Sale"),
                           onTap: () {
                             Navigator.push(
@@ -155,33 +152,27 @@ class _DashboardState extends State<Dashboard> {
                   collapsedShape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(15),
                   ),
-                 
                   title: const Text("Purchase Record"),
                   leading: Icon(Icons.shopping_bag),
-
                   children: [
                     MouseRegion(
-                      onEnter:
-                          (_) => setState(() {
-                            _isHoveredViewPurchase = true;
-                          }),
-                      onExit:
-                          (_) => setState(() {
-                            _isHoveredViewPurchase = false;
-                          }),
+                      onEnter: (_) => setState(() {
+                        _isHoveredViewPurchase = true;
+                      }),
+                      onExit: (_) => setState(() {
+                        _isHoveredViewPurchase = false;
+                      }),
                       child: Container(
-                        color:
-                            _isHoveredViewPurchase
-                                ? Color(0xFF008000)
-                                : Colors.white,
+                        color: _isHoveredViewPurchase
+                            ? Color(0xFF008000)
+                            : Colors.white,
                         child: ListTile(
-                          title: const Text("View Purchases"),
+                          title: const Text("Add Purchases"),
                           onTap: () {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder:
-                                    (context) => const ViewpurchaseRecord(),
+                                builder: (context) => const PurchaseScreen(),
                               ),
                             );
                           },
@@ -189,23 +180,18 @@ class _DashboardState extends State<Dashboard> {
                       ),
                     ),
                     SizedBox(height: 5),
-
                     MouseRegion(
-                      onEnter:
-                          (_) => setState(() {
-                            _isHoveredAddPurchase = true;
-                          }),
-                      onExit:
-                          (_) => setState(() {
-                            _isHoveredAddPurchase = false;
-                          }),
+                      onEnter: (_) => setState(() {
+                        _isHoveredAddPurchase = true;
+                      }),
+                      onExit: (_) => setState(() {
+                        _isHoveredAddPurchase = false;
+                      }),
                       child: Container(
-                        color:
-                            _isHoveredAddPurchase
-                                ? Color(0xFF008000)
-                                : Colors.white,
+                        color: _isHoveredAddPurchase
+                            ? Color(0xFF008000)
+                            : Colors.white,
                         child: ListTile(
-                          
                           title: const Text("Current Purchase"),
                           onTap: () {
                             Navigator.push(
@@ -227,24 +213,20 @@ class _DashboardState extends State<Dashboard> {
                   collapsedShape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(15),
                   ),
-                 
                   title: const Text("Stocks"),
                   leading: Icon(Icons.inventory_rounded),
                   children: [
                     MouseRegion(
-                      onEnter:
-                          (_) => setState(() {
-                            _isHoveredAvailableStock = true;
-                          }),
-                      onExit:
-                          (_) => setState(() {
-                            _isHoveredAvailableStock = false;
-                          }),
+                      onEnter: (_) => setState(() {
+                        _isHoveredAvailableStock = true;
+                      }),
+                      onExit: (_) => setState(() {
+                        _isHoveredAvailableStock = false;
+                      }),
                       child: Container(
-                        color:
-                            _isHoveredAvailableStock
-                                ? Color(0xFF008000)
-                                : Colors.white,
+                        color: _isHoveredAvailableStock
+                            ? Color(0xFF008000)
+                            : Colors.white,
                         child: ListTile(
                           title: const Text("Available Stock"),
                           onTap: () {
@@ -259,21 +241,17 @@ class _DashboardState extends State<Dashboard> {
                       ),
                     ),
                     SizedBox(height: 5),
-
                     MouseRegion(
-                      onEnter:
-                          (_) => setState(() {
-                            _isHoveredExpiredStock = true;
-                          }),
-                      onExit:
-                          (_) => setState(() {
-                            _isHoveredExpiredStock = false;
-                          }),
+                      onEnter: (_) => setState(() {
+                        _isHoveredExpiredStock = true;
+                      }),
+                      onExit: (_) => setState(() {
+                        _isHoveredExpiredStock = false;
+                      }),
                       child: Container(
-                        color:
-                            _isHoveredExpiredStock
-                                ? Color(0xFF008000)
-                                : Colors.white,
+                        color: _isHoveredExpiredStock
+                            ? Color(0xFF008000)
+                            : Colors.white,
                         child: ListTile(
                           title: const Text("Expired Stock"),
                           onTap: () {
@@ -289,19 +267,16 @@ class _DashboardState extends State<Dashboard> {
                     ),
                     SizedBox(height: 5),
                     MouseRegion(
-                      onEnter:
-                          (_) => setState(() {
-                            _isHoveredRequiredStocks = true;
-                          }),
-                      onExit:
-                          (_) => setState(() {
-                            _isHoveredRequiredStocks = false;
-                          }),
+                      onEnter: (_) => setState(() {
+                        _isHoveredRequiredStocks = true;
+                      }),
+                      onExit: (_) => setState(() {
+                        _isHoveredRequiredStocks = false;
+                      }),
                       child: Container(
-                        color:
-                            _isHoveredRequiredStocks
-                                ? Color(0xFF008000)
-                                : Colors.white,
+                        color: _isHoveredRequiredStocks
+                            ? Color(0xFF008000)
+                            : Colors.white,
                         child: ListTile(
                           title: const Text("Required Stocks"),
                           onTap: () {
@@ -324,27 +299,21 @@ class _DashboardState extends State<Dashboard> {
                   collapsedShape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(15),
                   ),
-                 
                   title: const Text("Distributor"),
                   leading: Icon(Icons.local_shipping),
-
                   children: [
                     MouseRegion(
-                      onEnter:
-                          (_) => setState(() {
-                            _isHoveredAllDistributor = true;
-                          }),
-                      onExit:
-                          (_) => setState(() {
-                            _isHoveredAllDistributor = false;
-                          }),
+                      onEnter: (_) => setState(() {
+                        _isHoveredAllDistributor = true;
+                      }),
+                      onExit: (_) => setState(() {
+                        _isHoveredAllDistributor = false;
+                      }),
                       child: Container(
-                        color:
-                            _isHoveredAllDistributor
-                                ? Color(0xFF008000)
-                                : Colors.white,
+                        color: _isHoveredAllDistributor
+                            ? Color(0xFF008000)
+                            : Colors.white,
                         child: ListTile(
-                         
                           title: const Text("All Distributors"),
                           onTap: () {
                             Navigator.push(
@@ -358,22 +327,17 @@ class _DashboardState extends State<Dashboard> {
                       ),
                     ),
                     SizedBox(height: 5),
-
                     MouseRegion(
-                      onEnter:
-                          (_) => setState(() {
-                            __isHoveredschedule = true;
-                          }),
-                      onExit:
-                          (_) => setState(() {
-                            __isHoveredschedule = false;
-                          }),
+                      onEnter: (_) => setState(() {
+                        __isHoveredschedule = true;
+                      }),
+                      onExit: (_) => setState(() {
+                        __isHoveredschedule = false;
+                      }),
                       child: Container(
-                        color:
-                            __isHoveredschedule
-                                ? Color(0xFF008000)
-                                : Colors.white,
-
+                        color: __isHoveredschedule
+                            ? Color(0xFF008000)
+                            : Colors.white,
                         child: ListTile(
                           // tileColor:
                           title: const Text("Booking Schedule"),
@@ -381,7 +345,7 @@ class _DashboardState extends State<Dashboard> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => const Schedule(),
+                                builder: (context) => const SchedulePage(),
                               ),
                             );
                           },
@@ -391,22 +355,18 @@ class _DashboardState extends State<Dashboard> {
                   ],
                 ),
                 MouseRegion(
-                  onEnter:
-                      (_) => setState(() {
-                        _isHoveredinvoiced = true;
-                      }),
-                  onExit:
-                      (_) => setState(() {
-                        _isHoveredinvoiced = false;
-                      }),
+                  onEnter: (_) => setState(() {
+                    _isHoveredinvoiced = true;
+                  }),
+                  onExit: (_) => setState(() {
+                    _isHoveredinvoiced = false;
+                  }),
                   child: Container(
                     color:
                         _isHoveredinvoiced ? Color(0xFF008000) : Colors.white,
-
                     child: ListTile(
                       title: const Text("Invoice"),
                       leading: Icon(Icons.receipt_long),
-
                       onTap: () {
                         Navigator.push(
                           context,
@@ -418,23 +378,89 @@ class _DashboardState extends State<Dashboard> {
                     ),
                   ),
                 ),
+
                 MouseRegion(
-                  onEnter:
-                      (_) => setState(() {
-                        _isHovereddetailed = true;
-                      }),
-                  onExit:
-                      (_) => setState(() {
-                        _isHovereddetailed = false;
-                      }),
+                  onEnter: (_) => setState(() {
+                    __isHoveredReport = true;
+                  }),
+                  onExit: (_) => setState(() {
+                    __isHoveredReport = false;
+                  }),
+                  child: Container(
+                    color: __isHoveredReport ? Color(0xFF008000) : Colors.white,
+                    child: ListTile(
+                      title: const Text("Reports"),
+                      leading: Icon(Icons.info_outline),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const Reports(),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+                MouseRegion(
+                  onEnter: (_) => setState(() {
+                    __isHoveredTasks = true;
+                  }),
+                  onExit: (_) => setState(() {
+                    __isHoveredTasks = false;
+                  }),
+                  child: Container(
+                    color: __isHoveredTasks ? Color(0xFF008000) : Colors.white,
+                    child: ListTile(
+                      title: const Text("Tasks"),
+                      leading: Icon(Icons.assignment),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const TasksToDo(),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+                MouseRegion(
+                  onEnter: (_) => setState(() {
+                    _isDiscount = true;
+                  }),
+                  onExit: (_) => setState(() {
+                    _isDiscount = false;
+                  }),
+                  child: Container(
+                    color: _isDiscount ? Color(0xFF008000) : Colors.white,
+                    child: ListTile(
+                      title: const Text("Discount"),
+                      leading: Icon(Icons.money_off_csred_rounded),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const Discount(),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+                MouseRegion(
+                  onEnter: (_) => setState(() {
+                    _isHovereddetailed = true;
+                  }),
+                  onExit: (_) => setState(() {
+                    _isHovereddetailed = false;
+                  }),
                   child: Container(
                     color:
                         _isHovereddetailed ? Color(0xFF008000) : Colors.white,
-
                     child: ListTile(
                       title: const Text("Bussiness Details"),
-                      leading: Icon(Icons.info_outline),
-
+                      leading: Icon(Icons.info_rounded),
                       onTap: () {
                         Navigator.push(
                           context,
@@ -446,10 +472,34 @@ class _DashboardState extends State<Dashboard> {
                     ),
                   ),
                 ),
+                MouseRegion(
+                  onEnter: (_) => setState(() {
+                    _isHoveredMedicineInvoiced = true;
+                  }),
+                  onExit: (_) => setState(() {
+                    _isHoveredMedicineInvoiced = false;
+                  }),
+                  child: Container(
+                    color: _isHoveredMedicineInvoiced
+                        ? Color(0xFF008000)
+                        : Colors.white,
+                    child: ListTile(
+                      title: const Text("Medicines Invoice"),
+                      leading: Icon(Icons.numbers),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const StoreMedicineInvoice(),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
-
           Expanded(
             child: Column(
               children: [
@@ -489,44 +539,42 @@ class _DashboardState extends State<Dashboard> {
                         ),
                       ],
                     ),
-                    const SizedBox(width: 200),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 80, left: 50),
-                      child: SizedBox(
-                        width: 300,
-                        height: 50,
-                        child: TextFormField(
-                          controller: searchController,
-                          onChanged: (value) {},
-                          style: const TextStyle(
-                            fontSize: 18,
-                            color: Colors.black,
-                          ),
-                          decoration: InputDecoration(
-                            hintText: 'Search Medicine',
-                            hintStyle: const TextStyle(
-                              fontSize: 18,
-                              color: Colors.black,
-                              fontWeight: FontWeight.w500,
-                            ),
-                            prefixIcon: const Icon(
-                              Icons.search,
-                              color: Colors.red,
-                            ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                              borderSide: BorderSide.none,
-                            ),
-                            filled: true,
-                            fillColor: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ),
+                    // const SizedBox(width: 200),
+                    // Padding(
+                    //   padding: const EdgeInsets.only(top: 80, left: 50),
+                    //   child: SizedBox(
+                    //     width: 300,
+                    //     height: 50,
+                    //     child: TextFormField(
+                    //       controller: searchController,
+                    //       onChanged: (value) {},
+                    //       style: const TextStyle(
+                    //         fontSize: 18,
+                    //         color: Colors.black,
+                    //       ),
+                    //       decoration: InputDecoration(
+                    //         hintText: 'Search Medicine',
+                    //         hintStyle: const TextStyle(
+                    //           fontSize: 18,
+                    //           color: Colors.black,
+                    //           fontWeight: FontWeight.w500,
+                    //         ),
+                    //         prefixIcon: const Icon(
+                    //           Icons.search,
+                    //           color: Colors.red,
+                    //         ),
+                    //         border: OutlineInputBorder(
+                    //           borderRadius: BorderRadius.circular(10),
+                    //           borderSide: BorderSide.none,
+                    //         ),
+                    //         filled: true,
+                    //         fillColor: Colors.white,
+                    //       ),
+                    //     ),
+                    //   ),
+                    // ),
                   ],
                 ),
-
-             
               ],
             ),
           ),

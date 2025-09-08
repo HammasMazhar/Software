@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:software/reuseable_widget/dynamic_form.dart'; // your DynamicForm widget
 
 class Expiredstocks extends StatefulWidget {
   const Expiredstocks({super.key});
@@ -8,168 +10,107 @@ class Expiredstocks extends StatefulWidget {
 }
 
 class _ExpiredstocksState extends State<Expiredstocks> {
-  static const String routeName = '/view_sale';
-  List<Map<String, dynamic>> sales = [];
+  late Box expiredBox;
+
+  final List<String> fieldNames = [
+    "id",
+    "Batch",
+    "Name",
+    "Quantity",
+    "Price",
+    "ExpiryDate",
+    "Distributor",
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    expiredBox = Hive.box('expiredBox');
+  }
 
   void _addSale() {
     showDialog(
       context: context,
       builder: (context) {
-        final idController = TextEditingController();
-        final batchController = TextEditingController();
-        final nameController = TextEditingController();
-        final quantityController = TextEditingController();
-        final priceController = TextEditingController();
-        final expiryDateController = TextEditingController();
-        final distributorController = TextEditingController();
         return AlertDialog(
           title: const Text("Add Expired Stock"),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: idController,
-                decoration: const InputDecoration(labelText: "ID"),
-              ),
-              TextField(
-                controller: batchController,
-                decoration: const InputDecoration(labelText: "Batch"),
-              ),
-              TextField(
-                controller: nameController,
-                decoration: const InputDecoration(labelText: "Name"),
-              ),
-              TextField(
-                controller: quantityController,
-                decoration: const InputDecoration(labelText: "Quantity"),
-              ),
-              TextField(
-                controller: priceController,
-                decoration: const InputDecoration(labelText: "Price"),
-              ),
-              TextField(
-                controller: expiryDateController,
-                decoration: const InputDecoration(labelText: "Expiry Date"),
-              ),
-              TextField(
-                controller: distributorController,
-                decoration: const InputDecoration(labelText: "Distributor"),
-              ),
-            ],
+          content: DynamicForm(
+            fieldNames: fieldNames,
+            onSubmit: (values) {
+              expiredBox.add({
+                "id": int.tryParse(values["id"] ?? "0") ?? 0,
+                "Batch": values["Batch"] ?? "",
+                "Name": values["Name"] ?? "",
+                "Quantitiy": int.tryParse(values["Quantity"] ?? "0") ?? 0,
+                "Price": double.tryParse(values["Price"] ?? "0") ?? 0.0,
+                "ExpiryDate": values["ExpiryDate"] ?? "",
+                "Distributor": values["Distributor"] ?? "",
+              });
+              Navigator.pop(context); // close dialog after adding
+            },
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text("Cancel"),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                setState(() {
-                  sales.add({
-                    "id": int.tryParse(idController.text) ?? 0,
-                    "Batch": batchController.text,
-                    "Name": nameController.text,
-                    "Quantitiy": int.tryParse(quantityController.text) ?? 0,
-                    "Price": double.tryParse(priceController.text) ?? 0.0,
-                    "ExpiryDate": expiryDateController.text,
-                    "Distributor": distributorController.text,
-                  });
-                });
-                Navigator.pop(context);
-              },
-              child: const Text("Add"),
-            ),
-          ],
         );
       },
     );
   }
 
-  void _editSale(Map<String, dynamic> sale) {
-    final idController = TextEditingController(text: sale["id"].toString());
-    final batchController = TextEditingController(text: sale["Batch"]);
-    final nameController = TextEditingController(text: sale["Name"]);
-    final quantityController = TextEditingController(
-      text: sale["Quantitiy"].toString(),
-    );
-    final priceController = TextEditingController(
-      text: sale["Price"].toString(),
-    );
-    final expiryDateController = TextEditingController(
-      text: sale["ExpiryDate"],
-    );
-    final distributorController = TextEditingController(
-      text: sale["Distributor"],
-    );
+  void _editSale(int key, Map sale) {
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
           title: const Text("Edit Expired Stock"),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: idController,
-                decoration: const InputDecoration(labelText: "ID"),
-              ),
-              TextField(
-                controller: batchController,
-                decoration: const InputDecoration(labelText: "Batch"),
-              ),
-              TextField(
-                controller: nameController,
-                decoration: const InputDecoration(labelText: "Name"),
-              ),
-              TextField(
-                controller: quantityController,
-                decoration: const InputDecoration(labelText: "Quantity"),
-              ),
-              TextField(
-                controller: priceController,
-                decoration: const InputDecoration(labelText: "Price"),
-              ),
-              TextField(
-                controller: expiryDateController,
-                decoration: const InputDecoration(labelText: "Expiry Date"),
-              ),
-              TextField(
-                controller: distributorController,
-                decoration: const InputDecoration(labelText: "Distributor"),
-              ),
-            ],
+          content: DynamicForm(
+            fieldNames: fieldNames,
+            initialValues: {
+              "id": sale["id"].toString(),
+              "Batch": sale["Batch"] ?? "",
+              "Name": sale["Name"] ?? "",
+              "Quantity": sale["Quantitiy"].toString(),
+              "Price": sale["Price"].toString(),
+              "ExpiryDate": sale["ExpiryDate"] ?? "",
+              "Distributor": sale["Distributor"] ?? "",
+            },
+            onSubmit: (values) {
+              expiredBox.put(key, {
+                "id": int.tryParse(values["id"] ?? "0") ?? 0,
+                "Batch": values["Batch"] ?? "",
+                "Name": values["Name"] ?? "",
+                "Quantitiy": int.tryParse(values["Quantity"] ?? "0") ?? 0,
+                "Price": double.tryParse(values["Price"] ?? "0") ?? 0.0,
+                "ExpiryDate": values["ExpiryDate"] ?? "",
+                "Distributor": values["Distributor"] ?? "",
+              });
+              // Navigator.pop(context); // close edit dialog
+            },
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text("Cancel"),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                setState(() {
-                  sale["id"] = int.tryParse(idController.text) ?? 0;
-                  sale["Batch"] = batchController.text;
-                  sale["Name"] = nameController.text;
-                  sale["Quantitiy"] =
-                      int.tryParse(quantityController.text) ?? 0;
-                  sale["Price"] = double.tryParse(priceController.text) ?? 0.0;
-                  sale["ExpiryDate"] = expiryDateController.text;
-                  sale["Distributor"] = distributorController.text;
-                });
-                Navigator.pop(context);
-              },
-              child: const Text("Update"),
-            ),
-          ],
         );
       },
     );
   }
 
-  void _deleteSale(Map<String, dynamic> sale) {
-    setState(() {
-      sales.remove(sale);
-    });
+  void _deleteSale(int key) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Confirm Delete"),
+        content:
+            const Text("Are you sure you want to delete this expired stock?"),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context), // Cancel
+            child: const Text("Cancel"),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              expiredBox.delete(key);
+              Navigator.pop(context);
+            },
+            child: const Text("Delete"),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -178,6 +119,7 @@ class _ExpiredstocksState extends State<Expiredstocks> {
       appBar: AppBar(
         title: const Text("Expired Stocks"),
         backgroundColor: Colors.green,
+        centerTitle: true,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -187,56 +129,64 @@ class _ExpiredstocksState extends State<Expiredstocks> {
               onPressed: _addSale,
               child: const Text("+ Add Expired Stock"),
             ),
+            const SizedBox(height: 10),
             Expanded(
-              child: DataTable(
-                columns: const [
-                  DataColumn(label: Text("Batch")),
-                  DataColumn(label: Text("Name")),
-                  DataColumn(label: Text("Quantity")),
-                  DataColumn(label: Text("Price")),
-                  DataColumn(label: Text("Expiry Date")),
-                  DataColumn(label: Text("Distributor")),
-                  DataColumn(label: Text("Actions")),
-                ],
-                rows:
-                    sales
-                        .map(
-                          (sale) => DataRow(
+              child: ValueListenableBuilder(
+                valueListenable: expiredBox.listenable(),
+                builder: (context, Box box, _) {
+                  if (box.isEmpty) {
+                    return const Center(child: Text("No expired stocks found"));
+                  }
+
+                  final keys = box.keys.toList();
+
+                  return SingleChildScrollView(
+                    scrollDirection: Axis.vertical,
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: DataTable(
+                        columns: const [
+                          DataColumn(label: Text("Batch")),
+                          DataColumn(label: Text("Name")),
+                          DataColumn(label: Text("Quantity")),
+                          DataColumn(label: Text("Price")),
+                          DataColumn(label: Text("Expiry Date")),
+                          DataColumn(label: Text("Distributor")),
+                          DataColumn(label: Text("Actions")),
+                        ],
+                        rows: keys.map((key) {
+                          final sale = box.get(key) as Map;
+                          return DataRow(
                             cells: [
                               DataCell(Text(sale["Batch"] ?? "")),
                               DataCell(Text(sale["Name"] ?? "")),
-                              DataCell(
-                                Text(sale["Quantitiy"]?.toString() ?? "0"),
-                              ),
-                              DataCell(
-                                Text(sale["Price"]?.toString() ?? "0.0"),
-                              ),
+                              DataCell(Text(sale["Quantitiy"].toString())),
+                              DataCell(Text(sale["Price"].toString())),
                               DataCell(Text(sale["ExpiryDate"] ?? "")),
                               DataCell(Text(sale["Distributor"] ?? "")),
                               DataCell(
                                 Row(
                                   children: [
                                     IconButton(
-                                      icon: const Icon(
-                                        Icons.edit,
-                                        color: Colors.blue,
-                                      ),
-                                      onPressed: () => _editSale(sale),
+                                      icon: const Icon(Icons.edit,
+                                          color: Colors.blue),
+                                      onPressed: () => _editSale(key, sale),
                                     ),
                                     IconButton(
-                                      icon: const Icon(
-                                        Icons.delete,
-                                        color: Colors.red,
-                                      ),
-                                      onPressed: () => _deleteSale(sale),
+                                      icon: const Icon(Icons.delete,
+                                          color: Colors.red),
+                                      onPressed: () => _deleteSale(key),
                                     ),
                                   ],
                                 ),
                               ),
                             ],
-                          ),
-                        )
-                        .toList(),
+                          );
+                        }).toList(),
+                      ),
+                    ),
+                  );
+                },
               ),
             ),
           ],
