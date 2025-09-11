@@ -1,289 +1,7 @@
-// // import 'package:flutter/material.dart';
-// // import 'package:hive/hive.dart';
-// // import 'package:intl/intl.dart';
-
-// // class Reports extends StatefulWidget {
-// //   const Reports({super.key});
-
-// //   @override
-// //   State<Reports> createState() => _ReportsState();
-// // }
-
-// // class _ReportsState extends State<Reports> {
-// //   late Box purchaseBox;
-// //   late Box salesBox;
-
-// //   double totalPurchases = 0.0;
-// //   double totalSales = 0.0;
-
-// //   String selectedMonth = DateFormat('yyyy-MM').format(DateTime.now());
-
-// //   @override
-// //   void initState() {
-// //     super.initState();
-// //     purchaseBox = Hive.box('purchaseBox');
-// //     salesBox = Hive.box('viewsalesBox');
-// //     _calculateReports();
-// //   }
-
-// //   void _calculateReports() {
-// //     double purchaseSum = 0.0;
-// //     double salesSum = 0.0;
-
-// //     purchaseSum =
-// //         purchaseBox.get('${selectedMonth}-purchase', defaultValue: 0.0);
-// //     salesSum = salesBox.get('${selectedMonth}-sale', defaultValue: 0.0);
-
-// //     setState(() {
-// //       totalPurchases = purchaseSum;
-// //       totalSales = salesSum;
-// //     });
-// //   }
-
-// //   @override
-// //   Widget build(BuildContext context) {
-// //     final profitOrLoss = totalSales - totalPurchases;
-
-// //     return Scaffold(
-// //       appBar: AppBar(
-// //         title: const Text(
-// //           'Monthly Reports',
-// //           style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-// //         ),
-// //         centerTitle: true,
-// //         // backgroundColor: Color(0xFF008000),
-// //       ),
-// //       backgroundColor: const Color(0xFF008000),
-// //       body: Padding(
-// //         padding: const EdgeInsets.all(20.0),
-// //         child: Column(
-// //           mainAxisAlignment: MainAxisAlignment.center,
-// //           children: [
-// //             DropdownButton<String>(
-// //               value: selectedMonth,
-// //               items: _getAvailableMonths()
-// //                   .map((month) => DropdownMenuItem(
-// //                         value: month,
-// //                         child: Text(month),
-// //                       ))
-// //                   .toList(),
-// //               onChanged: (value) {
-// //                 if (value != null) {
-// //                   setState(() {
-// //                     selectedMonth = value;
-// //                   });
-// //                   _calculateReports();
-// //                 }
-// //               },
-// //             ),
-// //             const SizedBox(height: 30),
-// //             _reportCard("Total Purchases", totalPurchases),
-// //             const SizedBox(height: 20),
-// //             _reportCard("Total Sales", totalSales),
-// //             const SizedBox(height: 20),
-// //             _reportCard(
-// //               profitOrLoss >= 0 ? "Profit" : "Loss",
-// //               profitOrLoss.abs(),
-// //               isProfit: profitOrLoss >= 0,
-// //             ),
-// //           ],
-// //         ),
-// //       ),
-// //     );
-// //   }
-
-// //   List<String> _getAvailableMonths() {
-// //     final purchaseMonths = purchaseBox.keys
-// //         .where((k) => k.toString().length >= 7)
-// //         .map((k) => k.toString().substring(0, 7))
-// //         .toSet()
-// //         .toList();
-
-// //     final salesMonths = salesBox.keys
-// //         .where((k) => k.toString().length >= 7)
-// //         .map((k) => k.toString().substring(0, 7))
-// //         .toSet()
-// //         .toList();
-
-// //     final allMonths = {...purchaseMonths, ...salesMonths}.toList();
-// //     allMonths.sort();
-// //     return allMonths;
-// //   }
-
-// //   Widget _reportCard(String title, double amount, {bool isProfit = true}) {
-// //     return Container(
-// //       width: double.infinity,
-// //       height: 150,
-// //       decoration: BoxDecoration(
-// //         borderRadius: BorderRadius.circular(10),
-// //         gradient: LinearGradient(
-// //           colors: [Colors.white, isProfit ? Colors.green : Colors.red],
-// //           stops: const [0.5, 0.5],
-// //           begin: Alignment.topCenter,
-// //           end: Alignment.bottomCenter,
-// //         ),
-// //       ),
-// //       child: Column(
-// //         mainAxisAlignment: MainAxisAlignment.center,
-// //         children: [
-// //           Text(
-// //             title,
-// //             style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-// //           ),
-// //           const SizedBox(height: 20),
-// //           Text(
-// //             "Rs. ${amount.toStringAsFixed(2)}",
-// //             style: TextStyle(
-// //               fontSize: 28,
-// //               fontWeight: FontWeight.bold,
-// //               color: isProfit ? Colors.green[800] : Colors.red[800],
-// //             ),
-// //           ),
-// //         ],
-// //       ),
-// //     );
-// //   }
-// // }
-// import 'package:flutter/material.dart';
-// import 'package:hive/hive.dart';
-// import 'package:intl/intl.dart';
-
-// class Reports extends StatefulWidget {
-//   const Reports({super.key});
-
-//   @override
-//   State<Reports> createState() => _ReportsState();
-// }
-
-// class _ReportsState extends State<Reports> {
-//   late Box purchaseBox;
-//   late Box salesBox;
-
-//   double totalPurchases = 0.0;
-//   double totalSales = 0.0;
-
-//   @override
-//   void initState() {
-//     super.initState();
-//     purchaseBox = Hive.box('purchaseBox');
-//     salesBox = Hive.box('viewsalesBox');
-//     _calculateReports();
-//   }
-
-//   // 🔹 Calculate totals for the last 5 days
-//   void _calculateReports() {
-//     double purchaseSum = 0.0;
-//     double salesSum = 0.0;
-
-//     final today = DateTime.now();
-//     final last5Days =
-//         List.generate(5, (i) => today.subtract(Duration(days: i)));
-
-//     for (var day in last5Days) {
-//       final key = DateFormat('yyyy-MM-dd').format(day);
-
-//       // Sum purchases
-//       final dayPurchases = purchaseBox.get(key, defaultValue: 0.0);
-//       if (dayPurchases is double || dayPurchases is int) {
-//         purchaseSum += dayPurchases.toDouble();
-//       } else if (dayPurchases is List) {
-//         for (var item in dayPurchases) {
-//           if (item is Map && item.containsKey('amount')) {
-//             purchaseSum += (item['amount'] as num).toDouble();
-//           }
-//         }
-//       }
-
-//       // Sum sales
-//       final daySales = salesBox.get(key, defaultValue: 0.0);
-//       if (daySales is double || daySales is int) {
-//         salesSum += daySales.toDouble();
-//       } else if (daySales is List) {
-//         for (var item in daySales) {
-//           if (item is Map && item.containsKey('amount')) {
-//             salesSum += (item['amount'] as num).toDouble();
-//           }
-//         }
-//       }
-//     }
-
-//     setState(() {
-//       totalPurchases = purchaseSum;
-//       totalSales = salesSum;
-//     });
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     final profitOrLoss = totalSales - totalPurchases;
-
-//     return Scaffold(
-//       appBar: AppBar(
-//         title: const Text(
-//           'Last 5 Days Report',
-//           style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-//         ),
-//         centerTitle: true,
-//         backgroundColor: const Color(0xFF008000),
-//       ),
-//       backgroundColor: const Color(0xFF008000),
-//       body: Padding(
-//         padding: const EdgeInsets.all(20.0),
-//         child: Column(
-//           mainAxisAlignment: MainAxisAlignment.center,
-//           children: [
-//             _reportCard("Total Purchases", totalPurchases),
-//             const SizedBox(height: 20),
-//             _reportCard("Total Sales", totalSales),
-//             const SizedBox(height: 20),
-//             _reportCard(
-//               profitOrLoss >= 0 ? "Profit" : "Loss",
-//               profitOrLoss.abs(),
-//               isProfit: profitOrLoss >= 0,
-//             ),
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-
-//   // 🔹 Report card design (kept original)
-//   Widget _reportCard(String title, double amount, {bool isProfit = true}) {
-//     return Container(
-//       width: double.infinity,
-//       height: 150,
-//       decoration: BoxDecoration(
-//         borderRadius: BorderRadius.circular(10),
-//         gradient: LinearGradient(
-//           colors: [Colors.white, isProfit ? Colors.green : Colors.red],
-//           stops: const [0.5, 0.5],
-//           begin: Alignment.topCenter,
-//           end: Alignment.bottomCenter,
-//         ),
-//       ),
-//       child: Column(
-//         mainAxisAlignment: MainAxisAlignment.center,
-//         children: [
-//           Text(title,
-//               style:
-//                   const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-//           const SizedBox(height: 20),
-//           Text(
-//             "Rs. ${amount.toStringAsFixed(2)}",
-//             style: TextStyle(
-//               fontSize: 28,
-//               fontWeight: FontWeight.bold,
-//               color: isProfit ? Colors.green[800] : Colors.red[800],
-//             ),
-//           ),
-//         ],
-//       ),
-//     );
-//   }
-// }
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:intl/intl.dart';
+import 'package:software/reuseable_widget/excel.dart';
 
 class Reports extends StatefulWidget {
   const Reports({super.key});
@@ -306,35 +24,29 @@ class _ReportsState extends State<Reports> {
     _calculateWeeklyReports();
   }
 
-  // 🔹 Get start of the week (Monday)
   DateTime _startOfWeek(DateTime date) {
     return date.subtract(Duration(days: date.weekday - 1));
   }
 
-  // 🔹 Get end of the week (Sunday)
   DateTime _endOfWeek(DateTime date) {
     return date.add(Duration(days: 7 - date.weekday));
   }
 
-  // 🔹 Calculate weekly totals
   void _calculateWeeklyReports() {
     final allDates = <DateTime>{};
 
-    // Collect all purchase dates
     for (var key in purchaseBox.keys) {
       if (key.toString().length >= 10) {
         allDates.add(DateTime.parse(key.toString()));
       }
     }
 
-    // Collect all sales dates
     for (var key in currentsalesBox.keys) {
       if (key.toString().length >= 10) {
         allDates.add(DateTime.parse(key.toString()));
       }
     }
 
-    // Group by week
     final Map<String, Map<String, double>> weeks = {};
 
     for (var date in allDates) {
@@ -346,7 +58,6 @@ class _ReportsState extends State<Reports> {
       double weekPurchase = 0.0;
       double weekSales = 0.0;
 
-      // Sum purchases for this week
       for (int i = 0; i < 7; i++) {
         final key =
             DateFormat('yyyy-MM-dd').format(start.add(Duration(days: i)));
@@ -361,7 +72,6 @@ class _ReportsState extends State<Reports> {
           weekPurchase += (dayPurchases as num).toDouble();
         }
 
-        // Sum sales for this week
         final daySales = currentsalesBox.get(key, defaultValue: []);
         if (daySales is List) {
           for (var item in daySales) {
@@ -380,7 +90,6 @@ class _ReportsState extends State<Reports> {
       };
     }
 
-    // Convert map to list and sort latest week first
     final List<Map<String, dynamic>> weekList = weeks.entries.map((e) {
       final profit = e.value['sales']! - e.value['purchase']!;
       return {
@@ -406,6 +115,54 @@ class _ReportsState extends State<Reports> {
         title: const Text('Weekly Reports',
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
         centerTitle: true,
+        actions: [
+          IconButton(
+            tooltip: "Export to Excel",
+            onPressed: () {
+              ExcelHelper.exportRowsToExcel(
+                context: context,
+                sheetName: "Reports",
+                fileName: "Reports",
+                headers: [
+                  "week",
+                  "purchase",
+                  "sales",
+                  "profit",
+                  "loss",
+                ],
+                rows: weeklyTotals
+                    .map((week) => [
+                          week['week'].toString(),
+                          week['purchase'].toString(),
+                          week['sales'].toString(),
+                          week['profit'].toString(),
+                          week['profit'].toString(),
+                        ])
+                    .toList(),
+              );
+            },
+            icon: const Icon(Icons.file_upload),
+          ),
+          IconButton(
+            tooltip: "Import from Excel",
+            onPressed: () async {
+              final imported = await ExcelHelper.importRowsFromExcel(
+                context: context,
+                headers: [
+                  "week",
+                  "purchase",
+                  "sales",
+                  "profit",
+                  "loss",
+                ],
+              );
+              setState(() {
+                weeklyTotals = imported;
+              });
+            },
+            icon: const Icon(Icons.file_download),
+          ),
+        ],
         backgroundColor: const Color(0xFF008000),
       ),
       backgroundColor: const Color(0xFF008000),
@@ -416,10 +173,10 @@ class _ReportsState extends State<Reports> {
           final week = weeklyTotals[index];
           return _weekCard(
             week['week'],
-            week['purchase'],
-            week['sales'],
-            week['profit'],
-            week['isProfit'],
+            double.tryParse(week['purchase'].toString()) ?? 0,
+            double.tryParse(week['sales'].toString()) ?? 0,
+            double.tryParse(week['profit'].toString()) ?? 0,
+            week['isProfit'] == true || week['profit'] >= 0,
           );
         },
       ),

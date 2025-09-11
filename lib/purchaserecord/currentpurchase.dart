@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:intl/intl.dart';
+import 'package:software/reuseable_widget/excel.dart';
 
 class Currentpurchase extends StatefulWidget {
   const Currentpurchase({super.key});
@@ -171,13 +172,48 @@ class _DailyPurchaseReportState extends State<Currentpurchase> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Daily Purchase Report',
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-        ),
-        centerTitle: true,
-        backgroundColor: Color(0xFF008000),
-      ),
+          title: const Text(
+            'Daily Purchase Report',
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+          centerTitle: true,
+          backgroundColor: Color(0xFF008000),
+          actions: [
+            IconButton(
+              tooltip: "Export to Excel",
+              onPressed: () {
+                ExcelHelper.exportToExcel(
+                  context: context,
+                  boxes: [purchaseBox],
+                  sheetName: " Current Purchase",
+                  fileName: " Current Purchase",
+                  headers: [
+                    "company",
+                    "date",
+                    "day",
+                    "amount",
+                  ],
+                );
+              },
+              icon: const Icon(Icons.file_upload),
+            ),
+            IconButton(
+              tooltip: "Import from Excel",
+              onPressed: () {
+                ExcelHelper.importFromExcel(
+                  context: context,
+                  boxes: [purchaseBox],
+                  headers: [
+                    "company",
+                    "date",
+                    "day",
+                    "amount",
+                  ],
+                );
+              },
+              icon: const Icon(Icons.file_download),
+            ),
+          ]),
       body: ListView.builder(
         itemCount: sortedKeys.length,
         itemBuilder: (context, index) {
@@ -221,8 +257,12 @@ class _DailyPurchaseReportState extends State<Currentpurchase> {
     );
   }
 
-  Widget _purchaseCard(String title, double amount, String dateKey,
-      List<MapEntry<int, dynamic>> purchasesOfDay) {
+  Widget _purchaseCard(
+    String title,
+    double amount,
+    String dateKey,
+    List<MapEntry<int, dynamic>> purchasesOfDay,
+  ) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       child: Container(
@@ -230,25 +270,27 @@ class _DailyPurchaseReportState extends State<Currentpurchase> {
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10),
-          gradient: const LinearGradient(
-            colors: [Colors.white, Colors.green],
-            stops: [0.0, 0.0],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
+          color: Colors.green,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               title,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
             ),
             const SizedBox(height: 10),
             ...purchasesOfDay.map((entry) {
               final index = entry.key;
-              final purchase = entry.value as Map;
-              final purchaseAmount = (purchase['amount'] as num).toDouble();
+              final purchase = entry.value;
+
+              final purchaseAmount =
+                  (purchase is Map && purchase.containsKey('amount'))
+                      ? (purchase['amount'] as num).toDouble()
+                      : 0.0;
 
               return Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -276,11 +318,14 @@ class _DailyPurchaseReportState extends State<Currentpurchase> {
                   ),
                 ],
               );
-            }).toList(),
+            }),
             const SizedBox(height: 10),
             Text(
               "Total: Rs. ${amount.toStringAsFixed(2)}",
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ],
         ),

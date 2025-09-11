@@ -1,107 +1,116 @@
-// import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 
-// class PasswordProtectedTile extends StatelessWidget {
-//   final String title;
-//   final double amount;
-//   final String password;
-//   final bool isProtected;
+Future<bool> checkPassword(BuildContext context) async {
+  final TextEditingController controller = TextEditingController();
+  bool isCorrect = false;
 
-//   const PasswordProtectedTile({
-//     super.key,
-//     required this.title,
-//     required this.amount,
-//     this.password = "1234",
-//     this.isProtected = false,
-//   });
+  String currentPassword =
+      Hive.box('passwordBox').get('password', defaultValue: '122003');
 
-//   @override
-//   Widget build(BuildContext context) {
-//     return GestureDetector(
-//       onTap: () {
-//         if (isProtected) {
-//           _askPassword(context);
-//         }
-//       },
-//       child: Container(
-//         margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-//         width: double.infinity,
-//         height: 180,
-//         decoration: BoxDecoration(
-//           borderRadius: BorderRadius.circular(10),
-//           gradient: const LinearGradient(
-//             colors: [Colors.white, Colors.green],
-//             stops: [0.3, 0.3],
-//             begin: Alignment.topCenter,
-//             end: Alignment.bottomCenter,
-//           ),
-//         ),
-//         child: Column(
-//           mainAxisAlignment: MainAxisAlignment.center,
-//           children: [
-//             Text(
-//               title,
-//               style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-//               textAlign: TextAlign.center,
-//             ),
-//             const SizedBox(height: 50),
-//             Text(
-//               isProtected ? "🔒 Locked" : 'Rs. ${amount.toStringAsFixed(2)}',
-//               style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-//             ),
-//           ],
-//         ),
-//       ),
-//     );
-//   }
+  await showDialog(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        title: const Text("Enter Password"),
+        content: TextField(
+          controller: controller,
+          obscureText: true,
+          decoration: const InputDecoration(hintText: "Password"),
+        ),
+        actions: [
+          TextButton(
+            child: const Text("Cancel"),
+            onPressed: () => Navigator.pop(context),
+          ),
+          TextButton(
+            child: const Text("OK"),
+            onPressed: () {
+              if (controller.text == currentPassword) {
+                isCorrect = true;
+              }
+              Navigator.pop(context);
+            },
+          ),
+          TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                changePassword(context);
+              },
+              child: Text('Change Password')),
+        ],
+      );
+    },
+  );
 
-//   void _askPassword(BuildContext context) {
-//     final TextEditingController _controller = TextEditingController();
+  if (!isCorrect && context.mounted) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Wrong password!")),
+    );
+  }
 
-//     showDialog(
-//       context: context,
-//       builder: (context) {
-//         return AlertDialog(
-//           title: Text("Enter Password"),
-//           content: TextField(
-//             controller: _controller,
-//             obscureText: true,
-//             decoration: const InputDecoration(hintText: "Password"),
-//           ),
-//           actions: [
-//             TextButton(
-//               child: const Text("Cancel"),
-//               onPressed: () => Navigator.pop(context),
-//             ),
-//             TextButton(
-//               child: const Text("OK"),
-//               onPressed: () {
-//                 if (_controller.text == password) {
-//                   Navigator.pop(context);
+  return isCorrect;
+}
 
-//                   showDialog(
-//                     context: context,
-//                     builder: (context) => AlertDialog(
-//                       title: Text(title),
-//                       content: Text('Rs. ${amount.toStringAsFixed(2)}'),
-//                       actions: [
-//                         TextButton(
-//                           child: const Text("Close"),
-//                           onPressed: () => Navigator.pop(context),
-//                         )
-//                       ],
-//                     ),
-//                   );
-//                 } else {
-//                   Navigator.pop(context);
-//                   ScaffoldMessenger.of(context).showSnackBar(
-//                     const SnackBar(content: Text("Wrong password!")),
-//                   );
-//                 }
-//               },
-//             ),
-//           ],
-//         );
-//       },
-//     );
-//   }
-// }
+void changePassword(BuildContext context) {
+  final oldController = TextEditingController();
+  final newController = TextEditingController();
+  final confirmController = TextEditingController();
+
+  showDialog(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        title: const Text("Change Password"),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: oldController,
+              obscureText: true,
+              decoration: const InputDecoration(labelText: "Old Password"),
+            ),
+            TextField(
+              controller: newController,
+              obscureText: true,
+              decoration: const InputDecoration(labelText: "New Password"),
+            ),
+            TextField(
+              controller: confirmController,
+              obscureText: true,
+              decoration:
+                  const InputDecoration(labelText: "Confirm New Password"),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("Cancel")),
+          TextButton(
+            onPressed: () {
+              String currentPassword = Hive.box('passwordBox')
+                  .get('password', defaultValue: '122003');
+              if (oldController.text != currentPassword) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Old password is wrong")));
+                return;
+              }
+              if (newController.text != confirmController.text) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Passwords do not match")));
+                return;
+              }
+
+              Hive.box('passwordBox').put('password', newController.text);
+              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                  content: Text("Password changed successfully")));
+              Navigator.pop(context);
+            },
+            child: const Text("Change"),
+          ),
+        ],
+      );
+    },
+  );
+}

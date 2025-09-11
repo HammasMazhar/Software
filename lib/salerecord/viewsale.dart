@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:intl/intl.dart';
+import 'package:software/reuseable_widget/excel.dart';
 import '../reuseable_widget/dynamic_form.dart';
 
 class Viewsale extends StatefulWidget {
@@ -162,9 +163,50 @@ class _ViewsaleState extends State<Viewsale> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("View Sales"),
-        backgroundColor: const Color(0xFF008000),
-      ),
+          title: const Text("View Sales"),
+          backgroundColor: const Color(0xFF008000),
+          actions: [
+            IconButton(
+              tooltip: "Export to Excel",
+              onPressed: () {
+                ExcelHelper.exportToExcel(
+                  context: context,
+                  boxes: [viewsalesBox],
+                  sheetName: " View Sales ",
+                  fileName: " View Sales",
+                  headers: [
+                    "billNo",
+                    "customer",
+                    "date",
+                    "items",
+                    "subtotal",
+                    "discount",
+                    "grandTotal",
+                  ],
+                );
+              },
+              icon: const Icon(Icons.file_upload),
+            ),
+            IconButton(
+              tooltip: "Import from Excel",
+              onPressed: () {
+                ExcelHelper.importFromExcel(
+                  context: context,
+                  boxes: [viewsalesBox],
+                  headers: [
+                    "billNo",
+                    "customer",
+                    "date",
+                    "items",
+                    "subtotal",
+                    "discount",
+                    "grandTotal",
+                  ],
+                );
+              },
+              icon: const Icon(Icons.file_download),
+            ),
+          ]),
       body: Column(
         children: [
           Padding(

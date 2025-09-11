@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:software/reuseable_widget/dynamic_form.dart';
+import 'package:software/reuseable_widget/excel.dart';
 
 class SchedulePage extends StatefulWidget {
   const SchedulePage({super.key});
@@ -98,10 +99,41 @@ class _SchedulePageState extends State<SchedulePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Booking Schedule"),
-        centerTitle: true,
-        backgroundColor: Colors.green,
-      ),
+          title: const Text("Booking Schedule"),
+          centerTitle: true,
+          backgroundColor: Colors.green,
+          actions: [
+            IconButton(
+              tooltip: "Export to Excel",
+              onPressed: () {
+                ExcelHelper.exportToExcel(
+                  context: context,
+                  boxes: [scheduleBox],
+                  sheetName: " Booking Schedule",
+                  fileName: " Booking Schedule",
+                  headers: [
+                    "name",
+                    "day",
+                  ],
+                );
+              },
+              icon: const Icon(Icons.file_upload),
+            ),
+            IconButton(
+              tooltip: "Import from Excel",
+              onPressed: () {
+                ExcelHelper.importFromExcel(
+                  context: context,
+                  boxes: [scheduleBox],
+                  headers: [
+                    "name",
+                    "day",
+                  ],
+                );
+              },
+              icon: const Icon(Icons.file_download),
+            ),
+          ]),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(

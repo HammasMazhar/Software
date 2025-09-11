@@ -1,9 +1,10 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:blue_thermal_printer/blue_thermal_printer.dart';
 import 'package:pdf/widgets.dart' as pw;
-import 'package:printing/printing.dart';
 
 class InvoiceScreen extends StatefulWidget {
   const InvoiceScreen({super.key});
@@ -147,8 +148,9 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
         double.tryParse(discountPercentController.text.trim()) ?? 0;
 
     if (discountAmountInput > 0) return discountAmountInput.clamp(0, subtotal);
-    if (discountPercentInput > 0)
+    if (discountPercentInput > 0) {
       return subtotal * (discountPercentInput / 100).clamp(0, 1);
+    }
     return 0;
   }
 
@@ -205,6 +207,18 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
               return;
             }
           }
+
+          if (event.logicalKey == LogicalKeyboardKey.arrowRight &&
+              rightFocus != null) {
+            FocusScope.of(context).requestFocus(rightFocus);
+            return;
+          }
+          if (event.logicalKey == LogicalKeyboardKey.arrowLeft &&
+              leftFocus != null) {
+            FocusScope.of(context).requestFocus(leftFocus);
+            return;
+          }
+
           if (event.logicalKey == LogicalKeyboardKey.enter && onEnter != null) {
             onEnter();
           }
@@ -225,7 +239,7 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
               : null,
           helperText: isMedicineField
               ? '↑↓: Navigate, Enter: Select (then enter Qty), Esc: Close'
-              : null,
+              : '← → : Move between fields',
           helperMaxLines: 2,
         ),
         onChanged: onChanged,
@@ -251,6 +265,7 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
     });
 
     Future.delayed(Duration(milliseconds: 100), () {
+      if (!mounted) return;
       FocusScope.of(context).requestFocus(qtyFocus);
     });
   }
@@ -327,7 +342,6 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            // Header
             Row(
               children: [
                 const Expanded(
@@ -349,7 +363,6 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
               ],
             ),
             const SizedBox(height: 8),
-
             Row(
               children: [
                 Expanded(
@@ -376,7 +389,6 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
               ],
             ),
             const Divider(height: 24, thickness: 1),
-
             Card(
               child: Padding(
                 padding: EdgeInsets.all(16),
@@ -527,9 +539,7 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
                 ),
               ),
             ),
-
             const SizedBox(height: 16),
-
             Container(
               constraints: BoxConstraints(maxHeight: 300),
               child: SingleChildScrollView(
@@ -548,7 +558,7 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
                       DataRow(cells: [
                         DataCell(Text('${i + 1}')),
                         DataCell(
-                          Container(
+                          SizedBox(
                             width: 120,
                             child: Text(
                               cart[i]['name'].toString(),
@@ -601,9 +611,7 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
                 ),
               ),
             ),
-
             const SizedBox(height: 16),
-
             Card(
               child: Padding(
                 padding: EdgeInsets.all(16),
@@ -672,9 +680,7 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
                 ),
               ),
             ),
-
             const SizedBox(height: 16),
-
             Row(
               children: [
                 Expanded(
@@ -695,28 +701,17 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
                 ),
               ],
             ),
-
             const SizedBox(height: 20),
-
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                ElevatedButton.icon(
-                  onPressed: cart.isEmpty ? null : _printThermalInvoice,
-                  icon: const Icon(Icons.print),
-                  label: const Text('Print Invoice (Thermal)'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green,
-                    foregroundColor: Colors.white,
-                  ),
-                ),
                 const SizedBox(width: 16),
                 ElevatedButton.icon(
-                  onPressed: cart.isEmpty ? null : _generatePdfInvoice,
-                  icon: const Icon(Icons.picture_as_pdf),
-                  label: const Text('Generate PDF'),
+                  onPressed: cart.isEmpty ? null : _saveAndPrintInvoice,
+                  icon: const Icon(Icons.print),
+                  label: const Text('Save & Print Invoice'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
+                    backgroundColor: Colors.green,
                     foregroundColor: Colors.white,
                   ),
                 ),
@@ -747,17 +742,68 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
     );
   }
 
-  Future<void> _printThermalInvoice() async {
+  Future<void> _saveAndPrintInvoice() async {
+    final pdf = pw.Document();
+
+    pdf.addPage(
+      pw.Page(
+        build: (context) {
+          return pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              pw.Text('AL-SHIFA MEDICAL',
+                  style: pw.TextStyle(
+                      fontSize: 24, fontWeight: pw.FontWeight.bold)),
+              pw.Text('Invoice - $activeBill',
+                  style: pw.TextStyle(fontSize: 18)),
+              pw.SizedBox(height: 10),
+              pw.Text('Customer: ${customerController.text}'),
+              pw.Text('Counter: ${counterPersonController.text}'),
+              pw.Text('Date: ${_formatDateTime(DateTime.now())}'),
+              pw.SizedBox(height: 10),
+              pw.TableHelper.fromTextArray(
+                headers: ['S.No', 'Medicine', 'Qty', 'Unit Rate', 'Total'],
+                data: List.generate(cart.length, (index) {
+                  final item = cart[index];
+                  return [
+                    '${index + 1}',
+                    item['name'],
+                    item['qty'].toString(),
+                    'Rs. ${(item['unitPrice'] as double).toStringAsFixed(2)}',
+                    'Rs. ${(item['price'] as double).toStringAsFixed(2)}',
+                  ];
+                }),
+              ),
+              pw.SizedBox(height: 10),
+              pw.Text('Subtotal: Rs. ${subtotal.toStringAsFixed(2)}'),
+              pw.Text('Discount: Rs. ${discount.toStringAsFixed(2)}'),
+              pw.Text('Grand Total: Rs. ${grandTotal.toStringAsFixed(2)}',
+                  style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+              pw.SizedBox(height: 20),
+              pw.Center(
+                  child: pw.Text('THANK YOU FOR SHOPPING',
+                      style: pw.TextStyle(
+                          fontSize: 16, fontWeight: pw.FontWeight.bold))),
+            ],
+          );
+        },
+      ),
+    );
+
+    final output = File("Invoice_$activeBill.pdf");
+    await output.writeAsBytes(await pdf.save());
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text("PDF saved: Invoice_$activeBill.pdf")),
+    );
+
     bool isConnected = await printer.isConnected ?? false;
+    if (!mounted) return;
     if (!isConnected) {
-      List<BluetoothDevice> devices = await printer.getBondedDevices();
-      if (devices.isNotEmpty)
-        await printer.connect(devices.first);
-      else {
-        ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('No Bluetooth printer found!')));
-        return;
-      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please connect the printer first!")),
+      );
+      return;
     }
 
     printer.printNewLine();
@@ -796,58 +842,8 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
       'grandTotal': grandTotal,
     });
 
-    ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Invoice saved to sales history!')));
-  }
-
-  Future<void> _generatePdfInvoice() async {
-    final pdf = pw.Document();
-
-    pdf.addPage(
-      pw.Page(
-        build: (context) {
-          return pw.Column(
-            crossAxisAlignment: pw.CrossAxisAlignment.start,
-            children: [
-              pw.Text('AL-SHIFA MEDICAL',
-                  style: pw.TextStyle(
-                      fontSize: 24, fontWeight: pw.FontWeight.bold)),
-              pw.Text('Invoice - $activeBill',
-                  style: pw.TextStyle(fontSize: 18)),
-              pw.SizedBox(height: 10),
-              pw.Text('Customer: ${customerController.text}'),
-              pw.Text('Counter: ${counterPersonController.text}'),
-              pw.Text('Date: ${_formatDateTime(DateTime.now())}'),
-              pw.SizedBox(height: 10),
-              pw.Table.fromTextArray(
-                headers: ['S.No', 'Medicine', 'Qty', 'Unit Rate', 'Total'],
-                data: List.generate(cart.length, (index) {
-                  final item = cart[index];
-                  return [
-                    '${index + 1}',
-                    item['name'],
-                    item['qty'].toString(),
-                    'Rs. ${(item['unitPrice'] as double).toStringAsFixed(2)}',
-                    'Rs. ${(item['price'] as double).toStringAsFixed(2)}',
-                  ];
-                }),
-              ),
-              pw.SizedBox(height: 10),
-              pw.Text('Subtotal: Rs. ${subtotal.toStringAsFixed(2)}'),
-              pw.Text('Discount: Rs. ${discount.toStringAsFixed(2)}'),
-              pw.Text('Grand Total: Rs. ${grandTotal.toStringAsFixed(2)}',
-                  style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
-              pw.SizedBox(height: 20),
-              pw.Center(
-                  child: pw.Text('THANK YOU FOR SHOPPING',
-                      style: pw.TextStyle(
-                          fontSize: 16, fontWeight: pw.FontWeight.bold))),
-            ],
-          );
-        },
-      ),
-    );
-
-    await Printing.layoutPdf(onLayout: (format) async => pdf.save());
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('Invoice printed & saved to sales history!')));
   }
 }

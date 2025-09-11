@@ -17449,3 +17449,4607 @@
 //     );
 //   }
 // }
+// import 'package:flutter/material.dart';
+// import 'package:hive_flutter/hive_flutter.dart';
+// import 'package:software/reuseable_widget/dynamic_form.dart';
+
+// class Availablestocks extends StatefulWidget {
+//   const Availablestocks({super.key});
+
+//   @override
+//   State<Availablestocks> createState() => _AvailablestocksState();
+// }
+
+// class _AvailablestocksState extends State<Availablestocks> {
+//   late Box availableBox;
+//   String searchQuery = "";
+
+//   @override
+//   void initState() {
+//     super.initState();
+//     availableBox = Hive.box('availableBox');
+//   }
+
+//   void _addStocks() {
+//     final fieldNames = ["Medicine Name", "Company", "Tablets", "Pack Price"];
+
+//     showDialog(
+//       context: context,
+//       builder: (context) {
+//         return AlertDialog(
+//           title: const Text("Add Stocks"),
+//           content: DynamicForm(
+//             fieldNames: fieldNames,
+//             onSubmit: (values) {
+//               final newStock = {
+//                 "Medicine Name": values["Medicine Name"] ?? "",
+//                 "Company": values["Company"] ?? "",
+//                 "Tablets": values["Tablets"] ?? "",
+//                 "Pack Price": values["Pack Price"] ?? "",
+//               };
+//               availableBox.add(newStock);
+//             },
+//           ),
+//         );
+//       },
+//     );
+//   }
+
+//   void _editStocks(int key, Map stock) {
+//     final fieldNames = ["Medicine Name", "Company", "Tablets", "Pack Price"];
+
+//     showDialog(
+//       context: context,
+//       builder: (context) {
+//         return AlertDialog(
+//           title: const Text("Edit Stocks"),
+//           content: DynamicForm(
+//             fieldNames: fieldNames,
+//             initialValues: {
+//               "Medicine Name": stock["Medicine Name"] ?? "",
+//               "Company": stock["Company"] ?? "",
+//               "Tablets": stock["Tablets"] ?? "",
+//               "Pack Price": stock["Pack Price"] ?? "",
+//             },
+//             onSubmit: (values) {
+//               final updatedStock = {
+//                 "Medicine Name": values["Medicine Name"] ?? "",
+//                 "Company": values["Company"] ?? "",
+//                 "Tablets": values["Tablets"] ?? "",
+//                 "Pack Price": values["Pack Price"] ?? "",
+//               };
+//               availableBox.put(key, updatedStock);
+//             },
+//           ),
+//         );
+//       },
+//     );
+//   }
+
+//   void _deleteStocks(int key) {
+//     showDialog(
+//       context: context,
+//       builder: (context) {
+//         return AlertDialog(
+//           title: const Text("Are you sure?"),
+//           content: const Text("This stock will be deleted permanently."),
+//           actions: [
+//             TextButton(
+//               onPressed: () => Navigator.pop(context),
+//               child: const Text("Cancel"),
+//             ),
+//             ElevatedButton(
+//               onPressed: () {
+//                 availableBox.delete(key);
+//                 Navigator.pop(context);
+//                 ScaffoldMessenger.of(context).showSnackBar(
+//                   const SnackBar(content: Text('Stock deleted')),
+//                 );
+//               },
+//               child: const Text("Delete"),
+//             ),
+//           ],
+//         );
+//       },
+//     );
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       appBar: AppBar(
+//         title: const Text("Available Stocks"),
+//         backgroundColor: Colors.green,
+//         centerTitle: true,
+//       ),
+//       body: Padding(
+//         padding: const EdgeInsets.all(16.0),
+//         child: Column(
+//           children: [
+//             TextField(
+//               decoration: InputDecoration(
+//                 labelText: "Search by Medicine or Company",
+//                 prefixIcon: const Icon(Icons.search),
+//                 border: OutlineInputBorder(
+//                   borderRadius: BorderRadius.circular(10),
+//                 ),
+//               ),
+//               onChanged: (value) {
+//                 setState(() {
+//                   searchQuery = value.toLowerCase();
+//                 });
+//               },
+//             ),
+//             const SizedBox(height: 10),
+//             ElevatedButton(
+//               onPressed: _addStocks,
+//               child: const Text("+ Add Stocks"),
+//             ),
+//             const SizedBox(height: 10),
+//             Expanded(
+//               child: SingleChildScrollView(
+//                 scrollDirection: Axis.vertical,
+//                 child: SingleChildScrollView(
+//                   scrollDirection: Axis.horizontal,
+//                   child: ValueListenableBuilder(
+//                     valueListenable: availableBox.listenable(),
+//                     builder: (context, Box box, _) {
+//                       if (box.isEmpty) {
+//                         return const Padding(
+//                           padding: EdgeInsets.all(16.0),
+//                           child: Center(child: Text("No stocks available")),
+//                         );
+//                       }
+
+//                       final filteredKeys = box.keys.where((key) {
+//                         final data = box.get(key);
+//                         if (data is! Map) return false;
+
+//                         final stock = Map<String, dynamic>.from(data);
+
+//                         final name = (stock["Medicine Name"] ?? "")
+//                             .toString()
+//                             .toLowerCase();
+//                         final company =
+//                             (stock["Company"] ?? "").toString().toLowerCase();
+
+//                         return name.contains(searchQuery) ||
+//                             company.contains(searchQuery);
+//                       }).toList();
+
+//                       if (filteredKeys.isEmpty) {
+//                         return const Padding(
+//                           padding: EdgeInsets.all(16.0),
+//                           child: Center(child: Text("No matching stocks")),
+//                         );
+//                       }
+
+//                       return DataTable(
+//                         columns: const [
+//                           DataColumn(label: Text("Medicine Name")),
+//                           DataColumn(label: Text("Company")),
+//                           DataColumn(label: Text("Tablets")),
+//                           DataColumn(label: Text("Pack Price")),
+//                           DataColumn(label: Text("Actions")),
+//                         ],
+//                         rows: filteredKeys.map((key) {
+//                           final stock = Map<String, dynamic>.from(box.get(key));
+
+//                           return DataRow(
+//                             cells: [
+//                               DataCell(Text(stock["Medicine Name"] ?? "")),
+//                               DataCell(Text(stock["Company"] ?? "")),
+//                               DataCell(Text(stock["Tablets"] ?? "")),
+//                               DataCell(Text(stock["Pack Price"] ?? "")),
+//                               DataCell(
+//                                 Row(
+//                                   children: [
+//                                     IconButton(
+//                                       icon: const Icon(Icons.edit,
+//                                           color: Colors.blue),
+//                                       onPressed: () => _editStocks(key, stock),
+//                                     ),
+//                                     IconButton(
+//                                       icon: const Icon(Icons.delete,
+//                                           color: Colors.red),
+//                                       onPressed: () => _deleteStocks(key),
+//                                     ),
+//                                   ],
+//                                 ),
+//                               ),
+//                             ],
+//                           );
+//                         }).toList(),
+//                       );
+//                     },
+//                   ),
+//                 ),
+//               ),
+//             ),
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+// }
+//uppper is same
+// import 'dart:io';
+// import 'package:flutter/material.dart';
+// import 'package:hive_flutter/hive_flutter.dart';
+// import 'package:software/reuseable_widget/dynamic_form.dart';
+// import 'package:excel/excel.dart';
+// //import 'package:path_provider/path_provider.dart';
+// import 'package:permission_handler/permission_handler.dart';
+// import 'package:file_picker/file_picker.dart';
+
+// class Availablestocks extends StatefulWidget {
+//   const Availablestocks({super.key});
+
+//   @override
+//   State<Availablestocks> createState() => _AvailablestocksState();
+// }
+
+// class _AvailablestocksState extends State<Availablestocks> {
+//   late Box availableBox;
+//   String searchQuery = "";
+
+//   @override
+//   void initState() {
+//     super.initState();
+//     availableBox = Hive.box('availableBox');
+//   }
+
+//   // ✅ EXPORT to Excel
+//   Future<void> _exportToExcel() async {
+//     var status = await Permission.storage.request();
+//     if (!status.isGranted) {
+//       if (!mounted) return;
+//       ScaffoldMessenger.of(context).showSnackBar(
+//         const SnackBar(content: Text("Storage permission denied")),
+//       );
+//       return;
+//     }
+
+//     var excel = Excel.createExcel();
+//     Sheet sheet = excel['Available Stocks'];
+
+//     // Header row (using CellValue)
+//     sheet.appendRow([
+//       TextCellValue("Medicine Name"),
+//       TextCellValue("Company"),
+//       TextCellValue("Tablets"),
+//       TextCellValue("Pack Price"),
+//     ]);
+
+//     for (var key in availableBox.keys) {
+//       final stock = Map<String, dynamic>.from(availableBox.get(key));
+//       sheet.appendRow([
+//         TextCellValue(stock["Medicine Name"] ?? ""),
+//         TextCellValue(stock["Company"] ?? ""),
+//         TextCellValue(stock["Tablets"] ?? ""),
+//         TextCellValue(stock["Pack Price"] ?? ""),
+//       ]);
+//     }
+
+//     // Save file in Downloads
+//     Directory dir = Directory("/storage/emulated/0/Download");
+//     String filePath = "${dir.path}/AvailableStocks.xlsx";
+
+//     File file = File(filePath);
+//     await file.writeAsBytes(excel.encode()!);
+
+//     if (!mounted) return;
+//     ScaffoldMessenger.of(context).showSnackBar(
+//       SnackBar(content: Text("Exported to $filePath")),
+//     );
+//   }
+
+// // ✅ IMPORT from Excel
+// Future<void> _importFromExcel() async {
+//   FilePickerResult? result = await FilePicker.platform.pickFiles(
+//     type: FileType.custom,
+//     allowedExtensions: ['xlsx'],
+//   );
+
+//   if (result != null) {
+//     var bytes = File(result.files.single.path!).readAsBytesSync();
+//     var excel = Excel.decodeBytes(bytes);
+
+//     for (var table in excel.tables.keys) {
+//       for (var row in excel.tables[table]!.rows.skip(1)) {
+//         // skip header row
+//         final stock = {
+//           "Medicine Name": row[0]?.value.toString() ?? "",
+//           "Company": row[1]?.value.toString() ?? "",
+//           "Tablets": row[2]?.value.toString() ?? "",
+//           "Pack Price": row[3]?.value.toString() ?? "",
+//         };
+//         availableBox.add(stock); // ✅ use your already opened box
+//       }
+//     }
+
+//     if (!mounted) return;
+//     ScaffoldMessenger.of(context).showSnackBar(
+//       const SnackBar(content: Text("Import successful")),
+//     );
+//   }
+// }
+
+//   // ---------------- ADD ----------------
+//   void _addStocks() {
+//     final fieldNames = ["Medicine Name", "Company", "Tablets", "Pack Price"];
+//     showDialog(
+//       context: context,
+//       builder: (context) {
+//         return AlertDialog(
+//           title: const Text("Add Stocks"),
+//           content: DynamicForm(
+//             fieldNames: fieldNames,
+//             onSubmit: (values) {
+//               final newStock = {
+//                 "Medicine Name": values["Medicine Name"] ?? "",
+//                 "Company": values["Company"] ?? "",
+//                 "Tablets": values["Tablets"] ?? "",
+//                 "Pack Price": values["Pack Price"] ?? "",
+//               };
+//               availableBox.add(newStock);
+//             },
+//           ),
+//         );
+//       },
+//     );
+//   }
+
+//   // ---------------- EDIT ----------------
+//   void _editStocks(int key, Map stock) {
+//     final fieldNames = ["Medicine Name", "Company", "Tablets", "Pack Price"];
+//     showDialog(
+//       context: context,
+//       builder: (context) {
+//         return AlertDialog(
+//           title: const Text("Edit Stocks"),
+//           content: DynamicForm(
+//             fieldNames: fieldNames,
+//             initialValues: {
+//               "Medicine Name": stock["Medicine Name"] ?? "",
+//               "Company": stock["Company"] ?? "",
+//               "Tablets": stock["Tablets"] ?? "",
+//               "Pack Price": stock["Pack Price"] ?? "",
+//             },
+//             onSubmit: (values) {
+//               final updatedStock = {
+//                 "Medicine Name": values["Medicine Name"] ?? "",
+//                 "Company": values["Company"] ?? "",
+//                 "Tablets": values["Tablets"] ?? "",
+//                 "Pack Price": values["Pack Price"] ?? "",
+//               };
+//               availableBox.put(key, updatedStock);
+//             },
+//           ),
+//         );
+//       },
+//     );
+//   }
+
+//   // ---------------- DELETE ----------------
+//   void _deleteStocks(int key) {
+//     showDialog(
+//       context: context,
+//       builder: (context) {
+//         return AlertDialog(
+//           title: const Text("Are you sure?"),
+//           content: const Text("This stock will be deleted permanently."),
+//           actions: [
+//             TextButton(
+//               onPressed: () => Navigator.pop(context),
+//               child: const Text("Cancel"),
+//             ),
+//             ElevatedButton(
+//               onPressed: () {
+//                 availableBox.delete(key);
+//                 Navigator.pop(context);
+//                 ScaffoldMessenger.of(context).showSnackBar(
+//                   const SnackBar(content: Text('Stock deleted')),
+//                 );
+//               },
+//               child: const Text("Delete"),
+//             ),
+//           ],
+//         );
+//       },
+//     );
+//   }
+
+//   // ---------------- UI ----------------
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       appBar: AppBar(
+//         title: const Text("Available Stocks"),
+//         backgroundColor: Colors.green,
+//         centerTitle: true,
+//         actions: [
+//          IconButton(
+//   icon: const Icon(Icons.file_upload),
+//   tooltip: "Import from Excel",
+//   onPressed: _importFromExcel, // ✅ just call directly
+// ),
+
+//         ],
+//       ),
+//       body: Padding(
+//         padding: const EdgeInsets.all(16.0),
+//         child: Column(
+//           children: [
+//             TextField(
+//               decoration: InputDecoration(
+//                 labelText: "Search by Medicine or Company",
+//                 prefixIcon: const Icon(Icons.search),
+//                 border: OutlineInputBorder(
+//                   borderRadius: BorderRadius.circular(10),
+//                 ),
+//               ),
+//               onChanged: (value) {
+//                 setState(() {
+//                   searchQuery = value.toLowerCase();
+//                 });
+//               },
+//             ),
+//             const SizedBox(height: 10),
+//             ElevatedButton(
+//               onPressed: _addStocks,
+//               child: const Text("+ Add Stocks"),
+//             ),
+//             const SizedBox(height: 10),
+//             Expanded(
+//               child: SingleChildScrollView(
+//                 scrollDirection: Axis.vertical,
+//                 child: SingleChildScrollView(
+//                   scrollDirection: Axis.horizontal,
+//                   child: ValueListenableBuilder(
+//                     valueListenable: availableBox.listenable(),
+//                     builder: (context, Box box, _) {
+//                       if (box.isEmpty) {
+//                         return const Padding(
+//                           padding: EdgeInsets.all(16.0),
+//                           child: Center(child: Text("No stocks available")),
+//                         );
+//                       }
+
+//                       final filteredKeys = box.keys.where((key) {
+//                         final data = box.get(key);
+//                         if (data is! Map) return false;
+
+//                         final stock = Map<String, dynamic>.from(data);
+//                         final name = (stock["Medicine Name"] ?? "")
+//                             .toString()
+//                             .toLowerCase();
+//                         final company =
+//                             (stock["Company"] ?? "").toString().toLowerCase();
+
+//                         return name.contains(searchQuery) ||
+//                             company.contains(searchQuery);
+//                       }).toList();
+
+//                       if (filteredKeys.isEmpty) {
+//                         return const Padding(
+//                           padding: EdgeInsets.all(16.0),
+//                           child: Center(child: Text("No matching stocks")),
+//                         );
+//                       }
+
+//                       return DataTable(
+//                         columns: const [
+//                           DataColumn(label: Text("Medicine Name")),
+//                           DataColumn(label: Text("Company")),
+//                           DataColumn(label: Text("Tablets")),
+//                           DataColumn(label: Text("Pack Price")),
+//                           DataColumn(label: Text("Actions")),
+//                         ],
+//                         rows: filteredKeys.map((key) {
+//                           final stock = Map<String, dynamic>.from(box.get(key));
+//                           return DataRow(
+//                             cells: [
+//                               DataCell(Text(stock["Medicine Name"] ?? "")),
+//                               DataCell(Text(stock["Company"] ?? "")),
+//                               DataCell(Text(stock["Tablets"] ?? "")),
+//                               DataCell(Text(stock["Pack Price"] ?? "")),
+//                               DataCell(
+//                                 Row(
+//                                   children: [
+//                                     IconButton(
+//                                       icon: const Icon(Icons.edit,
+//                                           color: Colors.blue),
+//                                       onPressed: () => _editStocks(key, stock),
+//                                     ),
+//                                     IconButton(
+//                                       icon: const Icon(Icons.delete,
+//                                           color: Colors.red),
+//                                       onPressed: () => _deleteStocks(key),
+//                                     ),
+//                                   ],
+//                                 ),
+//                               ),
+//                             ],
+//                           );
+//                         }).toList(),
+//                       );
+//                     },
+//                   ),
+//                 ),
+//               ),
+//             ),
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+// }
+// import 'package:flutter/material.dart';
+// import 'package:hive_flutter/hive_flutter.dart';
+// import 'package:flutter/services.dart';
+// import 'package:software/reuseable_widget/excel.dart';
+
+// class Alldistributor extends StatefulWidget {
+//   const Alldistributor({super.key});
+
+//   @override
+//   State<Alldistributor> createState() => _AlldistributorState();
+// }
+
+// class _AlldistributorState extends State<Alldistributor> {
+//   final nameFocus = FocusNode();
+//   final managerNameFocus = FocusNode();
+//   final managerNumberFocus = FocusNode();
+//   final bookingMan1Focus = FocusNode();
+//   final bookingMan1NumberFocus = FocusNode();
+//   final bookingMan2Focus = FocusNode();
+//   final bookingMan2NumberFocus = FocusNode();
+//   final supplyManNameFocus = FocusNode();
+//   final supplyManNumberFocus = FocusNode();
+
+//   final distributorBox = Hive.box('distributorBox');
+//   String searchQuery = "";
+
+//   void _addDistributor() {
+//     final nameController = TextEditingController();
+//     final managerNameController = TextEditingController();
+//     final managerNumberController = TextEditingController();
+//     final bookingMan1Controller = TextEditingController();
+//     final bookingMan1NumberController = TextEditingController();
+//     final bookingMan2Controller = TextEditingController();
+//     final bookingMan2NumberController = TextEditingController();
+//     final supplyManNameController = TextEditingController();
+//     final supplyManNumberController = TextEditingController();
+
+//     showDialog(
+//       context: context,
+//       builder: (context) {
+//         return AlertDialog(
+//           shape: const RoundedRectangleBorder(
+//             borderRadius: BorderRadius.zero,
+//           ),
+//           title: const Text('Add Distributor'),
+//           content: RawKeyboardListener(
+//             focusNode: FocusNode(),
+//             onKey: (RawKeyEvent event) {
+//               if (event is RawKeyDownEvent) {
+//                 if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
+//                   FocusScope.of(context).nextFocus();
+//                 } else if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
+//                   FocusScope.of(context).previousFocus();
+//                 }
+//               }
+//             },
+//             child: FocusTraversalGroup(
+//               policy: OrderedTraversalPolicy(),
+//               child: SingleChildScrollView(
+//                 child: Column(
+//                   mainAxisSize: MainAxisSize.min,
+//                   children: [
+//                     TextField(
+//                       focusNode: nameFocus,
+//                       controller: nameController,
+//                       decoration:
+//                           const InputDecoration(labelText: 'Distributor Name'),
+//                       textInputAction: TextInputAction.next,
+//                       onSubmitted: (_) =>
+//                           FocusScope.of(context).requestFocus(managerNameFocus),
+//                     ),
+//                     TextField(
+//                       focusNode: managerNameFocus,
+//                       controller: managerNameController,
+//                       decoration:
+//                           const InputDecoration(labelText: 'Manager Name'),
+//                       textInputAction: TextInputAction.next,
+//                       onSubmitted: (_) => FocusScope.of(context)
+//                           .requestFocus(managerNumberFocus),
+//                     ),
+//                     TextField(
+//                       focusNode: managerNumberFocus,
+//                       controller: managerNumberController,
+//                       decoration:
+//                           const InputDecoration(labelText: 'Manager Number'),
+//                       textInputAction: TextInputAction.next,
+//                       onSubmitted: (_) =>
+//                           FocusScope.of(context).requestFocus(bookingMan1Focus),
+//                     ),
+//                     TextField(
+//                       focusNode: bookingMan1Focus,
+//                       controller: bookingMan1Controller,
+//                       decoration:
+//                           const InputDecoration(labelText: 'Booking Man1'),
+//                       textInputAction: TextInputAction.next,
+//                       onSubmitted: (_) => FocusScope.of(context)
+//                           .requestFocus(bookingMan1NumberFocus),
+//                     ),
+//                     TextField(
+//                       focusNode: bookingMan1NumberFocus,
+//                       controller: bookingMan1NumberController,
+//                       decoration:
+//                           const InputDecoration(labelText: 'Booking 1 Number'),
+//                       textInputAction: TextInputAction.next,
+//                       onSubmitted: (_) =>
+//                           FocusScope.of(context).requestFocus(bookingMan2Focus),
+//                     ),
+//                     TextField(
+//                       focusNode: bookingMan2Focus,
+//                       controller: bookingMan2Controller,
+//                       decoration:
+//                           const InputDecoration(labelText: 'Booking Man2'),
+//                       textInputAction: TextInputAction.next,
+//                       onSubmitted: (_) => FocusScope.of(context)
+//                           .requestFocus(bookingMan2NumberFocus),
+//                     ),
+//                     TextField(
+//                       focusNode: bookingMan2NumberFocus,
+//                       controller: bookingMan2NumberController,
+//                       decoration:
+//                           const InputDecoration(labelText: 'Booking 2 Number'),
+//                       textInputAction: TextInputAction.next,
+//                       onSubmitted: (_) => FocusScope.of(context)
+//                           .requestFocus(supplyManNameFocus),
+//                     ),
+//                     TextField(
+//                       focusNode: supplyManNameFocus,
+//                       controller: supplyManNameController,
+//                       decoration:
+//                           const InputDecoration(labelText: 'Supply Man Name'),
+//                       textInputAction: TextInputAction.next,
+//                       onSubmitted: (_) => FocusScope.of(context)
+//                           .requestFocus(supplyManNumberFocus),
+//                     ),
+//                     TextField(
+//                       focusNode: supplyManNumberFocus,
+//                       controller: supplyManNumberController,
+//                       decoration:
+//                           const InputDecoration(labelText: 'Supply Man Number'),
+//                       textInputAction: TextInputAction.done,
+//                       onSubmitted: (_) {
+//                         _saveDistributor(
+//                           nameController,
+//                           managerNameController,
+//                           managerNumberController,
+//                           bookingMan1Controller,
+//                           bookingMan1NumberController,
+//                           bookingMan2Controller,
+//                           bookingMan2NumberController,
+//                           supplyManNameController,
+//                           supplyManNumberController,
+//                         );
+//                         Navigator.pop(context);
+//                       },
+//                     ),
+//                     const SizedBox(height: 10),
+//                     ElevatedButton(
+//                       onPressed: () {
+//                         _saveDistributor(
+//                           nameController,
+//                           managerNameController,
+//                           managerNumberController,
+//                           bookingMan1Controller,
+//                           bookingMan1NumberController,
+//                           bookingMan2Controller,
+//                           bookingMan2NumberController,
+//                           supplyManNameController,
+//                           supplyManNumberController,
+//                         );
+//                         Navigator.pop(context);
+//                       },
+//                       child: const Text('Add'),
+//                     ),
+//                   ],
+//                 ),
+//               ),
+//             ),
+//           ),
+//         );
+//       },
+//     );
+//   }
+
+//   void _saveDistributor(
+//     TextEditingController nameController,
+//     TextEditingController managerNameController,
+//     TextEditingController managerNumberController,
+//     TextEditingController bookingMan1Controller,
+//     TextEditingController bookingMan1NumberController,
+//     TextEditingController bookingMan2Controller,
+//     TextEditingController bookingMan2NumberController,
+//     TextEditingController supplyManNameController,
+//     TextEditingController supplyManNumberController,
+//   ) {
+//     distributorBox.add({
+//       "Name": nameController.text,
+//       "ManagerName": managerNameController.text,
+//       "ManagerNumber": managerNumberController.text,
+//       "BookingMan1": bookingMan1Controller.text,
+//       "BookingMan1Number": bookingMan1NumberController.text,
+//       "BookingMan2": bookingMan2Controller.text,
+//       "BookingMan2Number": bookingMan2NumberController.text,
+//       "SupplyManName": supplyManNameController.text,
+//       "SupplyManNumber": supplyManNumberController.text,
+//     });
+//   }
+
+//   void _editDistributor(dynamic key, Map distributor) {
+//     final nameController = TextEditingController(text: distributor['Name']);
+//     final managerNameController =
+//         TextEditingController(text: distributor['ManagerName']);
+//     final managerNumberController =
+//         TextEditingController(text: distributor['ManagerNumber']);
+//     final bookingMan1Controller =
+//         TextEditingController(text: distributor['BookingMan1']);
+//     final bookingMan1NumberController =
+//         TextEditingController(text: distributor['BookingMan1Number']);
+//     final bookingMan2Controller =
+//         TextEditingController(text: distributor['BookingMan2']);
+//     final bookingMan2NumberController =
+//         TextEditingController(text: distributor['BookingMan2Number']);
+//     final supplyManNameController =
+//         TextEditingController(text: distributor['SupplyManName']);
+//     final supplyManNumberController =
+//         TextEditingController(text: distributor['SupplyManNumber']);
+
+//     showDialog(
+//       context: context,
+//       builder: (context) {
+//         return AlertDialog(
+//           shape: const RoundedRectangleBorder(
+//             borderRadius: BorderRadius.zero,
+//           ),
+//           title: const Text("Edit Distributor"),
+//           content: SingleChildScrollView(
+//             child: Column(
+//               mainAxisSize: MainAxisSize.min,
+//               children: [
+//                 TextField(
+//                     controller: nameController,
+//                     decoration:
+//                         const InputDecoration(labelText: 'Distributor Name')),
+//                 TextField(
+//                     controller: managerNameController,
+//                     decoration:
+//                         const InputDecoration(labelText: 'Manager Name')),
+//                 TextField(
+//                     controller: managerNumberController,
+//                     decoration:
+//                         const InputDecoration(labelText: 'Manager Number')),
+//                 TextField(
+//                     controller: bookingMan1Controller,
+//                     decoration:
+//                         const InputDecoration(labelText: 'Booking Man1')),
+//                 TextField(
+//                     controller: bookingMan1NumberController,
+//                     decoration:
+//                         const InputDecoration(labelText: 'Booking 1 Number')),
+//                 TextField(
+//                     controller: bookingMan2Controller,
+//                     decoration:
+//                         const InputDecoration(labelText: 'Booking Man2')),
+//                 TextField(
+//                     controller: bookingMan2NumberController,
+//                     decoration:
+//                         const InputDecoration(labelText: 'Booking 2 Number')),
+//                 TextField(
+//                     controller: supplyManNameController,
+//                     decoration:
+//                         const InputDecoration(labelText: 'Supply Man Name')),
+//                 TextField(
+//                     controller: supplyManNumberController,
+//                     decoration:
+//                         const InputDecoration(labelText: 'Supply Man Number')),
+//                 const SizedBox(height: 10),
+//                 Row(
+//                   children: [
+//                     ElevatedButton(
+//                         onPressed: () => Navigator.pop(context),
+//                         child: const Text("Cancel")),
+//                     const SizedBox(width: 10),
+//                     ElevatedButton(
+//                         onPressed: () {
+//                           distributorBox.put(key, {
+//                             "Name": nameController.text,
+//                             "ManagerName": managerNameController.text,
+//                             "ManagerNumber": managerNumberController.text,
+//                             "BookingMan1": bookingMan1Controller.text,
+//                             "BookingMan1Number":
+//                                 bookingMan1NumberController.text,
+//                             "BookingMan2": bookingMan2Controller.text,
+//                             "BookingMan2Number":
+//                                 bookingMan2NumberController.text,
+//                             "SupplyManName": supplyManNameController.text,
+//                             "SupplyManNumber": supplyManNumberController.text,
+//                           });
+//                           Navigator.pop(context);
+//                         },
+//                         child: const Text("Update")),
+//                   ],
+//                 )
+//               ],
+//             ),
+//           ),
+//         );
+//       },
+//     );
+//   }
+
+//   void _deleteDistributor(dynamic key) {
+//     showDialog(
+//       context: context,
+//       builder: (context) {
+//         return AlertDialog(
+//           title: const Text("Are you sure?"),
+//           content: const Text("This distributor will be deleted permanently."),
+//           actions: [
+//             TextButton(
+//               onPressed: () => Navigator.pop(context),
+//               child: const Text("Cancel"),
+//             ),
+//             ElevatedButton(
+//               onPressed: () {
+//                 distributorBox.delete(key);
+//                 Navigator.pop(context);
+//                 ScaffoldMessenger.of(context).showSnackBar(
+//                   const SnackBar(content: Text('Distributor deleted')),
+//                 );
+//               },
+//               child: const Text("Delete"),
+//             ),
+//           ],
+//         );
+//       },
+//     );
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       appBar: AppBar(
+//         title: const Text("Distributors"),
+//         centerTitle: true,
+//         backgroundColor: Colors.green,
+//         actions: [
+//           IconButton(
+//             tooltip: "Export to Excel",
+//             onPressed: () {
+//               ExcelHelper.exportToExcel(
+//                 context: context,
+//                 box: distributorBox,
+//                 sheetName: "All Distributor",
+//                 fileName: "All Distributor",
+//                 headers: [
+//                   "Name",
+//                   "ManagerName",
+//                   "ManagerNumber",
+//                   "BookingMan1",
+//                   "BookingMan1Number",
+//                   "BookingMan2",
+//                   "BookingMan2Number",
+//                   "SupplyManName",
+//                   "SupplyManNumber"
+//                 ],
+//               );
+//             },
+//             icon: const Icon(Icons.file_upload),
+//           ),
+//           IconButton(
+//             tooltip: "Import from Excel",
+//             onPressed: () {
+//               ExcelHelper.importFromExcel(
+//                 context: context,
+//                 box: distributorBox,
+//                 headers: [
+//                   "Name",
+//                   "ManagerName",
+//                   "ManagerNumber",
+//                   "BookingMan1",
+//                   "BookingMan1Number",
+//                   "BookingMan2",
+//                   "BookingMan2Number",
+//                   "SupplyManName",
+//                   "SupplyManNumber"
+//                 ],
+//               );
+//             },
+//             icon: const Icon(Icons.file_download),
+//           ),
+//         ],
+//       ),
+//       body: Padding(
+//         padding: const EdgeInsets.all(16.0),
+//         child: Column(
+//           children: [
+//             ElevatedButton(
+//                 onPressed: _addDistributor,
+//                 child: const Text("+ Add Distributor")),
+//             const SizedBox(height: 10),
+//             TextField(
+//               decoration: const InputDecoration(
+//                   labelText: "Search by name", prefixIcon: Icon(Icons.search)),
+//               onChanged: (value) {
+//                 setState(() {
+//                   searchQuery = value.toLowerCase();
+//                 });
+//               },
+//             ),
+//             const SizedBox(height: 10),
+//             Expanded(
+//               child: SingleChildScrollView(
+//                 scrollDirection: Axis.vertical,
+//                 child: SingleChildScrollView(
+//                   scrollDirection: Axis.horizontal,
+//                   child: ValueListenableBuilder(
+//                     valueListenable: distributorBox.listenable(),
+//                     builder: (context, Box box, _) {
+//                       if (box.isEmpty) {
+//                         return const Center(
+//                             child: Padding(
+//                                 padding: EdgeInsets.all(16.0),
+//                                 child: Text("No Distributors Added")));
+//                       }
+
+//                       final distributors = box.keys
+//                           .map((key) => {"key": key, "data": box.get(key)})
+//                           .where((entry) {
+//                         final data = entry["data"] as Map;
+//                         final name =
+//                             (data["Name"] ?? "").toString().toLowerCase();
+//                         return name.contains(searchQuery);
+//                       }).toList();
+
+//                       distributors.sort((a, b) {
+//                         final aName =
+//                             (a["data"]["Name"] ?? "").toString().toLowerCase();
+//                         final bName =
+//                             (b["data"]["Name"] ?? "").toString().toLowerCase();
+//                         return aName.compareTo(bName);
+//                       });
+
+//                       return DataTable(
+//                         columns: const [
+//                           DataColumn(label: Text("Name")),
+//                           DataColumn(label: Text("Manager Name")),
+//                           DataColumn(label: Text("Manager Number")),
+//                           DataColumn(label: Text("Booking Man1")),
+//                           DataColumn(label: Text("Booking Man1 Number")),
+//                           DataColumn(label: Text("Booking Man2")),
+//                           DataColumn(label: Text("Booking Man2 Number")),
+//                           DataColumn(label: Text("Supply Man Name")),
+//                           DataColumn(label: Text("Supply Man Number")),
+//                           DataColumn(label: Text("Actions")),
+//                         ],
+//                         rows: distributors.map((entry) {
+//                           final distributor = entry["data"] as Map;
+//                           final key = entry["key"];
+//                           return DataRow(cells: [
+//                             DataCell(Text(distributor["Name"] ?? "")),
+//                             DataCell(Text(distributor["ManagerName"] ?? "")),
+//                             DataCell(Text(distributor["ManagerNumber"] ?? "")),
+//                             DataCell(Text(distributor["BookingMan1"] ?? "")),
+//                             DataCell(
+//                                 Text(distributor["BookingMan1Number"] ?? "")),
+//                             DataCell(Text(distributor["BookingMan2"] ?? "")),
+//                             DataCell(
+//                                 Text(distributor["BookingMan2Number"] ?? "")),
+//                             DataCell(Text(distributor["SupplyManName"] ?? "")),
+//                             DataCell(
+//                                 Text(distributor["SupplyManNumber"] ?? "")),
+//                             DataCell(Row(children: [
+//                               IconButton(
+//                                   icon: const Icon(Icons.edit,
+//                                       color: Colors.blue),
+//                                   onPressed: () =>
+//                                       _editDistributor(key, distributor)),
+//                               IconButton(
+//                                   icon: const Icon(Icons.delete,
+//                                       color: Colors.red),
+//                                   onPressed: () => _deleteDistributor(key)),
+//                             ])),
+//                           ]);
+//                         }).toList(),
+//                       );
+//                     },
+//                   ),
+//                 ),
+//               ),
+//             ),
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+// }
+// import 'package:flutter/material.dart';
+// import 'package:hive/hive.dart';
+// import 'package:intl/intl.dart';
+// import '../reuseable_widget/dynamic_form.dart';
+
+// class Currentsale extends StatefulWidget {
+//   const Currentsale({super.key});
+
+//   @override
+//   State<Currentsale> createState() => _DailySaleReportState();
+// }
+
+// class _DailySaleReportState extends State<Currentsale> {
+//   final Box currentsaleBox = Hive.box('currentsaleBox');
+
+//   Map<String, double> dailyTotals = {};
+
+//   @override
+//   void initState() {
+//     super.initState();
+//     _loadDailySales();
+//   }
+
+//   String _businessDateKey(DateTime dt) {
+//     if (dt.hour < 8) {
+//       dt = dt.subtract(const Duration(days: 1));
+//     }
+//     return DateFormat('yyyy-MM-dd').format(dt);
+//   }
+
+//   void _loadDailySales() {
+//     Map<String, double> totals = {};
+
+//     for (var key in currentsaleBox.keys) {
+//       final data = currentsaleBox.get(key, defaultValue: []);
+//       if (data is List) {
+//         for (var item in data) {
+//           if (item is Map &&
+//               item.containsKey('amount') &&
+//               item.containsKey('time')) {
+//             final amount = (item['amount'] as num).toDouble();
+//             final time = DateTime.parse(item['time']);
+//             final bKey = _businessDateKey(time);
+
+//             totals[bKey] = (totals[bKey] ?? 0) + amount;
+//           }
+//         }
+//       }
+//     }
+
+//     setState(() {
+//       dailyTotals = totals;
+//     });
+//   }
+
+//   void addSale(double amount, {bool isSubtract = false}) {
+//     final now = DateTime.now();
+//     final todayKey = _businessDateKey(now);
+
+//     final data = currentsaleBox.get(todayKey, defaultValue: []);
+//     List sales = (data is List) ? data : [];
+
+//     sales.add({
+//       'amount': isSubtract ? -amount : amount,
+//       'time': now.toIso8601String(),
+//     });
+
+//     currentsaleBox.put(todayKey, sales);
+
+//     _loadDailySales();
+//   }
+
+//   void _showSaleDialog({bool isSubtract = false}) {
+//     showDialog(
+//       context: context,
+//       builder: (context) => AlertDialog(
+//         shape: const RoundedRectangleBorder(
+//           borderRadius: BorderRadius.zero,
+//         ),
+//         title: Text(isSubtract ? "Subtract Sale" : "Add Sale"),
+//         content: DynamicForm(
+//           fieldNames: ["Amount"],
+//           onSubmit: (values) {
+//             final amount = double.tryParse(values["Amount"] ?? "0") ?? 0.0;
+//             if (amount > 0) {
+//               addSale(amount, isSubtract: isSubtract);
+//             }
+//           },
+//         ),
+//       ),
+//     );
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     final sortedKeys = dailyTotals.keys.toList()
+//       ..sort((a, b) => b.compareTo(a)); // latest first
+
+//     return Scaffold(
+//       appBar: AppBar(
+//         title: const Text(
+//           'Daily Sale Report',
+//           style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+//         ),
+//         centerTitle: true,
+//         backgroundColor: Colors.white,
+//       ),
+//       // backgroundColor: const Color(0xFF008000),
+//       body: ListView.builder(
+//         itemCount: sortedKeys.length,
+//         itemBuilder: (context, index) {
+//           final key = sortedKeys[index];
+//           final date = DateTime.parse(key);
+//           final dayName = DateFormat('EEEE').format(date);
+//           final formattedDate = DateFormat('dd-MMM-yyyy').format(date);
+
+//           return _saleCard(
+//             "$dayName ($formattedDate)",
+//             dailyTotals[key] ?? 0.0,
+//           );
+//         },
+//       ),
+
+//       floatingActionButton: Column(
+//         mainAxisAlignment: MainAxisAlignment.end,
+//         children: [
+//           FloatingActionButton(
+//             heroTag: "addSale",
+//             onPressed: () => _showSaleDialog(isSubtract: false),
+//             child: const Icon(Icons.add),
+//           ),
+//           const SizedBox(height: 10),
+//           FloatingActionButton(
+//             heroTag: "subtractSale",
+//             backgroundColor: Colors.red,
+//             onPressed: () => _showSaleDialog(isSubtract: true),
+//             child: const Icon(Icons.remove),
+//           ),
+//         ],
+//       ),
+//     );
+//   }
+// }
+
+// Widget _saleCard(String title, double amount) {
+//   return Padding(
+//     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+//     child: Container(
+//       width: double.infinity,
+//       padding: const EdgeInsets.all(20),
+//       decoration: BoxDecoration(
+//         borderRadius: BorderRadius.circular(10),
+//         gradient: const LinearGradient(
+//           colors: [Colors.white, Colors.green],
+//           stops: [0.5, 0.5],
+//           begin: Alignment.topCenter,
+//           end: Alignment.bottomCenter,
+//         ),
+//       ),
+//       child: Column(
+//         crossAxisAlignment: CrossAxisAlignment.start,
+//         children: [
+//           Text(
+//             title,
+//             style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+//           ),
+//           const SizedBox(height: 10),
+//           Text(
+//             "Rs. ${amount.toStringAsFixed(2)}",
+//             style: TextStyle(
+//               fontSize: 22,
+//               fontWeight: FontWeight.bold,
+//               color: amount >= 0 ? Colors.black : Colors.red,
+//             ),
+//           ),
+//         ],
+//       ),
+//     ),
+//   );
+// }
+// import 'package:flutter/material.dart';
+// import 'package:hive/hive.dart';
+// import 'package:intl/intl.dart';
+// import '../reuseable_widget/dynamic_form.dart';
+
+// class Currentsale extends StatefulWidget {
+//   const Currentsale({super.key});
+
+//   @override
+//   State<Currentsale> createState() => _DailySaleReportState();
+// }
+
+// class _DailySaleReportState extends State<Currentsale> {
+//   final Box currentsaleBox = Hive.box('currentsaleBox');
+
+//   Map<String, List<Map<String, dynamic>>> dailySales = {};
+
+//   @override
+//   void initState() {
+//     super.initState();
+//     _loadDailySales();
+//   }
+
+//   String _businessDateKey(DateTime dt) {
+//     if (dt.hour < 8) {
+//       dt = dt.subtract(const Duration(days: 1));
+//     }
+//     return DateFormat('yyyy-MM-dd').format(dt);
+//   }
+
+//   void _loadDailySales() {
+//     Map<String, List<Map<String, dynamic>>> salesMap = {};
+
+//     for (var key in currentsaleBox.keys) {
+//       final data = currentsaleBox.get(key, defaultValue: []);
+//       if (data is List) {
+//         final dateSales = <Map<String, dynamic>>[];
+//         for (var item in data) {
+//           if (item is Map &&
+//               item.containsKey('amount') &&
+//               item.containsKey('time')) {
+//             dateSales.add(Map<String, dynamic>.from(item));
+//           }
+//         }
+//         if (dateSales.isNotEmpty) {
+//           salesMap[key.toString()] = dateSales;
+//         }
+//       }
+//     }
+
+//     setState(() {
+//       dailySales = salesMap;
+//     });
+//   }
+
+//   void addSale(double amount, {bool isSubtract = false}) {
+//     final now = DateTime.now();
+//     final todayKey = _businessDateKey(now);
+
+//     final data = currentsaleBox.get(todayKey, defaultValue: []);
+//     List sales = (data is List) ? data : [];
+
+//     sales.add({
+//       'amount': isSubtract ? -amount : amount,
+//       'time': now.toIso8601String(),
+//     });
+
+//     currentsaleBox.put(todayKey, sales);
+//     _loadDailySales();
+//   }
+
+//   void editSale(String dateKey, int index, double newAmount) {
+//     final data = currentsaleBox.get(dateKey, defaultValue: []);
+//     if (data is List && index < data.length) {
+//       data[index]['amount'] = newAmount;
+//       data[index]['time'] = DateTime.now().toIso8601String();
+//       currentsaleBox.put(dateKey, data);
+//       _loadDailySales();
+//     }
+//   }
+
+//   void deleteSale(String dateKey, int index) {
+//     final data = currentsaleBox.get(dateKey, defaultValue: []);
+//     if (data is List && index < data.length) {
+//       data.removeAt(index);
+//       currentsaleBox.put(dateKey, data);
+//       _loadDailySales();
+//     }
+//   }
+
+//   void _showSaleDialog({bool isSubtract = false, String? dateKey, int? index}) {
+//     double initialValue = 0.0;
+//     if (dateKey != null && index != null) {
+//       initialValue = (dailySales[dateKey]![index]['amount'] as num).toDouble();
+//     }
+
+//     showDialog(
+//       context: context,
+//       builder: (context) => AlertDialog(
+//         shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+//         title: Text(isSubtract
+//             ? "Subtract Sale"
+//             : (dateKey != null ? "Edit Sale" : "Add Sale")),
+//         content: DynamicForm(
+//           fieldNames: ["Amount"],
+//           initialValues: {"Amount": initialValue.toString()},
+//           onSubmit: (values) {
+//             final amount = double.tryParse(values["Amount"] ?? "0") ?? 0.0;
+//             if (amount > 0) {
+//               if (dateKey != null && index != null) {
+//                 editSale(dateKey, index, amount);
+//               } else {
+//                 addSale(amount, isSubtract: isSubtract);
+//               }
+//             }
+//           },
+//         ),
+//       ),
+//     );
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     final sortedKeys = dailySales.keys.toList()
+//       ..sort((a, b) => b.compareTo(a)); // latest first
+
+//     return Scaffold(
+//       appBar: AppBar(
+//         title: const Text(
+//           'Daily Sale Report',
+//           style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+//         ),
+//         centerTitle: true,
+//         backgroundColor: Colors.white,
+//       ),
+//       body: ListView.builder(
+//         itemCount: sortedKeys.length,
+//         itemBuilder: (context, index) {
+//           final key = sortedKeys[index];
+//           final date = DateTime.parse(key);
+//           final dayName = DateFormat('EEEE').format(date);
+//           final formattedDate = DateFormat('dd-MMM-yyyy').format(date);
+//           final salesList = dailySales[key]!;
+
+//           return Padding(
+//             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+//             child: Column(
+//               crossAxisAlignment: CrossAxisAlignment.start,
+//               children: [
+//                 Text("$dayName ($formattedDate)",
+//                     style: const TextStyle(
+//                         fontSize: 18, fontWeight: FontWeight.bold)),
+//                 const SizedBox(height: 5),
+//                 ...List.generate(salesList.length, (i) {
+//                   final sale = salesList[i];
+//                   final amount = (sale['amount'] as num).toDouble();
+
+//                   return Card(
+//                     child: ListTile(
+//                       title: Text("Rs. ${amount.toStringAsFixed(2)}"),
+//                       subtitle: Text(
+//                           "Time: ${DateFormat('hh:mm a').format(DateTime.parse(sale['time']))}"),
+//                       trailing: Row(
+//                         mainAxisSize: MainAxisSize.min,
+//                         children: [
+//                           IconButton(
+//                             icon: const Icon(Icons.edit, color: Colors.blue),
+//                             onPressed: () =>
+//                                 _showSaleDialog(dateKey: key, index: i),
+//                           ),
+//                           IconButton(
+//                             icon: const Icon(Icons.delete, color: Colors.red),
+//                             onPressed: () => deleteSale(key, i),
+//                           ),
+//                         ],
+//                       ),
+//                     ),
+//                   );
+//                 }),
+//               ],
+//             ),
+//           );
+//         },
+//       ),
+//       floatingActionButton: Column(
+//         mainAxisAlignment: MainAxisAlignment.end,
+//         children: [
+//           FloatingActionButton(
+//             heroTag: "addSale",
+//             onPressed: () => _showSaleDialog(),
+//             child: const Icon(Icons.add),
+//           ),
+//           const SizedBox(height: 10),
+//           FloatingActionButton(
+//             heroTag: "subtractSale",
+//             backgroundColor: Colors.red,
+//             onPressed: () => _showSaleDialog(isSubtract: true),
+//             child: const Icon(Icons.remove),
+//           ),
+//         ],
+//       ),
+//     );
+//   }
+// }
+// import 'package:flutter/material.dart';
+// import 'package:hive/hive.dart';
+// import 'package:intl/intl.dart';
+// import '../reuseable_widget/dynamic_form.dart';
+
+// class Currentsale extends StatefulWidget {
+//   const Currentsale({super.key});
+
+//   @override
+//   State<Currentsale> createState() => _DailySaleReportState();
+// }
+
+// class _DailySaleReportState extends State<Currentsale> {
+//   final Box currentsaleBox = Hive.box('currentsaleBox');
+
+//   Map<String, List<Map<String, dynamic>>> dailySales = {};
+
+//   @override
+//   void initState() {
+//     super.initState();
+//     _loadDailySales();
+//   }
+
+//   String _businessDateKey(DateTime dt) {
+//     if (dt.hour < 8) {
+//       dt = dt.subtract(const Duration(days: 1));
+//     }
+//     return DateFormat('yyyy-MM-dd').format(dt);
+//   }
+
+//   void _loadDailySales() {
+//     Map<String, List<Map<String, dynamic>>> salesMap = {};
+
+//     for (var key in currentsaleBox.keys) {
+//       final data = currentsaleBox.get(key, defaultValue: []);
+//       if (data is List) {
+//         final dateSales = <Map<String, dynamic>>[];
+//         for (var item in data) {
+//           if (item is Map &&
+//               item.containsKey('amount') &&
+//               item.containsKey('time')) {
+//             dateSales.add(Map<String, dynamic>.from(item));
+//           }
+//         }
+//         if (dateSales.isNotEmpty) {
+//           salesMap[key.toString()] = dateSales;
+//         }
+//       }
+//     }
+
+//     setState(() {
+//       dailySales = salesMap;
+//     });
+//   }
+
+//   void addSale(double amount, {bool isSubtract = false}) {
+//     final now = DateTime.now();
+//     final todayKey = _businessDateKey(now);
+
+//     final data = currentsaleBox.get(todayKey, defaultValue: []);
+//     List sales = (data is List) ? data : [];
+
+//     sales.add({
+//       'amount': isSubtract ? -amount : amount,
+//       'time': now.toIso8601String(),
+//     });
+
+//     currentsaleBox.put(todayKey, sales);
+//     _loadDailySales();
+//   }
+
+//   void editSale(String dateKey, int index, double newAmount) {
+//     final data = currentsaleBox.get(dateKey, defaultValue: []);
+//     if (data is List && index < data.length) {
+//       data[index]['amount'] = newAmount;
+//       data[index]['time'] = DateTime.now().toIso8601String();
+//       currentsaleBox.put(dateKey, data);
+//       _loadDailySales();
+//     }
+//   }
+
+//   void deleteSale(String dateKey, int index) {
+//     final data = currentsaleBox.get(dateKey, defaultValue: []);
+//     if (data is List && index < data.length) {
+//       data.removeAt(index);
+//       currentsaleBox.put(dateKey, data);
+//       _loadDailySales();
+//     }
+//   }
+
+//   void _showSaleDialog({bool isSubtract = false, String? dateKey, int? index}) {
+//     double initialValue = 0.0;
+//     if (dateKey != null && index != null) {
+//       initialValue = (dailySales[dateKey]![index]['amount'] as num).toDouble();
+//     }
+
+//     showDialog(
+//       context: context,
+//       builder: (context) => AlertDialog(
+//         shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+//         title: Text(isSubtract
+//             ? "Subtract Sale"
+//             : (dateKey != null ? "Edit Sale" : "Add Sale")),
+//         content: DynamicForm(
+//           fieldNames: ["Amount"],
+//           initialValues: {"Amount": initialValue.toString()},
+//           validator: {
+//             "Amount": (value) {
+//               if (value == null || value.isEmpty) {
+//                 return "Amount is required";
+//               }
+//               final val = double.tryParse(value);
+//               if (val == null || val <= 0) {
+//                 return "Enter a valid number greater than 0";
+//               }
+//               return null;
+//             }
+//           },
+//           onSubmit: (values) {
+//             final amount = double.tryParse(values["Amount"] ?? "0") ?? 0.0;
+//             if (amount > 0) {
+//               if (dateKey != null && index != null) {
+//                 editSale(dateKey, index, amount);
+//               } else {
+//                 addSale(amount, isSubtract: isSubtract);
+//               }
+//             }
+//             Navigator.pop(context);
+//           },
+//         ),
+//       ),
+//     );
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     final sortedKeys = dailySales.keys.toList()
+//       ..sort((a, b) => b.compareTo(a)); // latest first
+
+//     return Scaffold(
+//       appBar: AppBar(
+//         title: const Text(
+//           'Daily Sale Report',
+//           style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+//         ),
+//         centerTitle: true,
+//         backgroundColor: Colors.white,
+//       ),
+//       body: ListView.builder(
+//         itemCount: sortedKeys.length,
+//         itemBuilder: (context, index) {
+//           final key = sortedKeys[index];
+//           final date = DateTime.parse(key);
+//           final dayName = DateFormat('EEEE').format(date);
+//           final formattedDate = DateFormat('dd-MMM-yyyy').format(date);
+//           final salesList = dailySales[key]!;
+
+//           double totalAmount = salesList.fold(0.0,
+//               (previousValue, element) => previousValue + (element['amount'] as num).toDouble());
+
+//           return Padding(
+//             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+//             child: Column(
+//               crossAxisAlignment: CrossAxisAlignment.start,
+//               children: [
+//                 Text("$dayName ($formattedDate)",
+//                     style: const TextStyle(
+//                         fontSize: 18, fontWeight: FontWeight.bold)),
+//                 const SizedBox(height: 5),
+//                 Text(
+//                   "Total: Rs. ${totalAmount.toStringAsFixed(2)}",
+//                   style: const TextStyle(
+//                       fontSize: 16, fontWeight: FontWeight.bold),
+//                 ),
+//                 const SizedBox(height: 5),
+//                 ...List.generate(salesList.length, (i) {
+//                   final sale = salesList[i];
+//                   final amount = (sale['amount'] as num).toDouble();
+
+//                   return Card(
+//                     child: ListTile(
+//                       title: Text("Rs. ${amount.toStringAsFixed(2)}"),
+//                       subtitle: Text(
+//                           "Time: ${DateFormat('hh:mm a').format(DateTime.parse(sale['time']))}"),
+//                       trailing: Row(
+//                         mainAxisSize: MainAxisSize.min,
+//                         children: [
+//                           IconButton(
+//                             icon: const Icon(Icons.edit, color: Colors.blue),
+//                             onPressed: () =>
+//                                 _showSaleDialog(dateKey: key, index: i),
+//                           ),
+//                           IconButton(
+//                             icon: const Icon(Icons.delete, color: Colors.red),
+//                             onPressed: () => deleteSale(key, i),
+//                           ),
+//                         ],
+//                       ),
+//                     ),
+//                   );
+//                 }),
+//               ],
+//             ),
+//           );
+//         },
+//       ),
+//       floatingActionButton: Column(
+//         mainAxisAlignment: MainAxisAlignment.end,
+//         children: [
+//           FloatingActionButton(
+//             heroTag: "addSale",
+//             onPressed: () => _showSaleDialog(),
+//             child: const Icon(Icons.add),
+//           ),
+//           const SizedBox(height: 10),
+//           FloatingActionButton(
+//             heroTag: "subtractSale",
+//             backgroundColor: Colors.red,
+//             onPressed: () => _showSaleDialog(isSubtract: true),
+//             child: const Icon(Icons.remove),
+//           ),
+//         ],
+//       ),
+//     );
+//   }
+// }
+// // import 'package:flutter/material.dart';
+// // import 'package:hive/hive.dart';
+// // import 'package:intl/intl.dart';
+
+// // class Reports extends StatefulWidget {
+// //   const Reports({super.key});
+
+// //   @override
+// //   State<Reports> createState() => _ReportsState();
+// // }
+
+// // class _ReportsState extends State<Reports> {
+// //   late Box purchaseBox;
+// //   late Box salesBox;
+
+// //   double totalPurchases = 0.0;
+// //   double totalSales = 0.0;
+
+// //   String selectedMonth = DateFormat('yyyy-MM').format(DateTime.now());
+
+// //   @override
+// //   void initState() {
+// //     super.initState();
+// //     purchaseBox = Hive.box('purchaseBox');
+// //     salesBox = Hive.box('viewsalesBox');
+// //     _calculateReports();
+// //   }
+
+// //   void _calculateReports() {
+// //     double purchaseSum = 0.0;
+// //     double salesSum = 0.0;
+
+// //     purchaseSum =
+// //         purchaseBox.get('${selectedMonth}-purchase', defaultValue: 0.0);
+// //     salesSum = salesBox.get('${selectedMonth}-sale', defaultValue: 0.0);
+
+// //     setState(() {
+// //       totalPurchases = purchaseSum;
+// //       totalSales = salesSum;
+// //     });
+// //   }
+
+// //   @override
+// //   Widget build(BuildContext context) {
+// //     final profitOrLoss = totalSales - totalPurchases;
+
+// //     return Scaffold(
+// //       appBar: AppBar(
+// //         title: const Text(
+// //           'Monthly Reports',
+// //           style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+// //         ),
+// //         centerTitle: true,
+// //         // backgroundColor: Color(0xFF008000),
+// //       ),
+// //       backgroundColor: const Color(0xFF008000),
+// //       body: Padding(
+// //         padding: const EdgeInsets.all(20.0),
+// //         child: Column(
+// //           mainAxisAlignment: MainAxisAlignment.center,
+// //           children: [
+// //             DropdownButton<String>(
+// //               value: selectedMonth,
+// //               items: _getAvailableMonths()
+// //                   .map((month) => DropdownMenuItem(
+// //                         value: month,
+// //                         child: Text(month),
+// //                       ))
+// //                   .toList(),
+// //               onChanged: (value) {
+// //                 if (value != null) {
+// //                   setState(() {
+// //                     selectedMonth = value;
+// //                   });
+// //                   _calculateReports();
+// //                 }
+// //               },
+// //             ),
+// //             const SizedBox(height: 30),
+// //             _reportCard("Total Purchases", totalPurchases),
+// //             const SizedBox(height: 20),
+// //             _reportCard("Total Sales", totalSales),
+// //             const SizedBox(height: 20),
+// //             _reportCard(
+// //               profitOrLoss >= 0 ? "Profit" : "Loss",
+// //               profitOrLoss.abs(),
+// //               isProfit: profitOrLoss >= 0,
+// //             ),
+// //           ],
+// //         ),
+// //       ),
+// //     );
+// //   }
+
+// //   List<String> _getAvailableMonths() {
+// //     final purchaseMonths = purchaseBox.keys
+// //         .where((k) => k.toString().length >= 7)
+// //         .map((k) => k.toString().substring(0, 7))
+// //         .toSet()
+// //         .toList();
+
+// //     final salesMonths = salesBox.keys
+// //         .where((k) => k.toString().length >= 7)
+// //         .map((k) => k.toString().substring(0, 7))
+// //         .toSet()
+// //         .toList();
+
+// //     final allMonths = {...purchaseMonths, ...salesMonths}.toList();
+// //     allMonths.sort();
+// //     return allMonths;
+// //   }
+
+// //   Widget _reportCard(String title, double amount, {bool isProfit = true}) {
+// //     return Container(
+// //       width: double.infinity,
+// //       height: 150,
+// //       decoration: BoxDecoration(
+// //         borderRadius: BorderRadius.circular(10),
+// //         gradient: LinearGradient(
+// //           colors: [Colors.white, isProfit ? Colors.green : Colors.red],
+// //           stops: const [0.5, 0.5],
+// //           begin: Alignment.topCenter,
+// //           end: Alignment.bottomCenter,
+// //         ),
+// //       ),
+// //       child: Column(
+// //         mainAxisAlignment: MainAxisAlignment.center,
+// //         children: [
+// //           Text(
+// //             title,
+// //             style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+// //           ),
+// //           const SizedBox(height: 20),
+// //           Text(
+// //             "Rs. ${amount.toStringAsFixed(2)}",
+// //             style: TextStyle(
+// //               fontSize: 28,
+// //               fontWeight: FontWeight.bold,
+// //               color: isProfit ? Colors.green[800] : Colors.red[800],
+// //             ),
+// //           ),
+// //         ],
+// //       ),
+// //     );
+// //   }
+// // }
+// import 'package:flutter/material.dart';
+// import 'package:hive/hive.dart';
+// import 'package:intl/intl.dart';
+
+// class Reports extends StatefulWidget {
+//   const Reports({super.key});
+
+//   @override
+//   State<Reports> createState() => _ReportsState();
+// }
+
+// class _ReportsState extends State<Reports> {
+//   late Box purchaseBox;
+//   late Box salesBox;
+
+//   double totalPurchases = 0.0;
+//   double totalSales = 0.0;
+
+//   @override
+//   void initState() {
+//     super.initState();
+//     purchaseBox = Hive.box('purchaseBox');
+//     salesBox = Hive.box('viewsalesBox');
+//     _calculateReports();
+//   }
+
+//   // 🔹 Calculate totals for the last 5 days
+//   void _calculateReports() {
+//     double purchaseSum = 0.0;
+//     double salesSum = 0.0;
+
+//     final today = DateTime.now();
+//     final last5Days =
+//         List.generate(5, (i) => today.subtract(Duration(days: i)));
+
+//     for (var day in last5Days) {
+//       final key = DateFormat('yyyy-MM-dd').format(day);
+
+//       // Sum purchases
+//       final dayPurchases = purchaseBox.get(key, defaultValue: 0.0);
+//       if (dayPurchases is double || dayPurchases is int) {
+//         purchaseSum += dayPurchases.toDouble();
+//       } else if (dayPurchases is List) {
+//         for (var item in dayPurchases) {
+//           if (item is Map && item.containsKey('amount')) {
+//             purchaseSum += (item['amount'] as num).toDouble();
+//           }
+//         }
+//       }
+
+//       // Sum sales
+//       final daySales = salesBox.get(key, defaultValue: 0.0);
+//       if (daySales is double || daySales is int) {
+//         salesSum += daySales.toDouble();
+//       } else if (daySales is List) {
+//         for (var item in daySales) {
+//           if (item is Map && item.containsKey('amount')) {
+//             salesSum += (item['amount'] as num).toDouble();
+//           }
+//         }
+//       }
+//     }
+
+//     setState(() {
+//       totalPurchases = purchaseSum;
+//       totalSales = salesSum;
+//     });
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     final profitOrLoss = totalSales - totalPurchases;
+
+//     return Scaffold(
+//       appBar: AppBar(
+//         title: const Text(
+//           'Last 5 Days Report',
+//           style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+//         ),
+//         centerTitle: true,
+//         backgroundColor: const Color(0xFF008000),
+//       ),
+//       backgroundColor: const Color(0xFF008000),
+//       body: Padding(
+//         padding: const EdgeInsets.all(20.0),
+//         child: Column(
+//           mainAxisAlignment: MainAxisAlignment.center,
+//           children: [
+//             _reportCard("Total Purchases", totalPurchases),
+//             const SizedBox(height: 20),
+//             _reportCard("Total Sales", totalSales),
+//             const SizedBox(height: 20),
+//             _reportCard(
+//               profitOrLoss >= 0 ? "Profit" : "Loss",
+//               profitOrLoss.abs(),
+//               isProfit: profitOrLoss >= 0,
+//             ),
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+
+//   // 🔹 Report card design (kept original)
+//   Widget _reportCard(String title, double amount, {bool isProfit = true}) {
+//     return Container(
+//       width: double.infinity,
+//       height: 150,
+//       decoration: BoxDecoration(
+//         borderRadius: BorderRadius.circular(10),
+//         gradient: LinearGradient(
+//           colors: [Colors.white, isProfit ? Colors.green : Colors.red],
+//           stops: const [0.5, 0.5],
+//           begin: Alignment.topCenter,
+//           end: Alignment.bottomCenter,
+//         ),
+//       ),
+//       child: Column(
+//         mainAxisAlignment: MainAxisAlignment.center,
+//         children: [
+//           Text(title,
+//               style:
+//                   const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+//           const SizedBox(height: 20),
+//           Text(
+//             "Rs. ${amount.toStringAsFixed(2)}",
+//             style: TextStyle(
+//               fontSize: 28,
+//               fontWeight: FontWeight.bold,
+//               color: isProfit ? Colors.green[800] : Colors.red[800],
+//             ),
+//           ),
+//         ],
+//       ),
+//     );
+//   }
+// }
+// import 'dart:io';
+// import 'package:excel/excel.dart';
+// import 'package:file_picker/file_picker.dart';
+// import 'package:flutter/material.dart';
+// import 'package:hive/hive.dart';
+
+// class ExcelHelper {
+//   static Future<void> exportToExcel({
+//     required BuildContext context,
+//     required Box box,
+
+//     required String sheetName,
+//     required String fileName,
+//     required List<String> headers,
+//   }) async {
+//     var excel = Excel.createExcel();
+
+//     if (excel.sheets.containsKey("Sheet1")) {
+//       excel.delete("Sheet1");
+//     }
+
+//     Sheet sheet = excel[sheetName];
+//     excel.setDefaultSheet(sheetName);
+
+//     sheet.appendRow(headers.map((h) => TextCellValue(h)).toList());
+
+//     for (var key in box.keys) {
+//       final value = box1.get(key);
+
+//       if (value is Map) {
+//         final stock = Map<String, dynamic>.from(value);
+
+//         sheet.appendRow(
+//           headers.map((h) {
+//             final cellValue = stock[h];
+//             if (cellValue is num) return DoubleCellValue(cellValue.toDouble());
+//             if (cellValue is bool) return BoolCellValue(cellValue);
+//             return TextCellValue(cellValue?.toString() ?? "");
+//           }).toList(),
+//         );
+//       }
+//     }
+
+//     String? outputFile = await FilePicker.platform.saveFile(
+//       dialogTitle: 'Save Excel File',
+//       fileName: '$fileName.xlsx',
+//       type: FileType.custom,
+//       allowedExtensions: ['xlsx'],
+//     );
+
+//     if (outputFile != null) {
+//       File(outputFile).writeAsBytesSync(excel.encode()!);
+
+//       if (context.mounted) {
+//         ScaffoldMessenger.of(context).showSnackBar(
+//           SnackBar(content: Text("Exported to $outputFile")),
+//         );
+//       }
+//     }
+//   }
+
+//   static Future<void> importFromExcel({
+//     required BuildContext context,
+//     required Box box,
+//     required List<String> headers,
+//   }) async {
+//     FilePickerResult? result = await FilePicker.platform.pickFiles(
+//       type: FileType.custom,
+//       allowedExtensions: ['xlsx'],
+//     );
+
+//     if (result != null) {
+//       var bytes = File(result.files.single.path!).readAsBytesSync();
+//       var excel = Excel.decodeBytes(bytes);
+
+//       for (var table in excel.tables.keys) {
+//         for (var row in excel.tables[table]!.rows.skip(1)) {
+//           final stock = <String, dynamic>{};
+
+//           for (int i = 0; i < headers.length; i++) {
+//             final cell = row.length > i ? row[i] : null;
+
+//             if (cell == null || cell.value == null) {
+//               stock[headers[i]] = "";
+//             } else if (cell.value is num) {
+//               stock[headers[i]] = cell.value; // keep number
+//             } else if (cell.value is bool) {
+//               stock[headers[i]] = cell.value; // keep bool
+//             } else {
+//               stock[headers[i]] = cell.value.toString();
+//             }
+//           }
+
+//           box.add(stock);
+//         }
+//       }
+
+//       if (context.mounted) {
+//         ScaffoldMessenger.of(context).showSnackBar(
+//           const SnackBar(content: Text("Import successful")),
+//         );
+//       }
+//     }
+//   }
+// }
+
+// import 'dart:io';
+// import 'package:excel/excel.dart';
+// import 'package:file_picker/file_picker.dart';
+// import 'package:flutter/material.dart';
+// import 'package:hive/hive.dart';
+
+// class ExcelHelper {
+//   /// Export data from one or many Hive boxes
+//   static Future<void> exportToExcel({
+//     required BuildContext context,
+//     required List<Box> boxes, // ✅ flexible
+//     required String sheetName,
+//     required String fileName,
+//     required List<String> headers,
+//   }) async {
+//     var excel = Excel.createExcel();
+
+//     if (excel.sheets.containsKey("Sheet1")) {
+//       excel.delete("Sheet1");
+//     }
+
+//     Sheet sheet = excel[sheetName];
+//     excel.setDefaultSheet(sheetName);
+
+//     // Add headers
+//     sheet.appendRow(headers.map((h) => TextCellValue(h)).toList());
+
+//     // Export from each box
+//     for (var box in boxes) {
+//       for (var key in box.keys) {
+//         final value = box.get(key);
+//         if (value is Map) {
+//           final stock = Map<String, dynamic>.from(value);
+//           sheet.appendRow(
+//             headers.map((h) {
+//               final cellValue = stock[h];
+//               if (cellValue is num)
+//                 return DoubleCellValue(cellValue.toDouble());
+//               if (cellValue is bool) return BoolCellValue(cellValue);
+//               return TextCellValue(cellValue?.toString() ?? "");
+//             }).toList(),
+//           );
+//         }
+//       }
+//     }
+
+//     // Save file
+//     String? outputFile = await FilePicker.platform.saveFile(
+//       dialogTitle: 'Save Excel File',
+//       fileName: '$fileName.xlsx',
+//       type: FileType.custom,
+//       allowedExtensions: ['xlsx'],
+//     );
+
+//     if (outputFile != null) {
+//       File(outputFile).writeAsBytesSync(excel.encode()!);
+//       if (context.mounted) {
+//         ScaffoldMessenger.of(context).showSnackBar(
+//           SnackBar(content: Text("Exported to $outputFile")),
+//         );
+//       }
+//     }
+//   }
+
+//   /// Import into one or many boxes
+//   static Future<void> importFromExcel({
+//     required BuildContext context,
+//     required List<Box> boxes, // ✅ flexible
+//     required List<String> headers,
+//   }) async {
+//     FilePickerResult? result = await FilePicker.platform.pickFiles(
+//       type: FileType.custom,
+//       allowedExtensions: ['xlsx'],
+//     );
+
+//     if (result != null) {
+//       var bytes = File(result.files.single.path!).readAsBytesSync();
+//       var excel = Excel.decodeBytes(bytes);
+
+//       int boxIndex = 0;
+
+//       for (var table in excel.tables.keys) {
+//         for (var row in excel.tables[table]!.rows.skip(1)) {
+//           final stock = <String, dynamic>{};
+
+//           for (int i = 0; i < headers.length; i++) {
+//             final cell = row.length > i ? row[i] : null;
+//             if (cell == null || cell.value == null) {
+//               stock[headers[i]] = "";
+//             } else if (cell.value is num) {
+//               stock[headers[i]] = cell.value;
+//             } else if (cell.value is bool) {
+//               stock[headers[i]] = cell.value;
+//             } else {
+//               stock[headers[i]] = cell.value.toString();
+//             }
+//           }
+
+//           // Add row into current box
+//           boxes[boxIndex].add(stock);
+
+//           // Move to next box if available
+//           boxIndex = (boxIndex + 1) % boxes.length;
+//         }
+//       }
+
+//       if (context.mounted) {
+//         ScaffoldMessenger.of(context).showSnackBar(
+//           const SnackBar(content: Text("Import successful")),
+//         );
+//       }
+//     }
+//   }
+// }
+// import 'dart:io';
+// import 'package:excel/excel.dart';
+// import 'package:file_picker/file_picker.dart';
+// import 'package:flutter/material.dart';
+// import 'package:hive/hive.dart';
+
+// class ExcelHelper {
+//   /// Export data from one or many Hive boxes OR from custom rows
+//   static Future<void> exportToExcel({
+//     required BuildContext context,
+//     List<Box>? boxes, // ✅ optional now
+//     required String sheetName,
+//     required String fileName,
+//     required List<String> headers,
+//     List<List<String>>? rows, // ✅ new optional
+//   }) async {
+//     var excel = Excel.createExcel();
+
+//     if (excel.sheets.containsKey("Sheet1")) {
+//       excel.delete("Sheet1");
+//     }
+
+//     Sheet sheet = excel[sheetName];
+//     excel.setDefaultSheet(sheetName);
+
+//     // Add headers
+//     sheet.appendRow(headers.map((h) => TextCellValue(h)).toList());
+
+//     // ✅ If rows are provided → use them
+//     if (rows != null) {
+//       for (var row in rows) {
+//         sheet.appendRow(
+//           row.map((cell) => TextCellValue(cell)).toList(),
+//         );
+//       }
+//     }
+//     // ✅ Otherwise → fallback to Hive box export
+//     else if (boxes != null) {
+//       for (var box in boxes) {
+//         for (var key in box.keys) {
+//           final value = box.get(key);
+//           if (value is Map) {
+//             final stock = Map<String, dynamic>.from(value);
+//             sheet.appendRow(
+//               headers.map((h) {
+//                 final cellValue = stock[h];
+//                 if (cellValue is num) {
+//                   return DoubleCellValue(cellValue.toDouble());
+//                 }
+//                 if (cellValue is bool) {
+//                   return BoolCellValue(cellValue);
+//                 }
+//                 return TextCellValue(cellValue?.toString() ?? "");
+//               }).toList(),
+//             );
+//           }
+//         }
+//       }
+//     }
+
+//     // Save file
+//     String? outputFile = await FilePicker.platform.saveFile(
+//       dialogTitle: 'Save Excel File',
+//       fileName: '$fileName.xlsx',
+//       type: FileType.custom,
+//       allowedExtensions: ['xlsx'],
+//     );
+
+//     if (outputFile != null) {
+//       File(outputFile).writeAsBytesSync(excel.encode()!);
+//       if (context.mounted) {
+//         ScaffoldMessenger.of(context).showSnackBar(
+//           SnackBar(content: Text("Exported to $outputFile")),
+//         );
+//       }
+//     }
+//   }
+
+//   /// Import into one or many boxes
+//   static Future<void> importFromExcel({
+//     required BuildContext context,
+//     required List<Box> boxes, // ✅ flexible
+//     required List<String> headers,
+//   }) async {
+//     FilePickerResult? result = await FilePicker.platform.pickFiles(
+//       type: FileType.custom,
+//       allowedExtensions: ['xlsx'],
+//     );
+
+//     if (result != null) {
+//       var bytes = File(result.files.single.path!).readAsBytesSync();
+//       var excel = Excel.decodeBytes(bytes);
+
+//       int boxIndex = 0;
+
+//       for (var table in excel.tables.keys) {
+//         for (var row in excel.tables[table]!.rows.skip(1)) {
+//           final stock = <String, dynamic>{};
+
+//           for (int i = 0; i < headers.length; i++) {
+//             final cell = row.length > i ? row[i] : null;
+//             if (cell == null || cell.value == null) {
+//               stock[headers[i]] = "";
+//             } else if (cell.value is num) {
+//               stock[headers[i]] = cell.value;
+//             } else if (cell.value is bool) {
+//               stock[headers[i]] = cell.value;
+//             } else {
+//               stock[headers[i]] = cell.value.toString();
+//             }
+//           }
+
+//           // Add row into current box
+//           boxes[boxIndex].add(stock);
+
+//           // Move to next box if available
+//           boxIndex = (boxIndex + 1) % boxes.length;
+//         }
+//       }
+
+//       if (context.mounted) {
+//         ScaffoldMessenger.of(context).showSnackBar(
+//           const SnackBar(content: Text("Import successful")),
+//         );
+//       }
+//     }
+//   }
+// }
+// import 'dart:io';
+// import 'package:excel/excel.dart';
+// import 'package:file_picker/file_picker.dart';
+// import 'package:flutter/material.dart';
+// import 'package:hive/hive.dart';
+
+// class ExcelHelper {
+//   /// Export data from Hive boxes
+//   static Future<void> exportToExcel({
+//     required BuildContext context,
+//     required List<Box> boxes,
+//     required String sheetName,
+//     required String fileName,
+//     required List<String> headers,
+//   }) async {
+//     var excel = Excel.createExcel();
+
+//     if (excel.sheets.containsKey("Sheet1")) {
+//       excel.delete("Sheet1");
+//     }
+
+//     Sheet sheet = excel[sheetName];
+//     excel.setDefaultSheet(sheetName);
+
+//     // Add headers
+//     sheet.appendRow(headers.map((h) => TextCellValue(h)).toList());
+
+//     // Export from each box
+//     for (var box in boxes) {
+//       for (var key in box.keys) {
+//         final value = box.get(key);
+//         if (value is Map) {
+//           final stock = Map<String, dynamic>.from(value);
+//           sheet.appendRow(
+//             headers.map((h) {
+//               final cellValue = stock[h];
+//               if (cellValue is num)
+//                 return DoubleCellValue(cellValue.toDouble());
+//               if (cellValue is bool) return BoolCellValue(cellValue);
+//               return TextCellValue(cellValue?.toString() ?? "");
+//             }).toList(),
+//           );
+//         }
+//       }
+//     }
+
+//     await _saveFile(context, excel, fileName);
+//   }
+
+//   /// Export custom rows (like weeklyTotals in Reports)
+//   static Future<void> exportRowsToExcel({
+//     required BuildContext context,
+//     required String sheetName,
+//     required String fileName,
+//     required List<String> headers,
+//     required List<List<String>> rows,
+//   }) async {
+//     var excel = Excel.createExcel();
+
+//     if (excel.sheets.containsKey("Sheet1")) {
+//       excel.delete("Sheet1");
+//     }
+
+//     Sheet sheet = excel[sheetName];
+//     excel.setDefaultSheet(sheetName);
+
+//     // Add headers
+//     sheet.appendRow(headers.map((h) => TextCellValue(h)).toList());
+
+//     // Add rows
+//     for (var row in rows) {
+//       sheet.appendRow(row.map((cell) => TextCellValue(cell)).toList());
+//     }
+
+//     await _saveFile(context, excel, fileName);
+//   }
+
+//   /// Import into one or many boxes
+//   static Future<void> importFromExcel({
+//     required BuildContext context,
+//     required List<Box> boxes,
+//     required List<String> headers,
+//   }) async {
+//     FilePickerResult? result = await FilePicker.platform.pickFiles(
+//       type: FileType.custom,
+//       allowedExtensions: ['xlsx'],
+//     );
+
+//     if (result != null) {
+//       var bytes = File(result.files.single.path!).readAsBytesSync();
+//       var excel = Excel.decodeBytes(bytes);
+
+//       int boxIndex = 0;
+
+//       for (var table in excel.tables.keys) {
+//         for (var row in excel.tables[table]!.rows.skip(1)) {
+//           final stock = <String, dynamic>{};
+
+//           for (int i = 0; i < headers.length; i++) {
+//             final cell = row.length > i ? row[i] : null;
+//             if (cell == null || cell.value == null) {
+//               stock[headers[i]] = "";
+//             } else if (cell.value is num) {
+//               stock[headers[i]] = cell.value;
+//             } else if (cell.value is bool) {
+//               stock[headers[i]] = cell.value;
+//             } else {
+//               stock[headers[i]] = cell.value.toString();
+//             }
+//           }
+
+//           boxes[boxIndex].add(stock);
+//           boxIndex = (boxIndex + 1) % boxes.length;
+//         }
+//       }
+
+//       if (context.mounted) {
+//         ScaffoldMessenger.of(context).showSnackBar(
+//           const SnackBar(content: Text("Import successful")),
+//         );
+//       }
+//     }
+//   }
+
+//   /// Save helper
+//   static Future<void> _saveFile(
+//       BuildContext context, Excel excel, String fileName) async {
+//     String? outputFile = await FilePicker.platform.saveFile(
+//       dialogTitle: 'Save Excel File',
+//       fileName: '$fileName.xlsx',
+//       type: FileType.custom,
+//       allowedExtensions: ['xlsx'],
+//     );
+
+//     if (outputFile != null) {
+//       File(outputFile).writeAsBytesSync(excel.encode()!);
+//       if (context.mounted) {
+//         ScaffoldMessenger.of(context).showSnackBar(
+//           SnackBar(content: Text("Exported to $outputFile")),
+//         );
+//       }
+//     }
+//   }
+// }
+// import 'package:flutter/material.dart';
+// import 'package:hive/hive.dart';
+// import 'package:intl/intl.dart';
+// import 'package:software/reuseable_widget/excel.dart';
+
+// class Reports extends StatefulWidget {
+//   const Reports({super.key});
+
+//   @override
+//   State<Reports> createState() => _ReportsState();
+// }
+
+// class _ReportsState extends State<Reports> {
+//   late Box purchaseBox;
+//   late Box currentsalesBox;
+
+//   List<Map<String, dynamic>> weeklyTotals = [];
+
+//   @override
+//   void initState() {
+//     super.initState();
+//     purchaseBox = Hive.box('purchaseBox');
+//     currentsalesBox = Hive.box('currentsalesBox');
+//     _calculateWeeklyReports();
+//   }
+
+//   DateTime _startOfWeek(DateTime date) {
+//     return date.subtract(Duration(days: date.weekday - 1));
+//   }
+
+//   DateTime _endOfWeek(DateTime date) {
+//     return date.add(Duration(days: 7 - date.weekday));
+//   }
+
+//   void _calculateWeeklyReports() {
+//     final allDates = <DateTime>{};
+
+//     for (var key in purchaseBox.keys) {
+//       if (key.toString().length >= 10) {
+//         allDates.add(DateTime.parse(key.toString()));
+//       }
+//     }
+
+//     for (var key in currentsalesBox.keys) {
+//       if (key.toString().length >= 10) {
+//         allDates.add(DateTime.parse(key.toString()));
+//       }
+//     }
+
+//     final Map<String, Map<String, double>> weeks = {};
+
+//     for (var date in allDates) {
+//       final start = _startOfWeek(date);
+//       final end = _endOfWeek(date);
+//       final weekKey =
+//           "${DateFormat('dd-MMM').format(start)} to ${DateFormat('dd-MMM').format(end)}";
+
+//       double weekPurchase = 0.0;
+//       double weekSales = 0.0;
+
+//       for (int i = 0; i < 7; i++) {
+//         final key =
+//             DateFormat('yyyy-MM-dd').format(start.add(Duration(days: i)));
+//         final dayPurchases = purchaseBox.get(key, defaultValue: []);
+//         if (dayPurchases is List) {
+//           for (var item in dayPurchases) {
+//             if (item is Map && item.containsKey('amount')) {
+//               weekPurchase += (item['amount'] as num).toDouble();
+//             }
+//           }
+//         } else if (dayPurchases is double || dayPurchases is int) {
+//           weekPurchase += (dayPurchases as num).toDouble();
+//         }
+
+//         final daySales = currentsalesBox.get(key, defaultValue: []);
+//         if (daySales is List) {
+//           for (var item in daySales) {
+//             if (item is Map && item.containsKey('amount')) {
+//               weekSales += (item['amount'] as num).toDouble();
+//             }
+//           }
+//         } else if (daySales is double || daySales is int) {
+//           weekSales += (daySales as num).toDouble();
+//         }
+//       }
+
+//       weeks[weekKey] = {
+//         'purchase': weekPurchase,
+//         'sales': weekSales,
+//       };
+//     }
+
+//     final List<Map<String, dynamic>> weekList = weeks.entries.map((e) {
+//       final profit = e.value['sales']! - e.value['purchase']!;
+//       return {
+//         'week': e.key,
+//         'purchase': e.value['purchase'],
+//         'sales': e.value['sales'],
+//         'profit': profit,
+//         'isProfit': profit >= 0,
+//       };
+//     }).toList();
+
+//     weekList.sort((a, b) => b['week'].compareTo(a['week']));
+
+//     setState(() {
+//       weeklyTotals = weekList;
+//     });
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       appBar: AppBar(
+//         title: const Text('Weekly Reports',
+//             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+//         centerTitle: true,
+//         actions: [
+//         //   IconButton(
+//         //     tooltip: "Export to Excel",
+//         //     onPressed: () {
+//         //       ExcelHelper.exportToExcel(
+//         //         context: context,
+//         //         boxes: [purchaseBox, currentsalesBox],
+//         //         sheetName: " Reports",
+//         //         fileName: "Reports",
+//         //         headers: [
+//         //           "week",
+//         //           "purchase",
+//         //           "sales",
+//         //           "profit",
+//         //           "loss",
+//         //         ],
+//         //       );
+//         //     },
+//         //     icon: const Icon(Icons.file_upload),
+//         //   ),
+//         //   IconButton(
+//         //     tooltip: "Import from Excel",
+//         //     onPressed: () {
+//         //       ExcelHelper.importFromExcel(
+//         //         context: context,
+//         //         boxes: [purchaseBox, currentsalesBox],
+//         //         headers: [
+//         //           "week",
+//         //           "purchase",
+//         //           "sales",
+//         //           "profit",
+//         //           "loss",
+//         //         ],
+//         //       );
+//         //     },
+//         //     icon: const Icon(Icons.file_download),
+//         //   ),
+//         IconButton(
+//   tooltip: "Export to Excel",
+//   onPressed: () {
+//     ExcelHelper.exportToExcel(
+//       context: context,
+//       boxes: [purchaseBox, currentsalesBox],
+//       sheetName: "Reports",
+//       fileName: "Reports",
+//       headers: [
+//         "week",
+//         "purchase",
+//         "sales",
+//         "profit",
+//         "loss",
+//       ],
+//       rows: weeklyTotals.map((week) => [
+//         week['week'],
+//         week['purchase'].toStringAsFixed(2),
+//         week['sales'].toStringAsFixed(2),
+//         week['profit'] >= 0
+//             ? week['profit'].toStringAsFixed(2) // Profit value
+//             : "0.00", // No profit when loss
+//         week['profit'] < 0
+//             ? week['profit'].abs().toStringAsFixed(2) // Loss value
+//             : "0.00", // No loss when profit
+//       ]).toList(),
+//     );
+//   },
+//   icon: const Icon(Icons.file_upload),
+// ),
+// ],
+//         backgroundColor: const Color(0xFF008000),
+//       ),
+//       backgroundColor: const Color(0xFF008000),
+//       body: ListView.builder(
+//         padding: const EdgeInsets.all(16),
+//         itemCount: weeklyTotals.length,
+//         itemBuilder: (context, index) {
+//           final week = weeklyTotals[index];
+//           return _weekCard(
+//             week['week'],
+//             week['purchase'],
+//             week['sales'],
+//             week['profit'],
+//             week['isProfit'],
+//           );
+//         },
+//       ),
+//     );
+//   }
+
+//   Widget _weekCard(String weekRange, double purchase, double sales,
+//       double profit, bool isProfit) {
+//     return Padding(
+//       padding: const EdgeInsets.symmetric(vertical: 8),
+//       child: Container(
+//         width: double.infinity,
+//         padding: const EdgeInsets.all(20),
+//         decoration: BoxDecoration(
+//           borderRadius: BorderRadius.circular(10),
+//           gradient: LinearGradient(
+//             colors: [Colors.white, isProfit ? Colors.green : Colors.red],
+//             stops: const [0.5, 0.5],
+//             begin: Alignment.topCenter,
+//             end: Alignment.bottomCenter,
+//           ),
+//         ),
+//         child: Column(
+//           crossAxisAlignment: CrossAxisAlignment.start,
+//           children: [
+//             Text(weekRange,
+//                 style:
+//                     const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+//             const SizedBox(height: 10),
+//             Text("Total Purchases: Rs. ${purchase.toStringAsFixed(2)}",
+//                 style: const TextStyle(fontSize: 16)),
+//             Text("Total Sales: Rs. ${sales.toStringAsFixed(2)}",
+//                 style: const TextStyle(fontSize: 16)),
+//             const SizedBox(height: 10),
+//             Text(
+//               isProfit
+//                   ? "Profit: Rs. ${profit.toStringAsFixed(2)}"
+//                   : "Loss: Rs. ${profit.abs().toStringAsFixed(2)}",
+//               style: TextStyle(
+//                   fontSize: 18,
+//                   fontWeight: FontWeight.bold,
+//                   color: isProfit ? Colors.green[800] : Colors.red[800]),
+//             ),
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+// }
+
+//   Widget _purchaseCard(String title, double amount, String dateKey,
+//       List<MapEntry<int, dynamic>> purchasesOfDay) {
+//     return Padding(
+//       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+//       child: Container(
+//         width: double.infinity,
+//         padding: const EdgeInsets.all(20),
+//         decoration: BoxDecoration(
+//           borderRadius: BorderRadius.circular(10),
+//           color: Colors.green
+//         ),
+//         child: Column(
+//           crossAxisAlignment: CrossAxisAlignment.start,
+//           children: [
+//             Text(
+//               title,
+//               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+//             ),
+//             const SizedBox(height: 10),
+//             ...purchasesOfDay.map((entry) {
+//               final index = entry.key;
+//               final purchase = entry.value as Map;
+//               final purchaseAmount = (purchase['amount'] as num).toDouble();
+
+//               return Row(
+//                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//                 children: [
+//                   Text(
+//                     "Rs. ${purchaseAmount.toStringAsFixed(2)}",
+//                     style: TextStyle(
+//                       fontSize: 18,
+//                       fontWeight: FontWeight.bold,
+//                       color: purchaseAmount >= 0 ? Colors.black : Colors.red,
+//                     ),
+//                   ),
+//                   Row(
+//                     children: [
+//                       IconButton(
+//                         icon: const Icon(Icons.edit, color: Colors.blue),
+//                         onPressed: () =>
+//                             _editPurchase(dateKey, index, purchaseAmount),
+//                       ),
+//                       IconButton(
+//                         icon: const Icon(Icons.delete, color: Colors.red),
+//                         onPressed: () => _deletePurchase(dateKey, index),
+//                       ),
+//                     ],
+//                   ),
+//                 ],
+//               );
+//             }).toList(),
+//             const SizedBox(height: 10),
+//             Text(
+//               "Total: Rs. ${amount.toStringAsFixed(2)}",
+//               style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+//             ),
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+// }
+//   Widget _saleCard(String title, double amount, String dateKey,
+//       List<MapEntry<int, dynamic>> salesOfDay) {
+//     return Padding(
+//       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+//       child: Container(
+//         width: double.infinity,
+//         padding: const EdgeInsets.all(20),
+//         decoration: BoxDecoration(
+//           borderRadius: BorderRadius.circular(10),
+//           gradient: const LinearGradient(
+//             colors: [Colors.white, Colors.green],
+//             stops: [0.0, 0.0],
+//             begin: Alignment.topCenter,
+//             end: Alignment.bottomCenter,
+//           ),
+//         ),
+//         child: Column(
+//           crossAxisAlignment: CrossAxisAlignment.start,
+//           children: [
+//             Text(
+//               title,
+//               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+//             ),
+//             const SizedBox(height: 10),
+//             ...salesOfDay.map((entry) {
+//               final index = entry.key;
+//               final sale = entry.value as Map;
+//               final saleAmount = (sale['amount'] as num).toDouble();
+
+//               return Row(
+//                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//                 children: [
+//                   Text(
+//                     "Rs. ${saleAmount.toStringAsFixed(2)}",
+//                     style: TextStyle(
+//                       fontSize: 18,
+//                       fontWeight: FontWeight.bold,
+//                       color: saleAmount >= 0 ? Colors.black : Colors.red,
+//                     ),
+//                   ),
+//                   Row(
+//                     children: [
+//                       IconButton(
+//                         icon: const Icon(Icons.edit, color: Colors.blue),
+//                         onPressed: () => _editSale(dateKey, index, saleAmount),
+//                       ),
+//                       IconButton(
+//                         icon: const Icon(Icons.delete, color: Colors.red),
+//                         onPressed: () => _deleteSale(dateKey, index),
+//                       ),
+//                     ],
+//                   ),
+//                 ],
+//               );
+//             }).toList(),
+//             const SizedBox(height: 10),
+//             Text(
+//               "Total: Rs. ${amount.toStringAsFixed(2)}",
+//               style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+//             ),
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+// }
+// import 'package:flutter/material.dart';
+// import 'package:flutter/services.dart';
+// import 'package:hive_flutter/hive_flutter.dart';
+// import 'package:blue_thermal_printer/blue_thermal_printer.dart';
+// import 'package:pdf/widgets.dart' as pw;
+// import 'package:printing/printing.dart';
+
+// class InvoiceScreen extends StatefulWidget {
+//   const InvoiceScreen({super.key});
+
+//   @override
+//   State<InvoiceScreen> createState() => _InvoiceScreenState();
+// }
+
+// class _InvoiceScreenState extends State<InvoiceScreen> {
+//   final Map<String, List<Map<String, dynamic>>> bills = {};
+//   String activeBill = "Bill_1";
+
+//   final Box availableBox = Hive.box('availableBox');
+//   final Box viewsalesBox = Hive.box('viewsalesBox');
+
+//   final TextEditingController nameController = TextEditingController();
+//   final TextEditingController qtyController = TextEditingController();
+//   final TextEditingController priceController = TextEditingController();
+//   final TextEditingController customerController = TextEditingController();
+//   final TextEditingController discountPercentController =
+//       TextEditingController();
+//   final TextEditingController discountAmountController =
+//       TextEditingController();
+//   final TextEditingController counterPersonController = TextEditingController();
+
+//   final FocusNode nameFocus = FocusNode();
+//   final FocusNode qtyFocus = FocusNode();
+//   final FocusNode priceFocus = FocusNode();
+//   final FocusNode customerFocus = FocusNode();
+//   final FocusNode discountPercentFocus = FocusNode();
+//   final FocusNode discountAmountFocus = FocusNode();
+//   final FocusNode counterPersonFocus = FocusNode();
+
+//   final String ntnNo = '#1234677';
+//   final String licenseNo = 'LIC-987654';
+
+//   List<Map> filteredMedicines = [];
+//   double currentPerTabletRate = 0.0;
+//   bool isManualRate = false;
+//   int selectedMedicineIndex = -1;
+
+//   final BlueThermalPrinter printer = BlueThermalPrinter.instance;
+
+//   @override
+//   void initState() {
+//     super.initState();
+//     bills[activeBill] = [];
+//   }
+
+//   @override
+//   void dispose() {
+//     nameController.dispose();
+//     qtyController.dispose();
+//     priceController.dispose();
+//     customerController.dispose();
+//     discountPercentController.dispose();
+//     discountAmountController.dispose();
+//     counterPersonController.dispose();
+//     nameFocus.dispose();
+//     qtyFocus.dispose();
+//     priceFocus.dispose();
+//     customerFocus.dispose();
+//     discountPercentFocus.dispose();
+//     discountAmountFocus.dispose();
+//     counterPersonFocus.dispose();
+//     super.dispose();
+//   }
+
+//   List<Map<String, dynamic>> get cart => bills[activeBill] ?? [];
+
+//   void addMedicine() {
+//     final name = nameController.text.trim();
+//     final int qty = int.tryParse(qtyController.text.trim()) ?? 1;
+//     final double price = double.tryParse(priceController.text.trim()) ?? 0.0;
+
+//     if (name.isEmpty || price <= 0) {
+//       ScaffoldMessenger.of(context).showSnackBar(
+//           const SnackBar(content: Text('Please fill all required fields!')));
+//       return;
+//     }
+
+//     if (!isManualRate) {
+//       final stock = availableBox.values.cast<Map>().firstWhere(
+//             (m) =>
+//                 m["Medicine Name"].toString().toLowerCase() ==
+//                 name.toLowerCase(),
+//             orElse: () => {},
+//           );
+
+//       if (stock.isEmpty) {
+//         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+//             content:
+//                 Text('Medicine not found in stock! Use manual rate instead.')));
+//         return;
+//       }
+//     }
+
+//     setState(() {
+//       cart.add({
+//         'name': name,
+//         'qty': qty,
+//         'price': price * qty,
+//         'unitPrice': price,
+//       });
+//       _clearInputs();
+//       nameFocus.requestFocus();
+//     });
+//   }
+
+//   void _clearInputs() {
+//     nameController.clear();
+//     qtyController.clear();
+//     priceController.clear();
+//     currentPerTabletRate = 0.0;
+//     filteredMedicines = [];
+//     selectedMedicineIndex = -1;
+//     isManualRate = false;
+//   }
+
+//   void _createNewBill() {
+//     final newKey = "Bill_${bills.length + 1}";
+//     setState(() {
+//       bills[newKey] = [];
+//       activeBill = newKey;
+//     });
+//   }
+
+//   void _switchBill(String key) {
+//     setState(() {
+//       activeBill = key;
+//     });
+//   }
+
+//   double get subtotal =>
+//       cart.fold<double>(0, (sum, item) => sum + (item['price'] as double));
+
+//   double get discount {
+//     final double discountAmountInput =
+//         double.tryParse(discountAmountController.text.trim()) ?? 0;
+//     final double discountPercentInput =
+//         double.tryParse(discountPercentController.text.trim()) ?? 0;
+
+//     if (discountAmountInput > 0) return discountAmountInput.clamp(0, subtotal);
+//     if (discountPercentInput > 0)
+//       return subtotal * (discountPercentInput / 100).clamp(0, 1);
+//     return 0;
+//   }
+
+//   double get grandTotal => (subtotal - discount).clamp(0, double.infinity);
+
+//   String _formatDateTime(DateTime dt) {
+//     String two(int n) => n.toString().padLeft(2, '0');
+//     return '${dt.year}-${two(dt.month)}-${two(dt.day)} ${two(dt.hour)}:${two(dt.minute)}';
+//   }
+
+//   Widget _keyboardTextField({
+//     required TextEditingController controller,
+//     required FocusNode focusNode,
+//     FocusNode? nextFocus,
+//     FocusNode? prevFocus,
+//     FocusNode? rightFocus,
+//     FocusNode? leftFocus,
+//     String? label,
+//     TextInputType keyboardType = TextInputType.text,
+//     bool readOnly = false,
+//     void Function(String)? onChanged,
+//     void Function()? onEnter,
+//     bool isMedicineField = false,
+//   }) {
+//     return KeyboardListener(
+//       focusNode: FocusNode(),
+//       onKeyEvent: (event) {
+//         if (event is KeyDownEvent && focusNode.hasFocus) {
+//           if (isMedicineField && filteredMedicines.isNotEmpty) {
+//             if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
+//               setState(() {
+//                 selectedMedicineIndex =
+//                     (selectedMedicineIndex + 1) % filteredMedicines.length;
+//               });
+//               return;
+//             } else if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
+//               setState(() {
+//                 selectedMedicineIndex = selectedMedicineIndex <= 0
+//                     ? filteredMedicines.length - 1
+//                     : selectedMedicineIndex - 1;
+//               });
+//               return;
+//             } else if (event.logicalKey == LogicalKeyboardKey.enter) {
+//               if (selectedMedicineIndex >= 0 &&
+//                   selectedMedicineIndex < filteredMedicines.length) {
+//                 _selectMedicine(filteredMedicines[selectedMedicineIndex]);
+//               }
+//               return;
+//             } else if (event.logicalKey == LogicalKeyboardKey.escape) {
+//               setState(() {
+//                 filteredMedicines = [];
+//                 selectedMedicineIndex = -1;
+//               });
+//               return;
+//             }
+//           }
+//           if (event.logicalKey == LogicalKeyboardKey.enter && onEnter != null) {
+//             onEnter();
+//           }
+//         }
+//       },
+//       child: TextField(
+//         controller: controller,
+//         focusNode: focusNode,
+//         keyboardType: keyboardType,
+//         readOnly: readOnly,
+//         decoration: InputDecoration(
+//           labelText: label,
+//           isDense: true,
+//           border: OutlineInputBorder(),
+//           contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+//           suffixIcon: isMedicineField && filteredMedicines.isNotEmpty
+//               ? Icon(Icons.keyboard_arrow_down)
+//               : null,
+//           helperText: isMedicineField
+//               ? '↑↓: Navigate, Enter: Select (then enter Qty), Esc: Close'
+//               : null,
+//           helperMaxLines: 2,
+//         ),
+//         onChanged: onChanged,
+//         onSubmitted: (_) {
+//           if (onEnter != null) onEnter();
+//         },
+//       ),
+//     );
+//   }
+
+//   void _selectMedicine(Map stock) {
+//     setState(() {
+//       nameController.text = stock["Medicine Name"];
+//       final int packSize = int.tryParse(stock["Tablets"].toString()) ?? 1;
+//       final double packPrice =
+//           double.tryParse(stock["Pack Price"].toString()) ?? 0.0;
+//       currentPerTabletRate = packSize > 0 ? packPrice / packSize : 0;
+//       qtyController.text = '';
+//       priceController.text = '';
+//       filteredMedicines = [];
+//       selectedMedicineIndex = -1;
+//       isManualRate = false;
+//     });
+
+//     Future.delayed(Duration(milliseconds: 100), () {
+//       FocusScope.of(context).requestFocus(qtyFocus);
+//     });
+//   }
+
+//   Widget _buildMedicineDropdown() {
+//     if (filteredMedicines.isEmpty) return const SizedBox.shrink();
+
+//     return Container(
+//       constraints: BoxConstraints(maxHeight: 200),
+//       decoration: BoxDecoration(
+//         border: Border.all(color: Colors.grey),
+//         borderRadius: BorderRadius.circular(4),
+//         color: Colors.white,
+//       ),
+//       child: ListView.builder(
+//         shrinkWrap: true,
+//         itemCount: filteredMedicines.length,
+//         itemBuilder: (context, index) {
+//           final stock = filteredMedicines[index];
+//           final bool isSelected = index == selectedMedicineIndex;
+
+//           return InkWell(
+//             onTap: () {
+//               _selectMedicine(stock);
+//             },
+//             child: Container(
+//               padding: EdgeInsets.all(12),
+//               color: isSelected ? Colors.blue.shade100 : null,
+//               child: Row(
+//                 children: [
+//                   Expanded(
+//                     child: Column(
+//                       crossAxisAlignment: CrossAxisAlignment.start,
+//                       children: [
+//                         Text(stock["Medicine Name"]),
+//                         Text(
+//                             "Pack: ${stock["Tablets"]}, Rs. ${stock["Pack Price"]}"),
+//                       ],
+//                     ),
+//                   ),
+//                 ],
+//               ),
+//             ),
+//           );
+//         },
+//       ),
+//     );
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       appBar: AppBar(
+//         title: Text('Invoice - $activeBill'),
+//         centerTitle: true,
+//         backgroundColor: const Color(0xFF008000),
+//         actions: [
+//           PopupMenuButton<String>(
+//             onSelected: _switchBill,
+//             itemBuilder: (context) => bills.keys
+//                 .map((bill) => PopupMenuItem(
+//                       value: bill,
+//                       child: Text(bill == activeBill ? "$bill (Active)" : bill),
+//                     ))
+//                 .toList(),
+//           ),
+//           IconButton(
+//               onPressed: _createNewBill,
+//               icon: const Icon(Icons.add),
+//               tooltip: "New Bill"),
+//         ],
+//       ),
+//       body: SingleChildScrollView(
+//         padding: const EdgeInsets.all(16),
+//         child: Column(
+//           children: [
+//             // Header
+//             Row(
+//               children: [
+//                 const Expanded(
+//                   child: Text('Al-Shifa Medical',
+//                       style:
+//                           TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+//                 ),
+//                 Expanded(
+//                   child: Align(
+//                     alignment: Alignment.centerRight,
+//                     child: Directionality(
+//                       textDirection: TextDirection.rtl,
+//                       child: const Text('الشفاء میڈیکل',
+//                           style: TextStyle(
+//                               fontSize: 20, fontWeight: FontWeight.bold)),
+//                     ),
+//                   ),
+//                 ),
+//               ],
+//             ),
+//             const SizedBox(height: 8),
+
+//             Row(
+//               children: [
+//                 Expanded(
+//                   child: Column(
+//                     crossAxisAlignment: CrossAxisAlignment.start,
+//                     children: [
+//                       Text('NTN: $ntnNo'),
+//                       Text('License No: $licenseNo'),
+//                       Text('Print Time: ${_formatDateTime(DateTime.now())}'),
+//                     ],
+//                   ),
+//                 ),
+//                 SizedBox(
+//                   width: 240,
+//                   child: _keyboardTextField(
+//                     controller: customerController,
+//                     focusNode: customerFocus,
+//                     nextFocus: nameFocus,
+//                     rightFocus: nameFocus,
+//                     leftFocus: counterPersonFocus,
+//                     label: 'Customer Name',
+//                   ),
+//                 ),
+//               ],
+//             ),
+//             const Divider(height: 24, thickness: 1),
+
+//             Card(
+//               child: Padding(
+//                 padding: EdgeInsets.all(16),
+//                 child: Column(
+//                   children: [
+//                     Row(
+//                       children: [
+//                         Expanded(
+//                           flex: 3,
+//                           child: Column(
+//                             children: [
+//                               _keyboardTextField(
+//                                 controller: nameController,
+//                                 focusNode: nameFocus,
+//                                 nextFocus: qtyFocus,
+//                                 prevFocus: customerFocus,
+//                                 rightFocus: qtyFocus,
+//                                 leftFocus: customerFocus,
+//                                 label: 'Medicine Name',
+//                                 isMedicineField: true,
+//                                 onChanged: (value) {
+//                                   setState(() {
+//                                     isManualRate = false;
+//                                     selectedMedicineIndex = -1;
+//                                     filteredMedicines = value.isEmpty
+//                                         ? []
+//                                         : availableBox.values
+//                                             .where((stock) =>
+//                                                 stock["Medicine Name"]
+//                                                     .toString()
+//                                                     .toLowerCase()
+//                                                     .contains(
+//                                                         value.toLowerCase()))
+//                                             .cast<Map>()
+//                                             .toList();
+//                                     if (filteredMedicines.isNotEmpty) {
+//                                       selectedMedicineIndex = 0;
+//                                     }
+//                                   });
+//                                 },
+//                                 onEnter: () {
+//                                   if (filteredMedicines.isNotEmpty &&
+//                                       selectedMedicineIndex >= 0) {
+//                                     _selectMedicine(filteredMedicines[
+//                                         selectedMedicineIndex]);
+//                                   } else {
+//                                     qtyFocus.requestFocus();
+//                                   }
+//                                 },
+//                               ),
+//                               SizedBox(height: 4),
+//                               _buildMedicineDropdown(),
+//                             ],
+//                           ),
+//                         ),
+//                         const SizedBox(width: 10),
+//                         Expanded(
+//                           flex: 1,
+//                           child: _keyboardTextField(
+//                             controller: qtyController,
+//                             focusNode: qtyFocus,
+//                             nextFocus: priceFocus,
+//                             prevFocus: nameFocus,
+//                             rightFocus: priceFocus,
+//                             leftFocus: nameFocus,
+//                             label: 'Quantity',
+//                             keyboardType: TextInputType.number,
+//                             onChanged: (value) {
+//                               if (!isManualRate && currentPerTabletRate > 0) {
+//                                 final qty = int.tryParse(value) ?? 1;
+//                                 setState(() {
+//                                   priceController.text =
+//                                       (currentPerTabletRate * qty)
+//                                           .toStringAsFixed(2);
+//                                 });
+//                               }
+//                             },
+//                             onEnter: addMedicine,
+//                           ),
+//                         ),
+//                         const SizedBox(width: 10),
+//                         Expanded(
+//                           flex: 1,
+//                           child: _keyboardTextField(
+//                             controller: priceController,
+//                             focusNode: priceFocus,
+//                             nextFocus: discountPercentFocus,
+//                             prevFocus: qtyFocus,
+//                             rightFocus: discountPercentFocus,
+//                             leftFocus: qtyFocus,
+//                             label: 'Unit Rate (Rs.)',
+//                             keyboardType: TextInputType.number,
+//                             readOnly: !isManualRate && currentPerTabletRate > 0,
+//                             onChanged: (value) {
+//                               if (value.isNotEmpty) {
+//                                 setState(() {
+//                                   isManualRate = true;
+//                                 });
+//                               }
+//                             },
+//                             onEnter: addMedicine,
+//                           ),
+//                         ),
+//                         const SizedBox(width: 10),
+//                         Column(
+//                           children: [
+//                             IconButton(
+//                               icon: const Icon(Icons.add, color: Colors.green),
+//                               onPressed: addMedicine,
+//                               tooltip: 'Add to cart',
+//                             ),
+//                             IconButton(
+//                               icon: const Icon(Icons.edit, color: Colors.blue),
+//                               onPressed: () {
+//                                 setState(() {
+//                                   isManualRate = true;
+//                                   priceController.clear();
+//                                   priceFocus.requestFocus();
+//                                 });
+//                               },
+//                               tooltip: 'Manual rate',
+//                             ),
+//                           ],
+//                         ),
+//                       ],
+//                     ),
+//                     Row(
+//                       children: [
+//                         Checkbox(
+//                           value: isManualRate,
+//                           onChanged: (value) {
+//                             setState(() {
+//                               isManualRate = value ?? false;
+//                               if (!isManualRate) {
+//                                 priceController.clear();
+//                               }
+//                             });
+//                           },
+//                         ),
+//                         Text('Manual Rate Entry'),
+//                         Spacer(),
+//                         if (currentPerTabletRate > 0 && !isManualRate)
+//                           Text(
+//                               'Auto Rate: Rs. ${currentPerTabletRate.toStringAsFixed(2)} per unit'),
+//                       ],
+//                     ),
+//                   ],
+//                 ),
+//               ),
+//             ),
+
+//             const SizedBox(height: 16),
+
+//             Container(
+//               constraints: BoxConstraints(maxHeight: 300),
+//               child: SingleChildScrollView(
+//                 child: DataTable(
+//                   columnSpacing: 20,
+//                   columns: const [
+//                     DataColumn(label: Text('S.No')),
+//                     DataColumn(label: Text('Medicine')),
+//                     DataColumn(label: Text('Qty')),
+//                     DataColumn(label: Text('Unit Rate')),
+//                     DataColumn(label: Text('Total')),
+//                     DataColumn(label: Text('Action')),
+//                   ],
+//                   rows: [
+//                     for (int i = 0; i < cart.length; i++)
+//                       DataRow(cells: [
+//                         DataCell(Text('${i + 1}')),
+//                         DataCell(
+//                           Container(
+//                             width: 120,
+//                             child: Text(
+//                               cart[i]['name'].toString(),
+//                               overflow: TextOverflow.ellipsis,
+//                             ),
+//                           ),
+//                         ),
+//                         DataCell(Text(cart[i]['qty'].toString())),
+//                         DataCell(Text(
+//                             'Rs. ${(cart[i]['unitPrice'] as double).toStringAsFixed(2)}')),
+//                         DataCell(Text(
+//                             'Rs. ${(cart[i]['price'] as double).toStringAsFixed(2)}')),
+//                         DataCell(
+//                           Row(
+//                             mainAxisSize: MainAxisSize.min,
+//                             children: [
+//                               IconButton(
+//                                 icon: const Icon(Icons.edit,
+//                                     color: Colors.blue, size: 18),
+//                                 onPressed: () {
+//                                   setState(() {
+//                                     nameController.text = cart[i]['name'];
+//                                     qtyController.text =
+//                                         cart[i]['qty'].toString();
+//                                     priceController.text =
+//                                         (cart[i]['unitPrice'] as double)
+//                                             .toStringAsFixed(2);
+//                                     isManualRate = true;
+//                                     cart.removeAt(i);
+//                                     nameFocus.requestFocus();
+//                                   });
+//                                 },
+//                                 tooltip: 'Edit',
+//                               ),
+//                               IconButton(
+//                                 icon: const Icon(Icons.delete,
+//                                     color: Colors.red, size: 18),
+//                                 onPressed: () {
+//                                   setState(() {
+//                                     cart.removeAt(i);
+//                                   });
+//                                 },
+//                                 tooltip: 'Delete',
+//                               ),
+//                             ],
+//                           ),
+//                         ),
+//                       ])
+//                   ],
+//                 ),
+//               ),
+//             ),
+
+//             const SizedBox(height: 16),
+
+//             Card(
+//               child: Padding(
+//                 padding: EdgeInsets.all(16),
+//                 child: Column(
+//                   children: [
+//                     Row(
+//                       children: [
+//                         Expanded(
+//                           child: _keyboardTextField(
+//                             controller: discountPercentController,
+//                             focusNode: discountPercentFocus,
+//                             nextFocus: discountAmountFocus,
+//                             prevFocus: priceFocus,
+//                             rightFocus: discountAmountFocus,
+//                             leftFocus: priceFocus,
+//                             keyboardType: TextInputType.number,
+//                             label: 'Discount %',
+//                             onChanged: (_) => setState(() {}),
+//                           ),
+//                         ),
+//                         const SizedBox(width: 16),
+//                         Expanded(
+//                           child: _keyboardTextField(
+//                             controller: discountAmountController,
+//                             focusNode: discountAmountFocus,
+//                             nextFocus: counterPersonFocus,
+//                             prevFocus: discountPercentFocus,
+//                             rightFocus: counterPersonFocus,
+//                             leftFocus: discountPercentFocus,
+//                             keyboardType: TextInputType.number,
+//                             label: 'Discount Amount (Rs.)',
+//                             onChanged: (_) => setState(() {}),
+//                           ),
+//                         ),
+//                       ],
+//                     ),
+//                     SizedBox(height: 16),
+//                     Row(
+//                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//                       children: [
+//                         Column(
+//                           crossAxisAlignment: CrossAxisAlignment.start,
+//                           children: [
+//                             Text('Items: ${cart.length}'),
+//                             Text(
+//                                 'Total Qty: ${cart.fold<int>(0, (sum, item) => sum + (item['qty'] as int))}'),
+//                           ],
+//                         ),
+//                         Column(
+//                           crossAxisAlignment: CrossAxisAlignment.end,
+//                           children: [
+//                             Text(
+//                                 'Subtotal: Rs. ${subtotal.toStringAsFixed(2)}'),
+//                             Text(
+//                                 'Discount: Rs. ${discount.toStringAsFixed(2)}'),
+//                             Text(
+//                               'Grand Total: Rs. ${grandTotal.toStringAsFixed(2)}',
+//                               style: const TextStyle(
+//                                   fontWeight: FontWeight.bold, fontSize: 18),
+//                             ),
+//                           ],
+//                         ),
+//                       ],
+//                     ),
+//                   ],
+//                 ),
+//               ),
+//             ),
+
+//             const SizedBox(height: 16),
+
+//             Row(
+//               children: [
+//                 Expanded(
+//                   child: _keyboardTextField(
+//                     controller: counterPersonController,
+//                     focusNode: counterPersonFocus,
+//                     nextFocus: customerFocus,
+//                     prevFocus: discountAmountFocus,
+//                     rightFocus: customerFocus,
+//                     leftFocus: discountAmountFocus,
+//                     label: 'Counter Person Name',
+//                   ),
+//                 ),
+//                 const SizedBox(width: 20),
+//                 const Text(
+//                   'THANK YOU FOR SHOPPING',
+//                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+//                 ),
+//               ],
+//             ),
+
+//             const SizedBox(height: 20),
+
+//             Row(
+//               mainAxisAlignment: MainAxisAlignment.center,
+//               children: [
+//                 const SizedBox(width: 16),
+//                 ElevatedButton.icon(
+//                   onPressed: cart.isEmpty ? null : _generatePdfInvoice,
+//                   icon: const Icon(Icons.picture_as_pdf),
+//                   label: const Text('Generate PDF'),
+//                   style: ElevatedButton.styleFrom(
+//                     backgroundColor: Colors.blue,
+//                     foregroundColor: Colors.white,
+//                   ),
+//                 ),
+//                 const SizedBox(width: 16),
+//                 ElevatedButton.icon(
+//                   onPressed: () {
+//                     setState(() {
+//                       bills[activeBill] = [];
+//                       _clearInputs();
+//                       customerController.clear();
+//                       counterPersonController.clear();
+//                       discountPercentController.clear();
+//                       discountAmountController.clear();
+//                     });
+//                   },
+//                   icon: const Icon(Icons.clear),
+//                   label: const Text('Clear All'),
+//                   style: ElevatedButton.styleFrom(
+//                     backgroundColor: Colors.orange,
+//                     foregroundColor: Colors.white,
+//                   ),
+//                 ),
+//               ],
+//             ),
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+
+//   Future<void> _printThermalInvoice() async {
+//     bool isConnected = await printer.isConnected ?? false;
+//     if (!isConnected) {
+//       ScaffoldMessenger.of(context).showSnackBar(
+//         const SnackBar(content: Text("Please connect the printer first!")),
+//       );
+//       return;
+//     }
+
+//     printer.printNewLine();
+//     printer.printCustom("AL-SHIFA MEDICAL", 2, 1);
+//     printer.printCustom("Invoice - $activeBill", 1, 1);
+//     printer.printNewLine();
+//     printer.printCustom("Customer: ${customerController.text}", 1, 0);
+//     printer.printCustom("Counter: ${counterPersonController.text}", 1, 0);
+//     printer.printCustom("Date: ${_formatDateTime(DateTime.now())}", 1, 0);
+//     printer.printNewLine();
+
+//     for (var item in cart) {
+//       printer.printLeftRight("${item['name']} x${item['qty']}",
+//           "Rs.${(item['unitPrice'] as double).toStringAsFixed(2)}", 1);
+//       printer.printLeftRight(
+//           "", "Rs.${(item['price'] as double).toStringAsFixed(2)}", 1);
+//     }
+
+//     printer.printNewLine();
+//     printer.printLeftRight("Subtotal", "Rs.${subtotal.toStringAsFixed(2)}", 1);
+//     printer.printLeftRight("Discount", "Rs.${discount.toStringAsFixed(2)}", 1);
+//     printer.printLeftRight("Total", "Rs.${grandTotal.toStringAsFixed(2)}", 2);
+//     printer.printNewLine();
+//     printer.printCustom("THANK YOU FOR SHOPPING", 1, 1);
+//     printer.printNewLine();
+//     printer.paperCut();
+
+//     viewsalesBox.add({
+//       'billNo': activeBill,
+//       'customer': customerController.text,
+//       'counterPerson': counterPersonController.text,
+//       'date': DateTime.now().toString(),
+//       'items': cart,
+//       'subtotal': subtotal,
+//       'discount': discount,
+//       'grandTotal': grandTotal,
+//     });
+
+//     ScaffoldMessenger.of(context).showSnackBar(
+//         const SnackBar(content: Text('Invoice saved to sales history!')));
+//   }
+
+//   Future<void> _generatePdfInvoice() async {
+//     final pdf = pw.Document();
+
+//     pdf.addPage(
+//       pw.Page(
+//         build: (context) {
+//           return pw.Column(
+//             crossAxisAlignment: pw.CrossAxisAlignment.start,
+//             children: [
+//               pw.Text('AL-SHIFA MEDICAL',
+//                   style: pw.TextStyle(
+//                       fontSize: 24, fontWeight: pw.FontWeight.bold)),
+//               pw.Text('Invoice - $activeBill',
+//                   style: pw.TextStyle(fontSize: 18)),
+//               pw.SizedBox(height: 10),
+//               pw.Text('Customer: ${customerController.text}'),
+//               pw.Text('Counter: ${counterPersonController.text}'),
+//               pw.Text('Date: ${_formatDateTime(DateTime.now())}'),
+//               pw.SizedBox(height: 10),
+//               pw.Table.fromTextArray(
+//                 headers: ['S.No', 'Medicine', 'Qty', 'Unit Rate', 'Total'],
+//                 data: List.generate(cart.length, (index) {
+//                   final item = cart[index];
+//                   return [
+//                     '${index + 1}',
+//                     item['name'],
+//                     item['qty'].toString(),
+//                     'Rs. ${(item['unitPrice'] as double).toStringAsFixed(2)}',
+//                     'Rs. ${(item['price'] as double).toStringAsFixed(2)}',
+//                   ];
+//                 }),
+//               ),
+//               pw.SizedBox(height: 10),
+//               pw.Text('Subtotal: Rs. ${subtotal.toStringAsFixed(2)}'),
+//               pw.Text('Discount: Rs. ${discount.toStringAsFixed(2)}'),
+//               pw.Text('Grand Total: Rs. ${grandTotal.toStringAsFixed(2)}',
+//                   style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+//               pw.SizedBox(height: 20),
+//               pw.Center(
+//                   child: pw.Text('THANK YOU FOR SHOPPING',
+//                       style: pw.TextStyle(
+//                           fontSize: 16, fontWeight: pw.FontWeight.bold))),
+//             ],
+//           );
+//         },
+//       ),
+//     );
+
+//     await Printing.layoutPdf(onLayout: (format) async => pdf.save());
+//   }
+// }
+// import 'dart:io';
+
+// import 'package:flutter/material.dart';
+// import 'package:flutter/services.dart';
+// import 'package:hive_flutter/hive_flutter.dart';
+// import 'package:blue_thermal_printer/blue_thermal_printer.dart';
+// import 'package:pdf/widgets.dart' as pw;
+
+// class InvoiceScreen extends StatefulWidget {
+//   const InvoiceScreen({super.key});
+
+//   @override
+//   State<InvoiceScreen> createState() => _InvoiceScreenState();
+// }
+
+// class _InvoiceScreenState extends State<InvoiceScreen> {
+//   final Map<String, List<Map<String, dynamic>>> bills = {};
+//   String activeBill = "Bill_1";
+
+//   final Box availableBox = Hive.box('availableBox');
+//   final Box viewsalesBox = Hive.box('viewsalesBox');
+
+//   final TextEditingController nameController = TextEditingController();
+//   final TextEditingController qtyController = TextEditingController();
+//   final TextEditingController priceController = TextEditingController();
+//   final TextEditingController customerController = TextEditingController();
+//   final TextEditingController discountPercentController =
+//       TextEditingController();
+//   final TextEditingController discountAmountController =
+//       TextEditingController();
+//   final TextEditingController counterPersonController = TextEditingController();
+
+//   final FocusNode nameFocus = FocusNode();
+//   final FocusNode qtyFocus = FocusNode();
+//   final FocusNode priceFocus = FocusNode();
+//   final FocusNode customerFocus = FocusNode();
+//   final FocusNode discountPercentFocus = FocusNode();
+//   final FocusNode discountAmountFocus = FocusNode();
+//   final FocusNode counterPersonFocus = FocusNode();
+
+//   final String ntnNo = '#1234677';
+//   final String licenseNo = 'LIC-987654';
+
+//   List<Map> filteredMedicines = [];
+//   double currentPerTabletRate = 0.0;
+//   bool isManualRate = false;
+//   int selectedMedicineIndex = -1;
+
+//   final BlueThermalPrinter printer = BlueThermalPrinter.instance;
+
+//   @override
+//   void initState() {
+//     super.initState();
+//     bills[activeBill] = [];
+//   }
+
+//   @override
+//   void dispose() {
+//     nameController.dispose();
+//     qtyController.dispose();
+//     priceController.dispose();
+//     customerController.dispose();
+//     discountPercentController.dispose();
+//     discountAmountController.dispose();
+//     counterPersonController.dispose();
+//     nameFocus.dispose();
+//     qtyFocus.dispose();
+//     priceFocus.dispose();
+//     customerFocus.dispose();
+//     discountPercentFocus.dispose();
+//     discountAmountFocus.dispose();
+//     counterPersonFocus.dispose();
+//     super.dispose();
+//   }
+
+//   List<Map<String, dynamic>> get cart => bills[activeBill] ?? [];
+
+//   void addMedicine() {
+//     final name = nameController.text.trim();
+//     final int qty = int.tryParse(qtyController.text.trim()) ?? 1;
+//     final double price = double.tryParse(priceController.text.trim()) ?? 0.0;
+
+//     if (name.isEmpty || price <= 0) {
+//       ScaffoldMessenger.of(context).showSnackBar(
+//           const SnackBar(content: Text('Please fill all required fields!')));
+//       return;
+//     }
+
+//     if (!isManualRate) {
+//       final stock = availableBox.values.cast<Map>().firstWhere(
+//             (m) =>
+//                 m["Medicine Name"].toString().toLowerCase() ==
+//                 name.toLowerCase(),
+//             orElse: () => {},
+//           );
+
+//       if (stock.isEmpty) {
+//         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+//             content:
+//                 Text('Medicine not found in stock! Use manual rate instead.')));
+//         return;
+//       }
+//     }
+
+//     setState(() {
+//       cart.add({
+//         'name': name,
+//         'qty': qty,
+//         'price': price * qty,
+//         'unitPrice': price,
+//       });
+//       _clearInputs();
+//       nameFocus.requestFocus();
+//     });
+//   }
+
+//   void _clearInputs() {
+//     nameController.clear();
+//     qtyController.clear();
+//     priceController.clear();
+//     currentPerTabletRate = 0.0;
+//     filteredMedicines = [];
+//     selectedMedicineIndex = -1;
+//     isManualRate = false;
+//   }
+
+//   void _createNewBill() {
+//     final newKey = "Bill_${bills.length + 1}";
+//     setState(() {
+//       bills[newKey] = [];
+//       activeBill = newKey;
+//     });
+//   }
+
+//   void _switchBill(String key) {
+//     setState(() {
+//       activeBill = key;
+//     });
+//   }
+
+//   double get subtotal =>
+//       cart.fold<double>(0, (sum, item) => sum + (item['price'] as double));
+
+//   double get discount {
+//     final double discountAmountInput =
+//         double.tryParse(discountAmountController.text.trim()) ?? 0;
+//     final double discountPercentInput =
+//         double.tryParse(discountPercentController.text.trim()) ?? 0;
+
+//     if (discountAmountInput > 0) return discountAmountInput.clamp(0, subtotal);
+//     if (discountPercentInput > 0)
+//       return subtotal * (discountPercentInput / 100).clamp(0, 1);
+//     return 0;
+//   }
+
+//   double get grandTotal => (subtotal - discount).clamp(0, double.infinity);
+
+//   String _formatDateTime(DateTime dt) {
+//     String two(int n) => n.toString().padLeft(2, '0');
+//     return '${dt.year}-${two(dt.month)}-${two(dt.day)} ${two(dt.hour)}:${two(dt.minute)}';
+//   }
+
+//   Widget _keyboardTextField({
+//     required TextEditingController controller,
+//     required FocusNode focusNode,
+//     FocusNode? nextFocus,
+//     FocusNode? prevFocus,
+//     FocusNode? rightFocus,
+//     FocusNode? leftFocus,
+//     String? label,
+//     TextInputType keyboardType = TextInputType.text,
+//     bool readOnly = false,
+//     void Function(String)? onChanged,
+//     void Function()? onEnter,
+//     bool isMedicineField = false,
+//   }) {
+//     return KeyboardListener(
+//       focusNode: FocusNode(),
+//       onKeyEvent: (event) {
+//         if (event is KeyDownEvent && focusNode.hasFocus) {
+//           if (isMedicineField && filteredMedicines.isNotEmpty) {
+//             if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
+//               setState(() {
+//                 selectedMedicineIndex =
+//                     (selectedMedicineIndex + 1) % filteredMedicines.length;
+//               });
+//               return;
+//             } else if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
+//               setState(() {
+//                 selectedMedicineIndex = selectedMedicineIndex <= 0
+//                     ? filteredMedicines.length - 1
+//                     : selectedMedicineIndex - 1;
+//               });
+//               return;
+//             } else if (event.logicalKey == LogicalKeyboardKey.enter) {
+//               if (selectedMedicineIndex >= 0 &&
+//                   selectedMedicineIndex < filteredMedicines.length) {
+//                 _selectMedicine(filteredMedicines[selectedMedicineIndex]);
+//               }
+//               return;
+//             } else if (event.logicalKey == LogicalKeyboardKey.escape) {
+//               setState(() {
+//                 filteredMedicines = [];
+//                 selectedMedicineIndex = -1;
+//               });
+//               return;
+//             }
+//           }
+//           if (event.logicalKey == LogicalKeyboardKey.enter && onEnter != null) {
+//             onEnter();
+//           }
+//         }
+//       },
+//       child: TextField(
+//         controller: controller,
+//         focusNode: focusNode,
+//         keyboardType: keyboardType,
+//         readOnly: readOnly,
+//         decoration: InputDecoration(
+//           labelText: label,
+//           isDense: true,
+//           border: OutlineInputBorder(),
+//           contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+//           suffixIcon: isMedicineField && filteredMedicines.isNotEmpty
+//               ? Icon(Icons.keyboard_arrow_down)
+//               : null,
+//           helperText: isMedicineField
+//               ? '↑↓: Navigate, Enter: Select (then enter Qty), Esc: Close'
+//               : null,
+//           helperMaxLines: 2,
+//         ),
+//         onChanged: onChanged,
+//         onSubmitted: (_) {
+//           if (onEnter != null) onEnter();
+//         },
+//       ),
+//     );
+//   }
+
+//   void _selectMedicine(Map stock) {
+//     setState(() {
+//       nameController.text = stock["Medicine Name"];
+//       final int packSize = int.tryParse(stock["Tablets"].toString()) ?? 1;
+//       final double packPrice =
+//           double.tryParse(stock["Pack Price"].toString()) ?? 0.0;
+//       currentPerTabletRate = packSize > 0 ? packPrice / packSize : 0;
+//       qtyController.text = '';
+//       priceController.text = '';
+//       filteredMedicines = [];
+//       selectedMedicineIndex = -1;
+//       isManualRate = false;
+//     });
+
+//     Future.delayed(Duration(milliseconds: 100), () {
+//       FocusScope.of(context).requestFocus(qtyFocus);
+//     });
+//   }
+
+//   Widget _buildMedicineDropdown() {
+//     if (filteredMedicines.isEmpty) return const SizedBox.shrink();
+
+//     return Container(
+//       constraints: BoxConstraints(maxHeight: 200),
+//       decoration: BoxDecoration(
+//         border: Border.all(color: Colors.grey),
+//         borderRadius: BorderRadius.circular(4),
+//         color: Colors.white,
+//       ),
+//       child: ListView.builder(
+//         shrinkWrap: true,
+//         itemCount: filteredMedicines.length,
+//         itemBuilder: (context, index) {
+//           final stock = filteredMedicines[index];
+//           final bool isSelected = index == selectedMedicineIndex;
+
+//           return InkWell(
+//             onTap: () {
+//               _selectMedicine(stock);
+//             },
+//             child: Container(
+//               padding: EdgeInsets.all(12),
+//               color: isSelected ? Colors.blue.shade100 : null,
+//               child: Row(
+//                 children: [
+//                   Expanded(
+//                     child: Column(
+//                       crossAxisAlignment: CrossAxisAlignment.start,
+//                       children: [
+//                         Text(stock["Medicine Name"]),
+//                         Text(
+//                             "Pack: ${stock["Tablets"]}, Rs. ${stock["Pack Price"]}"),
+//                       ],
+//                     ),
+//                   ),
+//                 ],
+//               ),
+//             ),
+//           );
+//         },
+//       ),
+//     );
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       appBar: AppBar(
+//         title: Text('Invoice - $activeBill'),
+//         centerTitle: true,
+//         backgroundColor: const Color(0xFF008000),
+//         actions: [
+//           PopupMenuButton<String>(
+//             onSelected: _switchBill,
+//             itemBuilder: (context) => bills.keys
+//                 .map((bill) => PopupMenuItem(
+//                       value: bill,
+//                       child: Text(bill == activeBill ? "$bill (Active)" : bill),
+//                     ))
+//                 .toList(),
+//           ),
+//           IconButton(
+//               onPressed: _createNewBill,
+//               icon: const Icon(Icons.add),
+//               tooltip: "New Bill"),
+//         ],
+//       ),
+//       body: SingleChildScrollView(
+//         padding: const EdgeInsets.all(16),
+//         child: Column(
+//           children: [
+//             // Header
+//             Row(
+//               children: [
+//                 const Expanded(
+//                   child: Text('Al-Shifa Medical',
+//                       style:
+//                           TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+//                 ),
+//                 Expanded(
+//                   child: Align(
+//                     alignment: Alignment.centerRight,
+//                     child: Directionality(
+//                       textDirection: TextDirection.rtl,
+//                       child: const Text('الشفاء میڈیکل',
+//                           style: TextStyle(
+//                               fontSize: 20, fontWeight: FontWeight.bold)),
+//                     ),
+//                   ),
+//                 ),
+//               ],
+//             ),
+//             const SizedBox(height: 8),
+
+//             Row(
+//               children: [
+//                 Expanded(
+//                   child: Column(
+//                     crossAxisAlignment: CrossAxisAlignment.start,
+//                     children: [
+//                       Text('NTN: $ntnNo'),
+//                       Text('License No: $licenseNo'),
+//                       Text('Print Time: ${_formatDateTime(DateTime.now())}'),
+//                     ],
+//                   ),
+//                 ),
+//                 SizedBox(
+//                   width: 240,
+//                   child: _keyboardTextField(
+//                     controller: customerController,
+//                     focusNode: customerFocus,
+//                     nextFocus: nameFocus,
+//                     rightFocus: nameFocus,
+//                     leftFocus: counterPersonFocus,
+//                     label: 'Customer Name',
+//                   ),
+//                 ),
+//               ],
+//             ),
+//             const Divider(height: 24, thickness: 1),
+
+//             Card(
+//               child: Padding(
+//                 padding: EdgeInsets.all(16),
+//                 child: Column(
+//                   children: [
+//                     Row(
+//                       children: [
+//                         Expanded(
+//                           flex: 3,
+//                           child: Column(
+//                             children: [
+//                               _keyboardTextField(
+//                                 controller: nameController,
+//                                 focusNode: nameFocus,
+//                                 nextFocus: qtyFocus,
+//                                 prevFocus: customerFocus,
+//                                 rightFocus: qtyFocus,
+//                                 leftFocus: customerFocus,
+//                                 label: 'Medicine Name',
+//                                 isMedicineField: true,
+//                                 onChanged: (value) {
+//                                   setState(() {
+//                                     isManualRate = false;
+//                                     selectedMedicineIndex = -1;
+//                                     filteredMedicines = value.isEmpty
+//                                         ? []
+//                                         : availableBox.values
+//                                             .where((stock) =>
+//                                                 stock["Medicine Name"]
+//                                                     .toString()
+//                                                     .toLowerCase()
+//                                                     .contains(
+//                                                         value.toLowerCase()))
+//                                             .cast<Map>()
+//                                             .toList();
+//                                     if (filteredMedicines.isNotEmpty) {
+//                                       selectedMedicineIndex = 0;
+//                                     }
+//                                   });
+//                                 },
+//                                 onEnter: () {
+//                                   if (filteredMedicines.isNotEmpty &&
+//                                       selectedMedicineIndex >= 0) {
+//                                     _selectMedicine(filteredMedicines[
+//                                         selectedMedicineIndex]);
+//                                   } else {
+//                                     qtyFocus.requestFocus();
+//                                   }
+//                                 },
+//                               ),
+//                               SizedBox(height: 4),
+//                               _buildMedicineDropdown(),
+//                             ],
+//                           ),
+//                         ),
+//                         const SizedBox(width: 10),
+//                         Expanded(
+//                           flex: 1,
+//                           child: _keyboardTextField(
+//                             controller: qtyController,
+//                             focusNode: qtyFocus,
+//                             nextFocus: priceFocus,
+//                             prevFocus: nameFocus,
+//                             rightFocus: priceFocus,
+//                             leftFocus: nameFocus,
+//                             label: 'Quantity',
+//                             keyboardType: TextInputType.number,
+//                             onChanged: (value) {
+//                               if (!isManualRate && currentPerTabletRate > 0) {
+//                                 final qty = int.tryParse(value) ?? 1;
+//                                 setState(() {
+//                                   priceController.text =
+//                                       (currentPerTabletRate * qty)
+//                                           .toStringAsFixed(2);
+//                                 });
+//                               }
+//                             },
+//                             onEnter: addMedicine,
+//                           ),
+//                         ),
+//                         const SizedBox(width: 10),
+//                         Expanded(
+//                           flex: 1,
+//                           child: _keyboardTextField(
+//                             controller: priceController,
+//                             focusNode: priceFocus,
+//                             nextFocus: discountPercentFocus,
+//                             prevFocus: qtyFocus,
+//                             rightFocus: discountPercentFocus,
+//                             leftFocus: qtyFocus,
+//                             label: 'Unit Rate (Rs.)',
+//                             keyboardType: TextInputType.number,
+//                             readOnly: !isManualRate && currentPerTabletRate > 0,
+//                             onChanged: (value) {
+//                               if (value.isNotEmpty) {
+//                                 setState(() {
+//                                   isManualRate = true;
+//                                 });
+//                               }
+//                             },
+//                             onEnter: addMedicine,
+//                           ),
+//                         ),
+//                         const SizedBox(width: 10),
+//                         Column(
+//                           children: [
+//                             IconButton(
+//                               icon: const Icon(Icons.add, color: Colors.green),
+//                               onPressed: addMedicine,
+//                               tooltip: 'Add to cart',
+//                             ),
+//                             IconButton(
+//                               icon: const Icon(Icons.edit, color: Colors.blue),
+//                               onPressed: () {
+//                                 setState(() {
+//                                   isManualRate = true;
+//                                   priceController.clear();
+//                                   priceFocus.requestFocus();
+//                                 });
+//                               },
+//                               tooltip: 'Manual rate',
+//                             ),
+//                           ],
+//                         ),
+//                       ],
+//                     ),
+//                     Row(
+//                       children: [
+//                         Checkbox(
+//                           value: isManualRate,
+//                           onChanged: (value) {
+//                             setState(() {
+//                               isManualRate = value ?? false;
+//                               if (!isManualRate) {
+//                                 priceController.clear();
+//                               }
+//                             });
+//                           },
+//                         ),
+//                         Text('Manual Rate Entry'),
+//                         Spacer(),
+//                         if (currentPerTabletRate > 0 && !isManualRate)
+//                           Text(
+//                               'Auto Rate: Rs. ${currentPerTabletRate.toStringAsFixed(2)} per unit'),
+//                       ],
+//                     ),
+//                   ],
+//                 ),
+//               ),
+//             ),
+
+//             const SizedBox(height: 16),
+
+//             Container(
+//               constraints: BoxConstraints(maxHeight: 300),
+//               child: SingleChildScrollView(
+//                 child: DataTable(
+//                   columnSpacing: 20,
+//                   columns: const [
+//                     DataColumn(label: Text('S.No')),
+//                     DataColumn(label: Text('Medicine')),
+//                     DataColumn(label: Text('Qty')),
+//                     DataColumn(label: Text('Unit Rate')),
+//                     DataColumn(label: Text('Total')),
+//                     DataColumn(label: Text('Action')),
+//                   ],
+//                   rows: [
+//                     for (int i = 0; i < cart.length; i++)
+//                       DataRow(cells: [
+//                         DataCell(Text('${i + 1}')),
+//                         DataCell(
+//                           Container(
+//                             width: 120,
+//                             child: Text(
+//                               cart[i]['name'].toString(),
+//                               overflow: TextOverflow.ellipsis,
+//                             ),
+//                           ),
+//                         ),
+//                         DataCell(Text(cart[i]['qty'].toString())),
+//                         DataCell(Text(
+//                             'Rs. ${(cart[i]['unitPrice'] as double).toStringAsFixed(2)}')),
+//                         DataCell(Text(
+//                             'Rs. ${(cart[i]['price'] as double).toStringAsFixed(2)}')),
+//                         DataCell(
+//                           Row(
+//                             mainAxisSize: MainAxisSize.min,
+//                             children: [
+//                               IconButton(
+//                                 icon: const Icon(Icons.edit,
+//                                     color: Colors.blue, size: 18),
+//                                 onPressed: () {
+//                                   setState(() {
+//                                     nameController.text = cart[i]['name'];
+//                                     qtyController.text =
+//                                         cart[i]['qty'].toString();
+//                                     priceController.text =
+//                                         (cart[i]['unitPrice'] as double)
+//                                             .toStringAsFixed(2);
+//                                     isManualRate = true;
+//                                     cart.removeAt(i);
+//                                     nameFocus.requestFocus();
+//                                   });
+//                                 },
+//                                 tooltip: 'Edit',
+//                               ),
+//                               IconButton(
+//                                 icon: const Icon(Icons.delete,
+//                                     color: Colors.red, size: 18),
+//                                 onPressed: () {
+//                                   setState(() {
+//                                     cart.removeAt(i);
+//                                   });
+//                                 },
+//                                 tooltip: 'Delete',
+//                               ),
+//                             ],
+//                           ),
+//                         ),
+//                       ])
+//                   ],
+//                 ),
+//               ),
+//             ),
+
+//             const SizedBox(height: 16),
+
+//             Card(
+//               child: Padding(
+//                 padding: EdgeInsets.all(16),
+//                 child: Column(
+//                   children: [
+//                     Row(
+//                       children: [
+//                         Expanded(
+//                           child: _keyboardTextField(
+//                             controller: discountPercentController,
+//                             focusNode: discountPercentFocus,
+//                             nextFocus: discountAmountFocus,
+//                             prevFocus: priceFocus,
+//                             rightFocus: discountAmountFocus,
+//                             leftFocus: priceFocus,
+//                             keyboardType: TextInputType.number,
+//                             label: 'Discount %',
+//                             onChanged: (_) => setState(() {}),
+//                           ),
+//                         ),
+//                         const SizedBox(width: 16),
+//                         Expanded(
+//                           child: _keyboardTextField(
+//                             controller: discountAmountController,
+//                             focusNode: discountAmountFocus,
+//                             nextFocus: counterPersonFocus,
+//                             prevFocus: discountPercentFocus,
+//                             rightFocus: counterPersonFocus,
+//                             leftFocus: discountPercentFocus,
+//                             keyboardType: TextInputType.number,
+//                             label: 'Discount Amount (Rs.)',
+//                             onChanged: (_) => setState(() {}),
+//                           ),
+//                         ),
+//                       ],
+//                     ),
+//                     SizedBox(height: 16),
+//                     Row(
+//                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//                       children: [
+//                         Column(
+//                           crossAxisAlignment: CrossAxisAlignment.start,
+//                           children: [
+//                             Text('Items: ${cart.length}'),
+//                             Text(
+//                                 'Total Qty: ${cart.fold<int>(0, (sum, item) => sum + (item['qty'] as int))}'),
+//                           ],
+//                         ),
+//                         Column(
+//                           crossAxisAlignment: CrossAxisAlignment.end,
+//                           children: [
+//                             Text(
+//                                 'Subtotal: Rs. ${subtotal.toStringAsFixed(2)}'),
+//                             Text(
+//                                 'Discount: Rs. ${discount.toStringAsFixed(2)}'),
+//                             Text(
+//                               'Grand Total: Rs. ${grandTotal.toStringAsFixed(2)}',
+//                               style: const TextStyle(
+//                                   fontWeight: FontWeight.bold, fontSize: 18),
+//                             ),
+//                           ],
+//                         ),
+//                       ],
+//                     ),
+//                   ],
+//                 ),
+//               ),
+//             ),
+
+//             const SizedBox(height: 16),
+
+//             Row(
+//               children: [
+//                 Expanded(
+//                   child: _keyboardTextField(
+//                     controller: counterPersonController,
+//                     focusNode: counterPersonFocus,
+//                     nextFocus: customerFocus,
+//                     prevFocus: discountAmountFocus,
+//                     rightFocus: customerFocus,
+//                     leftFocus: discountAmountFocus,
+//                     label: 'Counter Person Name',
+//                   ),
+//                 ),
+//                 const SizedBox(width: 20),
+//                 const Text(
+//                   'THANK YOU FOR SHOPPING',
+//                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+//                 ),
+//               ],
+//             ),
+
+//             const SizedBox(height: 20),
+
+//             Row(
+//               mainAxisAlignment: MainAxisAlignment.center,
+//               children: [
+//                 const SizedBox(width: 16),
+//                 ElevatedButton.icon(
+//                   onPressed: cart.isEmpty ? null : _generatePdfInvoice,
+//                   icon: const Icon(Icons.picture_as_pdf),
+//                   label: const Text('Generate PDF'),
+//                   style: ElevatedButton.styleFrom(
+//                     backgroundColor: Colors.blue,
+//                     foregroundColor: Colors.white,
+//                   ),
+//                 ),
+//                 const SizedBox(width: 16),
+//                 ElevatedButton.icon(
+//                   onPressed: () {
+//                     setState(() {
+//                       bills[activeBill] = [];
+//                       _clearInputs();
+//                       customerController.clear();
+//                       counterPersonController.clear();
+//                       discountPercentController.clear();
+//                       discountAmountController.clear();
+//                     });
+//                   },
+//                   icon: const Icon(Icons.clear),
+//                   label: const Text('Clear All'),
+//                   style: ElevatedButton.styleFrom(
+//                     backgroundColor: Colors.orange,
+//                     foregroundColor: Colors.white,
+//                   ),
+//                 ),
+//               ],
+//             ),
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+
+//   Future<void> _printThermalInvoice() async {
+//     bool isConnected = await printer.isConnected ?? false;
+//     if (!isConnected) {
+//       ScaffoldMessenger.of(context).showSnackBar(
+//         const SnackBar(content: Text("Please connect the printer first!")),
+//       );
+//       return;
+//     }
+
+//     printer.printNewLine();
+//     printer.printCustom("AL-SHIFA MEDICAL", 2, 1);
+//     printer.printCustom("Invoice - $activeBill", 1, 1);
+//     printer.printNewLine();
+//     printer.printCustom("Customer: ${customerController.text}", 1, 0);
+//     printer.printCustom("Counter: ${counterPersonController.text}", 1, 0);
+//     printer.printCustom("Date: ${_formatDateTime(DateTime.now())}", 1, 0);
+//     printer.printNewLine();
+
+//     for (var item in cart) {
+//       printer.printLeftRight("${item['name']} x${item['qty']}",
+//           "Rs.${(item['unitPrice'] as double).toStringAsFixed(2)}", 1);
+//       printer.printLeftRight(
+//           "", "Rs.${(item['price'] as double).toStringAsFixed(2)}", 1);
+//     }
+
+//     printer.printNewLine();
+//     printer.printLeftRight("Subtotal", "Rs.${subtotal.toStringAsFixed(2)}", 1);
+//     printer.printLeftRight("Discount", "Rs.${discount.toStringAsFixed(2)}", 1);
+//     printer.printLeftRight("Total", "Rs.${grandTotal.toStringAsFixed(2)}", 2);
+//     printer.printNewLine();
+//     printer.printCustom("THANK YOU FOR SHOPPING", 1, 1);
+//     printer.printNewLine();
+//     printer.paperCut();
+
+//     viewsalesBox.add({
+//       'billNo': activeBill,
+//       'customer': customerController.text,
+//       'counterPerson': counterPersonController.text,
+//       'date': DateTime.now().toString(),
+//       'items': cart,
+//       'subtotal': subtotal,
+//       'discount': discount,
+//       'grandTotal': grandTotal,
+//     });
+
+//     ScaffoldMessenger.of(context).showSnackBar(
+//         const SnackBar(content: Text('Invoice saved to sales history!')));
+//   }
+
+//   // Future<void> _generatePdfInvoice() async {
+//   //   final pdf = pw.Document();
+
+//   //   pdf.addPage(
+//   //     pw.Page(
+//   //       build: (context) {
+//   //         return pw.Column(
+//   //           crossAxisAlignment: pw.CrossAxisAlignment.start,
+//   //           children: [
+//   //             pw.Text('AL-SHIFA MEDICAL',
+//   //                 style: pw.TextStyle(
+//   //                     fontSize: 24, fontWeight: pw.FontWeight.bold)),
+//   //             pw.Text('Invoice - $activeBill',
+//   //                 style: pw.TextStyle(fontSize: 18)),
+//   //             pw.SizedBox(height: 10),
+//   //             pw.Text('Customer: ${customerController.text}'),
+//   //             pw.Text('Counter: ${counterPersonController.text}'),
+//   //             pw.Text('Date: ${_formatDateTime(DateTime.now())}'),
+//   //             pw.SizedBox(height: 10),
+//   //             pw.Table.fromTextArray(
+//   //               headers: ['S.No', 'Medicine', 'Qty', 'Unit Rate', 'Total'],
+//   //               data: List.generate(cart.length, (index) {
+//   //                 final item = cart[index];
+//   //                 return [
+//   //                   '${index + 1}',
+//   //                   item['name'],
+//   //                   item['qty'].toString(),
+//   //                   'Rs. ${(item['unitPrice'] as double).toStringAsFixed(2)}',
+//   //                   'Rs. ${(item['price'] as double).toStringAsFixed(2)}',
+//   //                 ];
+//   //               }),
+//   //             ),
+//   //             pw.SizedBox(height: 10),
+//   //             pw.Text('Subtotal: Rs. ${subtotal.toStringAsFixed(2)}'),
+//   //             pw.Text('Discount: Rs. ${discount.toStringAsFixed(2)}'),
+//   //             pw.Text('Grand Total: Rs. ${grandTotal.toStringAsFixed(2)}',
+//   //                 style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+//   //             pw.SizedBox(height: 20),
+//   //             pw.Center(
+//   //                 child: pw.Text('THANK YOU FOR SHOPPING',
+//   //                     style: pw.TextStyle(
+//   //                         fontSize: 16, fontWeight: pw.FontWeight.bold))),
+//   //           ],
+//   //         );
+//   //       },
+//   //     ),
+//   //   );
+
+//   // }
+//   Future<void> _generatePdfInvoice() async {
+//     final pdf = pw.Document();
+
+//     pdf.addPage(
+//       pw.Page(
+//         build: (context) {
+//           return pw.Column(
+//             crossAxisAlignment: pw.CrossAxisAlignment.start,
+//             children: [
+//               pw.Text('AL-SHIFA MEDICAL',
+//                   style: pw.TextStyle(
+//                       fontSize: 24, fontWeight: pw.FontWeight.bold)),
+//               pw.Text('Invoice - $activeBill',
+//                   style: pw.TextStyle(fontSize: 18)),
+//               pw.SizedBox(height: 10),
+//               pw.Text('Customer: ${customerController.text}'),
+//               pw.Text('Counter: ${counterPersonController.text}'),
+//               pw.Text('Date: ${_formatDateTime(DateTime.now())}'),
+//               pw.SizedBox(height: 10),
+//               pw.Table.fromTextArray(
+//                 headers: ['S.No', 'Medicine', 'Qty', 'Unit Rate', 'Total'],
+//                 data: List.generate(cart.length, (index) {
+//                   final item = cart[index];
+//                   return [
+//                     '${index + 1}',
+//                     item['name'],
+//                     item['qty'].toString(),
+//                     'Rs. ${(item['unitPrice'] as double).toStringAsFixed(2)}',
+//                     'Rs. ${(item['price'] as double).toStringAsFixed(2)}',
+//                   ];
+//                 }),
+//               ),
+//               pw.SizedBox(height: 10),
+//               pw.Text('Subtotal: Rs. ${subtotal.toStringAsFixed(2)}'),
+//               pw.Text('Discount: Rs. ${discount.toStringAsFixed(2)}'),
+//               pw.Text('Grand Total: Rs. ${grandTotal.toStringAsFixed(2)}',
+//                   style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+//               pw.SizedBox(height: 20),
+//               pw.Center(
+//                   child: pw.Text('THANK YOU FOR SHOPPING',
+//                       style: pw.TextStyle(
+//                           fontSize: 16, fontWeight: pw.FontWeight.bold))),
+//             ],
+//           );
+//         },
+//       ),
+//     );
+
+//     final output = File("Invoice_$activeBill.pdf");
+//     await output.writeAsBytes(await pdf.save());
+
+//     ScaffoldMessenger.of(context).showSnackBar(
+//       SnackBar(content: Text("PDF saved: Invoice_$activeBill.pdf")),
+//     );
+//   }
+// }
+  // Widget _keyboardTextField({
+  //   required TextEditingController controller,
+  //   required FocusNode focusNode,
+  //   FocusNode? nextFocus,
+  //   FocusNode? prevFocus,
+  //   FocusNode? rightFocus,
+  //   FocusNode? leftFocus,
+  //   String? label,
+  //   TextInputType keyboardType = TextInputType.text,
+  //   bool readOnly = false,
+  //   void Function(String)? onChanged,
+  //   void Function()? onEnter,
+  //   bool isMedicineField = false,
+  // }) {
+  //   return KeyboardListener(
+  //     focusNode: FocusNode(),
+  //     onKeyEvent: (event) {
+  //       if (event is KeyDownEvent && focusNode.hasFocus) {
+  //         if (isMedicineField && filteredMedicines.isNotEmpty) {
+  //           if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
+  //             setState(() {
+  //               selectedMedicineIndex =
+  //                   (selectedMedicineIndex + 1) % filteredMedicines.length;
+  //             });
+  //             return;
+  //           } else if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
+  //             setState(() {
+  //               selectedMedicineIndex = selectedMedicineIndex <= 0
+  //                   ? filteredMedicines.length - 1
+  //                   : selectedMedicineIndex - 1;
+  //             });
+  //             return;
+  //           } else if (event.logicalKey == LogicalKeyboardKey.enter) {
+  //             if (selectedMedicineIndex >= 0 &&
+  //                 selectedMedicineIndex < filteredMedicines.length) {
+  //               _selectMedicine(filteredMedicines[selectedMedicineIndex]);
+  //             }
+  //             return;
+  //           } else if (event.logicalKey == LogicalKeyboardKey.escape) {
+  //             setState(() {
+  //               filteredMedicines = [];
+  //               selectedMedicineIndex = -1;
+  //             });
+  //             return;
+  //           }
+  //         }
+  //         if (event.logicalKey == LogicalKeyboardKey.enter && onEnter != null) {
+  //           onEnter();
+  //         }
+  //       }
+  //     },
+  //     child: TextField(
+  //       controller: controller,
+  //       focusNode: focusNode,
+  //       keyboardType: keyboardType,
+  //       readOnly: readOnly,
+  //       decoration: InputDecoration(
+  //         labelText: label,
+  //         isDense: true,
+  //         border: OutlineInputBorder(),
+  //         contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+  //         suffixIcon: isMedicineField && filteredMedicines.isNotEmpty
+  //             ? Icon(Icons.keyboard_arrow_down)
+  //             : null,
+  //         helperText: isMedicineField
+  //             ? '↑↓: Navigate, Enter: Select (then enter Qty), Esc: Close'
+  //             : null,
+  //         helperMaxLines: 2,
+  //       ),
+  //       onChanged: onChanged,
+  //       onSubmitted: (_) {
+  //         if (onEnter != null) onEnter();
+  //       },
+  //     ),
+  //   );
+  // }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:software/reuseable_widget/dynamic_form.dart';
+import 'package:software/reuseable_widget/excel.dart';
 
 class PurchaseScreen extends StatefulWidget {
   const PurchaseScreen({super.key});
@@ -60,7 +61,7 @@ class _PurchaseScreenState extends State<PurchaseScreen> {
           content: const Text("This purchase will be deleted permanently."),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(context), // Cancel
+              onPressed: () => Navigator.pop(context),
               child: const Text("Cancel"),
             ),
             ElevatedButton(
@@ -83,9 +84,44 @@ class _PurchaseScreenState extends State<PurchaseScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Purchases"),
-        backgroundColor: const Color(0xFF008000),
-      ),
+          title: const Text("Purchases"),
+          backgroundColor: const Color(0xFF008000),
+          actions: [
+            IconButton(
+              tooltip: "Export to Excel",
+              onPressed: () {
+                ExcelHelper.exportToExcel(
+                  context: context,
+                  boxes: [purchaseBox],
+                  sheetName: " Add Purchase",
+                  fileName: " Add Purchase",
+                  headers: [
+                    "company",
+                    "date",
+                    "day",
+                    "amount",
+                  ],
+                );
+              },
+              icon: const Icon(Icons.file_upload),
+            ),
+            IconButton(
+              tooltip: "Import from Excel",
+              onPressed: () {
+                ExcelHelper.importFromExcel(
+                  context: context,
+                  boxes: [purchaseBox],
+                  headers: [
+                    "company",
+                    "date",
+                    "day",
+                    "amount",
+                  ],
+                );
+              },
+              icon: const Icon(Icons.file_download),
+            ),
+          ]),
       body: Column(
         children: [
           Padding(

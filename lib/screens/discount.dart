@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:software/reuseable_widget/dynamic_form.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:software/reuseable_widget/excel.dart';
+import 'package:intl/intl.dart';
 
 class Discount extends StatefulWidget {
   const Discount({super.key});
@@ -27,7 +29,7 @@ class _DiscountState extends State<Discount> {
           fieldNames: ['Customer Name', 'Amount'],
           initialValues: discount != null
               ? {
-                  'Customer Name': discount['name'],
+                  'Customer Name': discount['name'].toString(),
                   'Amount': discount['amount'].toString(),
                 }
               : null,
@@ -38,7 +40,22 @@ class _DiscountState extends State<Discount> {
 
             if (name.isEmpty) return;
 
-            final discountMap = {'name': name, 'amount': amount};
+            DateTime now = DateTime.now();
+            final String currentDate = DateFormat('yyyy-MM-dd').format(now);
+            final String currentTime = DateFormat('hh:mm:ss a').format(now);
+
+            // final discountMap = {
+            //   'name': name,
+            //   'amount': amount,
+            //   'date': currentDate,
+            //   'time': currentTime,
+            // };
+            final discountMap = {
+              'Customer Name': name,
+              'Amount': amount,
+              'Date': currentDate,
+              'Time': currentTime,
+            };
 
             setState(() {
               if (discount == null) {
@@ -47,6 +64,8 @@ class _DiscountState extends State<Discount> {
                 discountsBox.putAt(index, discountMap);
               }
             });
+
+            Navigator.pop(context); // ✅ Close dialog after saving
           },
         ),
       ),
@@ -54,9 +73,29 @@ class _DiscountState extends State<Discount> {
   }
 
   void _deleteDiscount(int index) {
-    setState(() {
-      discountsBox.deleteAt(index);
-    });
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Confirm Delete"),
+        content: const Text("Are you sure you want to delete this discount?"),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context), // cancel
+            child: const Text("Cancel"),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            onPressed: () {
+              setState(() {
+                discountsBox.deleteAt(index);
+              });
+              Navigator.pop(context); // close confirmation dialog
+            },
+            child: const Text("Delete"),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -64,8 +103,44 @@ class _DiscountState extends State<Discount> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Discounts'),
-        backgroundColor: Color(0xFF008000),
+        backgroundColor: const Color(0xFF008000),
         centerTitle: true,
+        actions: [
+          IconButton(
+            tooltip: "Export to Excel",
+            onPressed: () {
+              ExcelHelper.exportToExcel(
+                context: context,
+                boxes: [discountsBox],
+                sheetName: "Discounts",
+                fileName: "Discounts",
+                headers: [
+                  'Customer Name',
+                  'Amount',
+                  'Date',
+                  'Time',
+                ],
+              );
+            },
+            icon: const Icon(Icons.file_upload),
+          ),
+          IconButton(
+            tooltip: "Import from Excel",
+            onPressed: () {
+              ExcelHelper.importFromExcel(
+                context: context,
+                boxes: [discountsBox],
+                headers: [
+                  'Customer Name',
+                  'Amount',
+                  'Date',
+                  'Time',
+                ],
+              );
+            },
+            icon: const Icon(Icons.file_download),
+          ),
+        ],
       ),
       body: ValueListenableBuilder(
         valueListenable: discountsBox.listenable(),
@@ -78,11 +153,17 @@ class _DiscountState extends State<Discount> {
             itemBuilder: (context, index) {
               final discount = box.getAt(index);
               return Card(
-                color: Color(0Xff008000),
+                color: const Color(0Xff008000),
                 margin: const EdgeInsets.all(8),
                 child: ListTile(
-                  title: Text(discount['name']),
-                  subtitle: Text('Amount: Rs.${discount['amount']}'),
+                  title: Text(discount['Customer Name'].toString(),
+                      style: const TextStyle(color: Colors.white)),
+                  subtitle: Text(
+                    'Amount: Rs.${discount['Amount']}\n'
+                    'Date: ${discount['Date']}\n'
+                    'Time: ${discount['Time']}',
+                    style: const TextStyle(color: Colors.white70),
+                  ),
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [

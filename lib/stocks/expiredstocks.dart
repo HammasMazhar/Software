@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:software/reuseable_widget/dynamic_form.dart'; // your DynamicForm widget
+import 'package:software/reuseable_widget/dynamic_form.dart';
+import 'package:software/reuseable_widget/excel.dart';
 
 class Expiredstocks extends StatefulWidget {
   const Expiredstocks({super.key});
@@ -46,7 +47,7 @@ class _ExpiredstocksState extends State<Expiredstocks> {
                 "ExpiryDate": values["ExpiryDate"] ?? "",
                 "Distributor": values["Distributor"] ?? "",
               });
-              Navigator.pop(context); // close dialog after adding
+              Navigator.pop(context);
             },
           ),
         );
@@ -98,7 +99,7 @@ class _ExpiredstocksState extends State<Expiredstocks> {
             const Text("Are you sure you want to delete this expired stock?"),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context), // Cancel
+            onPressed: () => Navigator.pop(context),
             child: const Text("Cancel"),
           ),
           ElevatedButton(
@@ -117,10 +118,51 @@ class _ExpiredstocksState extends State<Expiredstocks> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Expired Stocks"),
-        backgroundColor: Colors.green,
-        centerTitle: true,
-      ),
+          title: const Text("Expired Stocks"),
+          backgroundColor: Colors.green,
+          centerTitle: true,
+          actions: [
+            IconButton(
+              tooltip: "Export to Excel",
+              onPressed: () {
+                ExcelHelper.exportToExcel(
+                  context: context,
+                  boxes: [expiredBox],
+                  sheetName: " Expired Stocks ",
+                  fileName: " Expired Stocks",
+                  headers: [
+                    "id",
+                    "Batch",
+                    "Name",
+                    "Quantity",
+                    "Price",
+                    "ExpiryDate",
+                    "Distributor",
+                  ],
+                );
+              },
+              icon: const Icon(Icons.file_upload),
+            ),
+            IconButton(
+              tooltip: "Import from Excel",
+              onPressed: () {
+                ExcelHelper.importFromExcel(
+                  context: context,
+                  boxes: [expiredBox],
+                  headers: [
+                    "id",
+                    "Batch",
+                    "Name",
+                    "Quantity",
+                    "Price",
+                    "ExpiryDate",
+                    "Distributor",
+                  ],
+                );
+              },
+              icon: const Icon(Icons.file_download),
+            ),
+          ]),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:software/distributor/schedule.dart';
+import 'package:software/reuseable_widget/password.dart';
 import 'package:software/screens/medicine_invoices.dart';
 import 'package:software/purchaserecord/currentpurchase.dart';
 import 'package:software/screens/reports.dart';
@@ -14,6 +15,7 @@ import 'package:software/stocks/expiredstocks.dart';
 import 'package:software/purchaserecord/addpurchase.dart';
 import 'package:software/stocks/requiredstocks.dart';
 import 'package:software/screens/tasks_to_do.dart';
+import 'package:software/stocks/nonpaidstock.dart';
 
 class Dashboard extends StatefulWidget {
   const Dashboard({super.key});
@@ -32,6 +34,7 @@ class _DashboardState extends State<Dashboard> {
   bool _isHoveredAvailableStock = false;
   bool _isHoveredExpiredStock = false;
   bool _isHoveredRequiredStocks = false;
+  bool __isHoveredNonPaidStocks = false;
   bool _isHoveredAllDistributor = false;
   bool _isHoveredinvoiced = false;
   bool _isHovereddetailed = false;
@@ -130,16 +133,19 @@ class _DashboardState extends State<Dashboard> {
                             ? Color(0xFF008000)
                             : Colors.white,
                         child: ListTile(
-                          title: const Text("Current Sale"),
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const Currentsale(),
-                              ),
-                            );
-                          },
-                        ),
+                            title: const Text("Current Sale"),
+                            onTap: () async {
+                              bool canOpen = await checkPassword(context);
+
+                              if (canOpen && context.mounted) {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          const Currentsale()),
+                                );
+                              }
+                            }),
                       ),
                     ),
                   ],
@@ -192,16 +198,18 @@ class _DashboardState extends State<Dashboard> {
                             ? Color(0xFF008000)
                             : Colors.white,
                         child: ListTile(
-                          title: const Text("Current Purchase"),
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const Currentpurchase(),
-                              ),
-                            );
-                          },
-                        ),
+                            title: const Text("Current Purchase"),
+                            onTap: () async {
+                              bool canOpen = await checkPassword(context);
+                              if (canOpen && context.mounted) {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          const Currentpurchase()),
+                                );
+                              }
+                            }),
                       ),
                     ),
                   ],
@@ -284,6 +292,31 @@ class _DashboardState extends State<Dashboard> {
                               context,
                               MaterialPageRoute(
                                 builder: (context) => const Requiredstocks(),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 5),
+                    MouseRegion(
+                      onEnter: (_) => setState(() {
+                        __isHoveredNonPaidStocks = true;
+                      }),
+                      onExit: (_) => setState(() {
+                        __isHoveredNonPaidStocks = false;
+                      }),
+                      child: Container(
+                        color: __isHoveredNonPaidStocks
+                            ? Color(0xFF008000)
+                            : Colors.white,
+                        child: ListTile(
+                          title: const Text("Non Paid Stocks"),
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const Nonpaidstock(),
                               ),
                             );
                           },
@@ -389,17 +422,20 @@ class _DashboardState extends State<Dashboard> {
                   child: Container(
                     color: __isHoveredReport ? Color(0xFF008000) : Colors.white,
                     child: ListTile(
-                      title: const Text("Reports"),
-                      leading: Icon(Icons.info_outline),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const Reports(),
-                          ),
-                        );
-                      },
-                    ),
+                        title: const Text("Reports"),
+                        leading: Icon(Icons.info_outline),
+                        onTap: () async {
+                          bool canOpen = await checkPassword(context);
+                          if (!mounted) return;
+
+                          if (canOpen && context.mounted) {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => const Reports()),
+                            );
+                          }
+                        }),
                   ),
                 ),
                 MouseRegion(
