@@ -22,7 +22,7 @@ class _DailyPurchaseReportState extends State<Currentpurchase> {
   }
 
   String _businessDateKey(DateTime dt) {
-    if (dt.hour < 8) {
+    if (dt.hour < 13) {
       dt = dt.subtract(const Duration(days: 1));
     }
     return DateFormat('yyyy-MM-dd').format(dt);

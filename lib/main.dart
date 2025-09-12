@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:software/authentication/signin.dart';
 
 // import 'package:software/distributor/schedule.dart';
 // import 'package:software/invoice.dart';
@@ -13,7 +14,6 @@ import 'package:hive_flutter/hive_flutter.dart';
 // import 'package:software/stocks/availablestocks.dart';
 // import 'package:software/stocks/expiredstocks.dart';
 // import 'package:software/stocks/requiredstocks.dart';
-import 'package:software/screens/dashboard.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -23,10 +23,8 @@ Future<void> main() async {
   await Hive.openBox('availableBox');
   await Hive.openBox('viewsalesBox');
   await Hive.openBox('currentsalesBox');
-
   await Hive.openBox('purchaseBox');
   await Hive.openBox('distributorBox');
-  //await Hive.openBox('settingsBox');
   await Hive.openBox('expiredBox');
   await Hive.openBox('requiredBox');
   await Hive.openBox('nonpaidBox');
@@ -38,22 +36,28 @@ Future<void> main() async {
   await Hive.openBox('reportBox');
   await Hive.openBox('tasksToDoBox');
   await Hive.openBox('passwordBox');
+  await Hive.openBox('usersBox');
+  await Hive.openBox('sessionBox');
+
   var passwordBox = Hive.box('passwordBox');
   if (!passwordBox.containsKey('password')) {
     passwordBox.put('password', '122003');
   }
 
-  runApp(const PharmacySoftware());
+  final sessionBox = Hive.box('sessionBox');
+  final isSignedIn = sessionBox.get('isSignedIn', defaultValue: false);
+
+  runApp(PharmacySoftware(isSignedIn: isSignedIn));
 }
 
 class PharmacySoftware extends StatelessWidget {
-  const PharmacySoftware({super.key});
+  const PharmacySoftware({super.key, required isSignedIn});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: Dashboard(),
+      home: Signin(),
       // initialRoute: '/dashboard',
       // routes: {
       //   '/dashboard': (context) => const Dashboard(),

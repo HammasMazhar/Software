@@ -16,7 +16,8 @@ class Availablestocks extends StatefulWidget {
 class _AvailablestocksState extends State<Availablestocks> {
   late Box availableBox;
   String searchQuery = "";
-
+  int? _sortColumnIndex;
+  bool _isAscending = true;
   @override
   void initState() {
     super.initState();
@@ -223,7 +224,7 @@ class _AvailablestocksState extends State<Availablestocks> {
           children: [
             TextField(
               decoration: InputDecoration(
-                labelText: "Search by Medicine or Company",
+                labelText: "Search by Medicine or Company or Distributor",
                 prefixIcon: const Icon(Icons.search),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
@@ -256,7 +257,7 @@ class _AvailablestocksState extends State<Availablestocks> {
                         );
                       }
 
-                      final filteredKeys = box.keys.where((key) {
+                      var filteredKeys = box.keys.where((key) {
                         final data = box.get(key);
                         if (data is! Map) return false;
 
@@ -264,13 +265,17 @@ class _AvailablestocksState extends State<Availablestocks> {
                         final name = (stock["Medicine Name"] ?? "")
                             .toString()
                             .toLowerCase();
+                        final distributor = (stock["Distributor"] ?? "")
+                            .toString()
+                            .toLowerCase();
                         final company =
                             (stock["Company"] ?? "").toString().toLowerCase();
 
                         return name.contains(searchQuery) ||
-                            company.contains(searchQuery);
+                            company.contains(searchQuery) ||
+                            distributor.contains(searchQuery);
                       }).toList();
-
+                      filteredKeys = filteredKeys.reversed.toList();
                       if (filteredKeys.isEmpty) {
                         return const Padding(
                           padding: EdgeInsets.all(16.0),

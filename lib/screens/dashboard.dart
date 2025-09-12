@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:software/authentication/logout.dart';
 import 'package:software/distributor/schedule.dart';
 import 'package:software/reuseable_widget/password.dart';
 import 'package:software/screens/medicine_invoices.dart';
@@ -16,6 +17,7 @@ import 'package:software/purchaserecord/addpurchase.dart';
 import 'package:software/stocks/requiredstocks.dart';
 import 'package:software/screens/tasks_to_do.dart';
 import 'package:software/stocks/nonpaidstock.dart';
+import 'package:software/authentication/logout.dart';
 
 class Dashboard extends StatefulWidget {
   const Dashboard({super.key});
@@ -43,6 +45,7 @@ class _DashboardState extends State<Dashboard> {
   bool __isHoveredTasks = false;
   bool _isHoveredMedicineInvoiced = false;
   bool _isDiscount = false;
+  bool _isHoveredlogout = false;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -529,6 +532,24 @@ class _DashboardState extends State<Dashboard> {
                             builder: (context) => const StoreMedicineInvoice(),
                           ),
                         );
+                      },
+                    ),
+                  ),
+                ),
+                MouseRegion(
+                  onEnter: (_) => setState(() {
+                    _isHoveredlogout = true;
+                  }),
+                  onExit: (_) => setState(() {
+                    _isHoveredlogout = false;
+                  }),
+                  child: Container(
+                    color: _isHoveredlogout ? Color(0xFF008000) : Colors.white,
+                    child: ListTile(
+                      title: const Text("Log Out"),
+                      leading: Icon(Icons.logout),
+                      onTap: () {
+                        LogoutDialog.show(context);
                       },
                     ),
                   ),
