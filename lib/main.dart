@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:software/authentication/signin.dart';
+import 'package:software/screens/dashboard.dart';
+import 'package:software/screens/invoice.dart';
 
 // import 'package:software/distributor/schedule.dart';
 // import 'package:software/invoice.dart';
@@ -38,6 +40,7 @@ Future<void> main() async {
   await Hive.openBox('passwordBox');
   await Hive.openBox('usersBox');
   await Hive.openBox('sessionBox');
+  await Hive.openBox('printedBox');
 
   var passwordBox = Hive.box('passwordBox');
   if (!passwordBox.containsKey('password')) {
@@ -57,7 +60,7 @@ class PharmacySoftware extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: Signin(),
+      home: Dashboard(),
       // initialRoute: '/dashboard',
       // routes: {
       //   '/dashboard': (context) => const Dashboard(),

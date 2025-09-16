@@ -21,6 +21,7 @@ class _ViewsaleState extends State<Viewsale> {
     viewsalesBox = Hive.box('viewsalesBox');
   }
 
+  // Add a manual sale
   void _addManualSale() {
     showDialog(
       context: context,
@@ -49,7 +50,10 @@ class _ViewsaleState extends State<Viewsale> {
                 "customer": values["Customer Name"]!.isEmpty
                     ? "Random"
                     : values["Customer Name"],
-                "date": DateFormat("yyyy-MM-dd HH:mm").format(DateTime.now()),
+                "date": DateFormat("yyyy-MM-dd").format(DateTime.now()),
+                "time": DateFormat("HH:mm").format(DateTime.now()),
+
+                // "date": DateFormat("yyyy-MM-dd HH:mm").format(DateTime.now()),
                 "items": [
                   {
                     "name": values["Medicine Name"]!.isEmpty
@@ -100,9 +104,10 @@ class _ViewsaleState extends State<Viewsale> {
               final grandTotal = subtotal - discount;
 
               final updatedBill = {
-                "billNo": bill["billNo"],
+                // "billNo": bill["billNo"],
                 "customer": values["Customer Name"],
-                "date": bill["date"],
+                "date": bill["date"], "time": bill["time"],
+
                 "items": [
                   {
                     "name": values["Medicine Name"],
@@ -145,11 +150,13 @@ class _ViewsaleState extends State<Viewsale> {
       final billA = a["bill"];
       final billB = b["bill"];
 
-      final customerA = (billA["customer"] as String).toLowerCase();
-      final medicineA = (billA["items"][0]["name"] as String).toLowerCase();
+      final customerA = (billA["customer"]?.toString() ?? "").toLowerCase();
+      final medicineA =
+          (billA["items"][0]["name"]?.toString() ?? "").toLowerCase();
 
-      final customerB = (billB["customer"] as String).toLowerCase();
-      final medicineB = (billB["items"][0]["name"] as String).toLowerCase();
+      final customerB = (billB["customer"]?.toString() ?? "").toLowerCase();
+      final medicineB =
+          (billB["items"][0]["name"]?.toString() ?? "").toLowerCase();
 
       final aMatch =
           customerA.contains(searchQuery) || medicineA.contains(searchQuery);
@@ -163,52 +170,52 @@ class _ViewsaleState extends State<Viewsale> {
 
     return Scaffold(
       appBar: AppBar(
-          title: const Text("View Sales"),
-          backgroundColor: const Color(0xFF008000),
-          actions: [
-            IconButton(
-              tooltip: "Export to Excel",
-              onPressed: () {
-                ExcelHelper.exportToExcel(
-                  context: context,
-                  boxes: [viewsalesBox],
-                  sheetName: " View Sales ",
-                  fileName: " View Sales",
-                  headers: [
-                    "billNo",
-                    "customer",
-                    "date",
-                    "items",
-                    "subtotal",
-                    "discount",
-                    "grandTotal",
-                  ],
-                );
-              },
-              icon: const Icon(Icons.file_upload),
-            ),
-            IconButton(
-              tooltip: "Import from Excel",
-              onPressed: () {
-                ExcelHelper.importFromExcel(
-                  context: context,
-                  boxes: [viewsalesBox],
-                  headers: [
-                    "billNo",
-                    "customer",
-                    "date",
-                    "items",
-                    "subtotal",
-                    "discount",
-                    "grandTotal",
-                  ],
-                );
-              },
-              icon: const Icon(Icons.file_download),
-            ),
-          ]),
+        title: const Text("View Sales"),
+        backgroundColor: const Color(0xFF008000),
+        actions: [
+          IconButton(
+            tooltip: "Export to Excel",
+            onPressed: () {
+              ExcelHelper.exportToExcel(
+                context: context,
+                boxes: [viewsalesBox],
+                sheetName: " View Sales ",
+                fileName: " View Sales",
+                headers: [
+                  "customer",
+                  "date",
+                  "items",
+                  "subtotal",
+                  "discount",
+                  "Total",
+                ],
+              );
+            },
+            icon: const Icon(Icons.file_upload),
+          ),
+          IconButton(
+            tooltip: "Import from Excel",
+            onPressed: () {
+              ExcelHelper.importFromExcel(
+                context: context,
+                boxes: [viewsalesBox],
+                headers: [
+                  "customer",
+                  "date",
+                  "items",
+                  "subtotal",
+                  "discount",
+                  "Total",
+                ],
+              );
+            },
+            icon: const Icon(Icons.file_download),
+          ),
+        ],
+      ),
       body: Column(
         children: [
+          // Search bar
           Padding(
             padding: const EdgeInsets.all(16),
             child: TextField(
@@ -224,6 +231,8 @@ class _ViewsaleState extends State<Viewsale> {
               },
             ),
           ),
+
+          // Sales list
           Expanded(
             child: filteredSales.isEmpty
                 ? const Center(child: Text("No sales yet"))
@@ -234,14 +243,13 @@ class _ViewsaleState extends State<Viewsale> {
                       final index = filteredSales[i]["index"];
 
                       return Card(
-                        color: Color(0xFF008000),
+                        color: const Color(0xFF008000),
                         margin: const EdgeInsets.all(8),
                         child: ExpansionTile(
-                          //backgroundColor: Color(0xFF008000),
                           title: Text(
                               "Bill: ${bill['billNo']} - Rs. ${bill['grandTotal']}"),
                           subtitle: Text(
-                              "Customer: ${bill['customer']} | Date: ${bill['date']}"),
+                              "Customer: ${bill['customer']} | Date: ${bill['date']} | Time: ${bill['time']}"),
                           children: [
                             ...List.generate(
                               (bill['items'] as List).length,
@@ -255,7 +263,6 @@ class _ViewsaleState extends State<Viewsale> {
                               },
                             ),
                             ListTile(
-                              // textColor: Color(0xFF008000),
                               title: Text("Subtotal: Rs.${bill['subtotal']}"),
                             ),
                             ListTile(
@@ -267,6 +274,11 @@ class _ViewsaleState extends State<Viewsale> {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.end,
                               children: [
+                                // IconButton(
+                                //   icon: const Icon(Icons.print,
+                                //       color: Colors.black),
+                                //   onPressed: () => _markAsPrinted(index, bill),
+                                // ),
                                 IconButton(
                                   icon: const Icon(Icons.edit,
                                       color: Colors.blue),

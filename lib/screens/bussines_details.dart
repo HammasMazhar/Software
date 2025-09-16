@@ -54,7 +54,7 @@ class _BussinesDetailsState extends State<BussinesDetails> {
               ),
               child: Center(
                 child: Text(
-                  'Owner license :121121212121212',
+                  'Owner CNIC :33100-7711707-5-',
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
               ),
@@ -69,7 +69,7 @@ class _BussinesDetailsState extends State<BussinesDetails> {
               ),
               child: Center(
                 child: Text(
-                  'Shop License No: 123456789',
+                  'Shop License No: 06-331-0166-87626M',
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
               ),
@@ -84,7 +84,7 @@ class _BussinesDetailsState extends State<BussinesDetails> {
               ),
               child: Center(
                 child: Text(
-                  'License Expiry Date:12/12/2024',
+                  'License Expiry Date:25/2/2029',
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
               ),
@@ -99,7 +99,7 @@ class _BussinesDetailsState extends State<BussinesDetails> {
               ),
               child: Center(
                 child: Text(
-                  'NTN: 123456789EEEE',
+                  'NTN: D693222-6',
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
               ),

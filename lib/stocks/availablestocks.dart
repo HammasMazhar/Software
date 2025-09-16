@@ -16,8 +16,7 @@ class Availablestocks extends StatefulWidget {
 class _AvailablestocksState extends State<Availablestocks> {
   late Box availableBox;
   String searchQuery = "";
-  int? _sortColumnIndex;
-  bool _isAscending = true;
+
   @override
   void initState() {
     super.initState();

@@ -1,10 +1,9 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:blue_thermal_printer/blue_thermal_printer.dart';
+import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart';
 
 class InvoiceScreen extends StatefulWidget {
   const InvoiceScreen({super.key});
@@ -45,8 +44,6 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
   double currentPerTabletRate = 0.0;
   bool isManualRate = false;
   int selectedMedicineIndex = -1;
-
-  final BlueThermalPrinter printer = BlueThermalPrinter.instance;
 
   @override
   void initState() {
@@ -156,7 +153,7 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
 
   double get grandTotal => (subtotal - discount).clamp(0, double.infinity);
 
-  String _formatDateTime(DateTime dt) {
+  String formatDateTime(DateTime dt) {
     String two(int n) => n.toString().padLeft(2, '0');
     return '${dt.year}-${two(dt.month)}-${two(dt.day)} ${two(dt.hour)}:${two(dt.minute)}';
   }
@@ -342,62 +339,68 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            Row(
-              children: [
-                const Expanded(
-                  child: Text('Al-Shifa Medical',
-                      style:
-                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                ),
-                Expanded(
-                  child: Align(
-                    alignment: Alignment.centerRight,
-                    child: Directionality(
-                      textDirection: TextDirection.rtl,
-                      child: const Text('الشفاء میڈیکل',
-                          style: TextStyle(
-                              fontSize: 20, fontWeight: FontWeight.bold)),
+            // SizedBox(
+            //   width: 400,
+            //   child: Row(
+            //     children: [
+            //       const Expanded(
+            //         child: Text('Al-Shifa Medical',
+            //             style: TextStyle(
+            //                 fontSize: 20, fontWeight: FontWeight.bold)),
+            //       ),
+            //       Expanded(
+            //         child: Align(
+            //           alignment: Alignment.centerRight,
+            //           child: Directionality(
+            //             textDirection: TextDirection.rtl,
+            //             child: const Text('الشفاء میڈیکل',
+            //                 style: TextStyle(
+            //                     fontSize: 20, fontWeight: FontWeight.bold)),
+            //           ),
+            //         ),
+            //       ),
+            //     ],
+            //   ),
+            // ),
+            const SizedBox(height: 8),
+            SizedBox(
+              width: 500,
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      // children: [
+                      //   Text('NTN: $ntnNo'),
+                      //   Text('License No: $licenseNo'),
+                      //   Text('Print Time: ${_formatDateTime(DateTime.now())}'),
+                      // ],
                     ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('NTN: $ntnNo'),
-                      Text('License No: $licenseNo'),
-                      Text('Print Time: ${_formatDateTime(DateTime.now())}'),
-                    ],
-                  ),
-                ),
-                SizedBox(
-                  width: 240,
-                  child: _keyboardTextField(
-                    controller: customerController,
-                    focusNode: customerFocus,
-                    nextFocus: nameFocus,
-                    rightFocus: nameFocus,
-                    leftFocus: counterPersonFocus,
-                    label: 'Customer Name',
-                  ),
-                ),
-              ],
+                  // SizedBox(
+                  //   width: 240,
+                  //   child: _keyboardTextField(
+                  //     controller: customerController,
+                  //     focusNode: customerFocus,
+                  //     nextFocus: nameFocus,
+                  //     rightFocus: nameFocus,
+                  //     leftFocus: counterPersonFocus,
+                  //     label: 'Customer Name',
+                  //   ),
+                  // ),
+                ],
+              ),
             ),
             const Divider(height: 24, thickness: 1),
             Card(
               child: Padding(
-                padding: EdgeInsets.all(16),
+                padding: EdgeInsets.only(right: 50, left: 50),
                 child: Column(
                   children: [
                     Row(
                       children: [
                         Expanded(
-                          flex: 3,
+                          flex: 2,
                           child: Column(
                             children: [
                               _keyboardTextField(
@@ -614,7 +617,9 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
             const SizedBox(height: 16),
             Card(
               child: Padding(
-                padding: EdgeInsets.all(16),
+                padding:
+                    EdgeInsets.only(right: 50, left: 50, top: 20, bottom: 20),
+                //   padding: EdgeInsets.all(40),
                 child: Column(
                   children: [
                     Row(
@@ -663,12 +668,12 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
-                            Text(
-                                'Subtotal: Rs. ${subtotal.toStringAsFixed(2)}'),
+                            // Text(
+                            //     'Subtotal: Rs. ${subtotal.toStringAsFixed(2)}'),
                             Text(
                                 'Discount: Rs. ${discount.toStringAsFixed(2)}'),
                             Text(
-                              'Grand Total: Rs. ${grandTotal.toStringAsFixed(2)}',
+                              ' Total: Rs. ${grandTotal.toStringAsFixed(2)}',
                               style: const TextStyle(
                                   fontWeight: FontWeight.bold, fontSize: 18),
                             ),
@@ -681,25 +686,38 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
               ),
             ),
             const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: _keyboardTextField(
-                    controller: counterPersonController,
-                    focusNode: counterPersonFocus,
-                    nextFocus: customerFocus,
-                    prevFocus: discountAmountFocus,
-                    rightFocus: customerFocus,
-                    leftFocus: discountAmountFocus,
-                    label: 'Counter Person Name',
+            Padding(
+              padding: const EdgeInsets.only(right: 50, left: 50),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: _keyboardTextField(
+                      controller: counterPersonController,
+                      focusNode: counterPersonFocus,
+                      nextFocus: customerFocus,
+                      prevFocus: discountAmountFocus,
+                      rightFocus: customerFocus,
+                      leftFocus: discountAmountFocus,
+                      label: 'Sold By',
+                    ),
                   ),
-                ),
-                const SizedBox(width: 20),
-                const Text(
-                  'THANK YOU FOR SHOPPING',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
-                ),
-              ],
+                  const SizedBox(width: 20),
+                  Expanded(
+                      child: _keyboardTextField(
+                    controller: customerController,
+                    focusNode: customerFocus,
+                    nextFocus: nameFocus,
+                    rightFocus: nameFocus,
+                    leftFocus: counterPersonFocus,
+                    label: 'Customer Name',
+                  )),
+                  // const SizedBox(width: 20),
+                  // const Text(
+                  //   'THANK YOU FOR SHOPPING',
+                  //   style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                  // ),
+                ],
+              ),
             ),
             const SizedBox(height: 20),
             Row(
@@ -745,105 +763,229 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
   Future<void> _saveAndPrintInvoice() async {
     final pdf = pw.Document();
 
+    final fontUrdu = pw.Font.ttf(await rootBundle.load('asset/1.ttf'));
+    //  final discountPercentage = subtotal > 0 ? (discount / subtotal) * 100 : 0;
+
+    final now = DateTime.now();
+    final dateTime =
+        "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')} "
+        "${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}";
+
+    final saleData = {
+      "billNo": activeBill,
+      "customer": customerController.text,
+      "soldBy": counterPersonController.text,
+      "dateTime": dateTime,
+      "items": cart, // full medicine list
+
+      "Total": grandTotal,
+    };
+
+    await viewsalesBox.add(saleData);
+
+    pw.Widget boldUrduText(String text, {double fontSize = 12}) {
+      return pw.Text(
+        text,
+        style: pw.TextStyle(
+          font: fontUrdu,
+          fontSize: fontSize,
+          fontWeight: pw.FontWeight.bold,
+        ),
+        textDirection: pw.TextDirection.rtl,
+      );
+    }
+
+    pw.Widget buildHeader() {
+      return pw.Column(
+        crossAxisAlignment: pw.CrossAxisAlignment.center,
+        children: [
+          pw.Text(
+            'Al-Shifa Medical Store',
+            style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold),
+          ),
+          // sizebox(height: 2),
+          boldUrduText(' الشفاء میڈیکل سٹور', fontSize: 20),
+          pw.SizedBox(height: 2),
+          pw.Text(
+            'Jhanda Peer Road, Waris-pura (Faisalabad)',
+            style: pw.TextStyle(fontSize: 9),
+          ),
+          // pw.Text(
+          //   'Faisalabad. ',
+          //   style: pw.TextStyle(fontSize: 9),
+          // ),
+          pw.Text(
+            'LIC#: 06-331-0166-87626M',
+            style: pw.TextStyle(fontSize: 9),
+          ),
+
+          pw.Row(
+            mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+            children: [
+              // pw.Text('No: 847154', style: pw.TextStyle(fontSize: 9)),
+              pw.Text(dateTime, style: pw.TextStyle(fontSize: 9)),
+            ],
+          ),
+          pw.Row(
+            mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+            children: [
+              pw.Text('Customer: ${customerController.text}',
+                  style: pw.TextStyle(fontSize: 9)),
+            ],
+          ),
+          pw.Divider(),
+        ],
+      );
+    }
+
+    pw.Widget buildTableHeader() {
+      return pw.Row(
+        children: [
+          pw.SizedBox(
+              width: 20,
+              child: pw.Text('#',
+                  style: pw.TextStyle(
+                      fontSize: 9, fontWeight: pw.FontWeight.bold))),
+          pw.Expanded(
+              flex: 5,
+              child: pw.Text('Item Name',
+                  style: pw.TextStyle(
+                      fontSize: 9, fontWeight: pw.FontWeight.bold))),
+          pw.Expanded(
+              flex: 2,
+              child: pw.Text('Qty',
+                  style: pw.TextStyle(
+                      fontSize: 9, fontWeight: pw.FontWeight.bold))),
+          pw.Expanded(
+              flex: 3,
+              child: pw.Text('Price',
+                  style: pw.TextStyle(
+                      fontSize: 9, fontWeight: pw.FontWeight.bold))),
+          pw.Expanded(
+              flex: 3,
+              child: pw.Text('Total',
+                  style: pw.TextStyle(
+                      fontSize: 9, fontWeight: pw.FontWeight.bold))),
+        ],
+      );
+    }
+
+    pw.Widget buildTableRows() {
+      return pw.Column(
+        children: cart.asMap().entries.map((entry) {
+          final i = entry.key + 1;
+          final item = entry.value;
+          return pw.Padding(
+            padding: const pw.EdgeInsets.symmetric(vertical: 1),
+            child: pw.Row(
+              children: [
+                pw.SizedBox(
+                    width: 20,
+                    child: pw.Text('$i', style: pw.TextStyle(fontSize: 9))),
+                pw.Expanded(
+                    flex: 5,
+                    child: pw.Text('${item['name']}',
+                        style: pw.TextStyle(fontSize: 9))),
+                pw.Expanded(
+                    flex: 2,
+                    child: pw.Text('${item['qty']}',
+                        style: pw.TextStyle(fontSize: 9))),
+                pw.Expanded(
+                    flex: 3,
+                    child: pw.Text(
+                        (item['unitPrice'] as double).toStringAsFixed(2),
+                        style: pw.TextStyle(fontSize: 9))),
+                pw.Expanded(
+                    flex: 3,
+                    child: pw.Text((item['price'] as double).toStringAsFixed(2),
+                        style: pw.TextStyle(fontSize: 9))),
+              ],
+            ),
+          );
+        }).toList(),
+      );
+    }
+
+    pw.Widget buildTotals() {
+      return pw.Column(
+        crossAxisAlignment: pw.CrossAxisAlignment.end,
+        children: [
+          pw.SizedBox(height: 4),
+          pw.Row(
+            mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+            children: [
+              pw.Text('Total items: ${cart.length}',
+                  style: pw.TextStyle(fontSize: 9)),
+              // pw.Text('Sub total: Rs. ${subtotal.toStringAsFixed(2)}',
+              //     style: pw.TextStyle(fontSize: 9)),
+            ],
+          ),
+          // pw.Text(
+          //   'Discount: Rs. ${discount.toStringAsFixed(0)}',
+          //   style: pw.TextStyle(fontSize: 9),
+          // ),
+          //  pw.SizedBox(height: 2),
+          pw.Text(
+            ' Total: Rs. ${grandTotal.toStringAsFixed(0)}',
+            style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 11),
+          ),
+        ],
+      );
+    }
+
+    pw.Widget buildFooter() {
+      return pw.Column(
+        crossAxisAlignment: pw.CrossAxisAlignment.start,
+        children: [
+          pw.SizedBox(height: 5),
+          pw.Text('Sold By: ${counterPersonController.text}',
+              style: pw.TextStyle(fontSize: 9)),
+          pw.Divider(),
+          boldUrduText(
+            ' بل کے ساتھ 15 دن کےاندرادویات کی واپسی ممکن ہےورنہ نہیں',
+            fontSize: 7,
+          ),
+          boldUrduText(
+            '.فریج آئٹمز، کاسمیٹکس کی واپسی اور تبدیلی ممکن نہیں',
+            fontSize: 7,
+          ),
+          boldUrduText(
+            'خریداری کے لئے شکریہ!',
+            fontSize: 7,
+          ),
+        ],
+      );
+    }
+
+    final customFormat = PdfPageFormat.roll80.copyWith(
+      marginTop: 0,
+      marginBottom: 5,
+      marginLeft: 10,
+      marginRight: 10,
+    );
+
     pdf.addPage(
       pw.Page(
-        build: (context) {
-          return pw.Column(
-            crossAxisAlignment: pw.CrossAxisAlignment.start,
-            children: [
-              pw.Text('AL-SHIFA MEDICAL',
-                  style: pw.TextStyle(
-                      fontSize: 24, fontWeight: pw.FontWeight.bold)),
-              pw.Text('Invoice - $activeBill',
-                  style: pw.TextStyle(fontSize: 18)),
-              pw.SizedBox(height: 10),
-              pw.Text('Customer: ${customerController.text}'),
-              pw.Text('Counter: ${counterPersonController.text}'),
-              pw.Text('Date: ${_formatDateTime(DateTime.now())}'),
-              pw.SizedBox(height: 10),
-              pw.TableHelper.fromTextArray(
-                headers: ['S.No', 'Medicine', 'Qty', 'Unit Rate', 'Total'],
-                data: List.generate(cart.length, (index) {
-                  final item = cart[index];
-                  return [
-                    '${index + 1}',
-                    item['name'],
-                    item['qty'].toString(),
-                    'Rs. ${(item['unitPrice'] as double).toStringAsFixed(2)}',
-                    'Rs. ${(item['price'] as double).toStringAsFixed(2)}',
-                  ];
-                }),
-              ),
-              pw.SizedBox(height: 10),
-              pw.Text('Subtotal: Rs. ${subtotal.toStringAsFixed(2)}'),
-              pw.Text('Discount: Rs. ${discount.toStringAsFixed(2)}'),
-              pw.Text('Grand Total: Rs. ${grandTotal.toStringAsFixed(2)}',
-                  style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
-              pw.SizedBox(height: 20),
-              pw.Center(
-                  child: pw.Text('THANK YOU FOR SHOPPING',
-                      style: pw.TextStyle(
-                          fontSize: 16, fontWeight: pw.FontWeight.bold))),
-            ],
-          );
-        },
+        pageFormat: customFormat,
+        build: (context) => pw.Column(
+          crossAxisAlignment: pw.CrossAxisAlignment.start,
+          children: [
+            buildHeader(),
+            buildTableHeader(),
+            pw.Divider(),
+            buildTableRows(),
+            pw.Divider(),
+            buildTotals(),
+            buildFooter(),
+          ],
+        ),
       ),
     );
 
-    final output = File("Invoice_$activeBill.pdf");
-    await output.writeAsBytes(await pdf.save());
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text("PDF saved: Invoice_$activeBill.pdf")),
-    );
-
-    bool isConnected = await printer.isConnected ?? false;
-    if (!mounted) return;
-    if (!isConnected) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please connect the printer first!")),
-      );
-      return;
-    }
-
-    printer.printNewLine();
-    printer.printCustom("AL-SHIFA MEDICAL", 2, 1);
-    printer.printCustom("Invoice - $activeBill", 1, 1);
-    printer.printNewLine();
-    printer.printCustom("Customer: ${customerController.text}", 1, 0);
-    printer.printCustom("Counter: ${counterPersonController.text}", 1, 0);
-    printer.printCustom("Date: ${_formatDateTime(DateTime.now())}", 1, 0);
-    printer.printNewLine();
-
-    for (var item in cart) {
-      printer.printLeftRight("${item['name']} x${item['qty']}",
-          "Rs.${(item['unitPrice'] as double).toStringAsFixed(2)}", 1);
-      printer.printLeftRight(
-          "", "Rs.${(item['price'] as double).toStringAsFixed(2)}", 1);
-    }
-
-    printer.printNewLine();
-    printer.printLeftRight("Subtotal", "Rs.${subtotal.toStringAsFixed(2)}", 1);
-    printer.printLeftRight("Discount", "Rs.${discount.toStringAsFixed(2)}", 1);
-    printer.printLeftRight("Total", "Rs.${grandTotal.toStringAsFixed(2)}", 2);
-    printer.printNewLine();
-    printer.printCustom("THANK YOU FOR SHOPPING", 1, 1);
-    printer.printNewLine();
-    printer.paperCut();
-
-    viewsalesBox.add({
-      'billNo': activeBill,
-      'customer': customerController.text,
-      'counterPerson': counterPersonController.text,
-      'date': DateTime.now().toString(),
-      'items': cart,
-      'subtotal': subtotal,
-      'discount': discount,
-      'grandTotal': grandTotal,
+    await Printing.layoutPdf(onLayout: (format) async => pdf.save());
+    setState(() {
+      bills.remove(activeBill);
+      _createNewBill();
     });
-
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('Invoice printed & saved to sales history!')));
   }
 }

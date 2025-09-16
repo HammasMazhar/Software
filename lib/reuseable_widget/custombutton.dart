@@ -24,11 +24,11 @@ class CustomButton extends StatelessWidget {
       ),
       child: isloading
           ? const CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+              valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
             )
           : Text(
               text,
-              style: const TextStyle(fontSize: 16, color: Colors.white),
+              style: const TextStyle(fontSize: 16, color: Colors.black),
             ),
     );
   }
