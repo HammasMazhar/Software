@@ -53,7 +53,7 @@ class _ViewsaleState extends State<Viewsale> {
                 "date": DateFormat("yyyy-MM-dd").format(DateTime.now()),
                 "time": DateFormat("HH:mm").format(DateTime.now()),
 
-                // "date": DateFormat("yyyy-MM-dd HH:mm").format(DateTime.now()),
+                //  "date": DateFormat("yyyy-MM-dd HH:mm").format(DateTime.now()),
                 "items": [
                   {
                     "name": values["Medicine Name"]!.isEmpty
@@ -106,8 +106,9 @@ class _ViewsaleState extends State<Viewsale> {
               final updatedBill = {
                 // "billNo": bill["billNo"],
                 "customer": values["Customer Name"],
-                "date": bill["date"], "time": bill["time"],
-
+                // "date": bill["date"], "time": bill["time"],
+                "date": DateFormat("yyyy-MM-dd").format(DateTime.now()),
+                "time": DateFormat("HH:mm").format(DateTime.now()),
                 "items": [
                   {
                     "name": values["Medicine Name"],
@@ -146,26 +147,18 @@ class _ViewsaleState extends State<Viewsale> {
       return null;
     }).whereType<Map<String, dynamic>>().toList();
 
-    filteredSales.sort((a, b) {
-      final billA = a["bill"];
-      final billB = b["bill"];
+    final searchFiltered = filteredSales.where((entry) {
+      final bill = entry["bill"];
+      final customer = (bill["customer"]?.toString() ?? "").toLowerCase();
+      final medicine =
+          (bill["items"][0]["name"]?.toString() ?? "").toLowerCase();
+      return customer.contains(searchQuery) || medicine.contains(searchQuery);
+    }).toList();
 
-      final customerA = (billA["customer"]?.toString() ?? "").toLowerCase();
-      final medicineA =
-          (billA["items"][0]["name"]?.toString() ?? "").toLowerCase();
-
-      final customerB = (billB["customer"]?.toString() ?? "").toLowerCase();
-      final medicineB =
-          (billB["items"][0]["name"]?.toString() ?? "").toLowerCase();
-
-      final aMatch =
-          customerA.contains(searchQuery) || medicineA.contains(searchQuery);
-      final bMatch =
-          customerB.contains(searchQuery) || medicineB.contains(searchQuery);
-
-      if (aMatch && !bMatch) return -1;
-      if (!aMatch && bMatch) return 1;
-      return 0;
+    searchFiltered.sort((a, b) {
+      final billNoA = a["bill"]["billNo"] ?? 0;
+      final billNoB = b["bill"]["billNo"] ?? 0;
+      return billNoB.compareTo(billNoA);
     });
 
     return Scaffold(
@@ -200,12 +193,15 @@ class _ViewsaleState extends State<Viewsale> {
                 context: context,
                 boxes: [viewsalesBox],
                 headers: [
+                  "billNo",
                   "customer",
                   "date",
+                  "time",
                   "items",
                   "subtotal",
                   "discount",
-                  "Total",
+                  "grandTotal",
+                  "soldBy",
                 ],
               );
             },
@@ -234,13 +230,13 @@ class _ViewsaleState extends State<Viewsale> {
 
           // Sales list
           Expanded(
-            child: filteredSales.isEmpty
+            child: searchFiltered.isEmpty
                 ? const Center(child: Text("No sales yet"))
                 : ListView.builder(
-                    itemCount: filteredSales.length,
+                    itemCount: searchFiltered.length,
                     itemBuilder: (context, i) {
-                      final bill = filteredSales[i]["bill"];
-                      final index = filteredSales[i]["index"];
+                      final bill = searchFiltered[i]["bill"];
+                      final index = searchFiltered[i]["index"];
 
                       return Card(
                         color: const Color(0xFF008000),
@@ -274,11 +270,6 @@ class _ViewsaleState extends State<Viewsale> {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.end,
                               children: [
-                                // IconButton(
-                                //   icon: const Icon(Icons.print,
-                                //       color: Colors.black),
-                                //   onPressed: () => _markAsPrinted(index, bill),
-                                // ),
                                 IconButton(
                                   icon: const Icon(Icons.edit,
                                       color: Colors.blue),

@@ -179,40 +179,40 @@ class _DailyPurchaseReportState extends State<Currentpurchase> {
           centerTitle: true,
           backgroundColor: Color(0xFF008000),
           actions: [
-            IconButton(
-              tooltip: "Export to Excel",
-              onPressed: () {
-                ExcelHelper.exportToExcel(
-                  context: context,
-                  boxes: [purchaseBox],
-                  sheetName: " Current Purchase",
-                  fileName: " Current Purchase",
-                  headers: [
-                    "company",
-                    "date",
-                    "day",
-                    "amount",
-                  ],
-                );
-              },
-              icon: const Icon(Icons.file_upload),
-            ),
-            IconButton(
-              tooltip: "Import from Excel",
-              onPressed: () {
-                ExcelHelper.importFromExcel(
-                  context: context,
-                  boxes: [purchaseBox],
-                  headers: [
-                    "company",
-                    "date",
-                    "day",
-                    "amount",
-                  ],
-                );
-              },
-              icon: const Icon(Icons.file_download),
-            ),
+            // IconButton(
+            //   tooltip: "Export to Excel",
+            //   onPressed: () {
+            //     ExcelHelper.exportToExcel(
+            //       context: context,
+            //       boxes: [purchaseBox],
+            //       sheetName: " Current Purchase",
+            //       fileName: " Current Purchase",
+            //       headers: [
+            //         "company",
+            //         "date",
+            //         "day",
+            //         "amount",
+            //       ],
+            //     );
+            //   },
+            //   icon: const Icon(Icons.file_upload),
+            // ),
+            // IconButton(
+            //   tooltip: "Import from Excel",
+            //   onPressed: () {
+            //     ExcelHelper.importFromExcel(
+            //       context: context,
+            //       boxes: [purchaseBox],
+            //       headers: [
+            //         "company",
+            //         "date",
+            //         "day",
+            //         "amount",
+            //       ],
+            //     );
+            //   },
+            //   icon: const Icon(Icons.file_download),
+            // ),
           ]),
       body: ListView.builder(
         itemCount: sortedKeys.length,

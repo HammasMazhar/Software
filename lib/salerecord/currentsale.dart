@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:intl/intl.dart';
+import 'package:software/reuseable_widget/excel.dart';
 
 class Currentsale extends StatefulWidget {
   const Currentsale({super.key});
@@ -68,99 +69,65 @@ class _DailySaleReportState extends State<Currentsale> {
     _loadDailySales();
   }
 
-  void _editSale(String dateKey, int index, double oldAmount) {
-    final TextEditingController amountController =
-        TextEditingController(text: oldAmount.toString());
+  /// -------------------- EXPORT --------------------
+  void _exportSales() async {
+    final headers = ["Date", "Amount", "Time"];
+    List<List<String>> rows = [];
 
-    showDialog(
+    for (var key in currentsalesBox.keys) {
+      final data = currentsalesBox.get(key, defaultValue: []);
+      if (data is List) {
+        for (var item in data) {
+          if (item is Map &&
+              item.containsKey('amount') &&
+              item.containsKey('time')) {
+            final amount = (item['amount'] as num).toDouble();
+            final time = DateTime.parse(item['time']);
+            rows.add([
+              key.toString(),
+              amount.toStringAsFixed(2),
+              DateFormat("yyyy-MM-dd HH:mm:ss").format(time),
+            ]);
+          }
+        }
+      }
+    }
+
+    await ExcelHelper.exportRowsToExcel(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text("Edit Sale"),
-        content: TextField(
-          controller: amountController,
-          keyboardType: TextInputType.number,
-          decoration: const InputDecoration(labelText: "Enter new amount"),
-        ),
-        actions: [
-          TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text("Cancel")),
-          ElevatedButton(
-              onPressed: () {
-                final newAmount = double.tryParse(amountController.text) ?? 0.0;
-                if (newAmount != oldAmount && newAmount > 0) {
-                  final data = currentsalesBox.get(dateKey, defaultValue: []);
-                  if (data is List && index < data.length) {
-                    data[index]['amount'] = newAmount;
-                    currentsalesBox.put(dateKey, data);
-                    _loadDailySales();
-                  }
-                }
-                Navigator.pop(context);
-              },
-              child: const Text("Save")),
-        ],
-      ),
+      sheetName: "CurrentSales",
+      fileName: "current_sales",
+      headers: headers,
+      rows: rows,
     );
   }
 
-  void _deleteSale(String dateKey, int index) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text("Delete Sale"),
-        content: const Text("Are you sure you want to delete this sale?"),
-        actions: [
-          TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text("Cancel")),
-          ElevatedButton(
-            onPressed: () {
-              final data = currentsalesBox.get(dateKey, defaultValue: []);
-              if (data is List && index < data.length) {
-                data.removeAt(index);
-                currentsalesBox.put(dateKey, data);
-                _loadDailySales();
-              }
-              Navigator.pop(context);
-            },
-            child: const Text("Delete"),
-          ),
-        ],
-      ),
-    );
-  }
+  /// -------------------- IMPORT --------------------
+  void _importSales() async {
+    final headers = ["Date", "Amount", "Time"];
+    final importedData = await ExcelHelper.importRowsFromExcel(
+        context: context, headers: headers);
 
-  void _showSaleDialog({bool isSubtract = false}) {
-    final TextEditingController amountController = TextEditingController();
+    for (var row in importedData) {
+      final dateKey = row["Date"] ?? "";
+      final amount = double.tryParse(row["Amount"] ?? "0") ?? 0.0;
+      final timeString = row["Time"] ?? "";
+      final time = timeString.isNotEmpty
+          ? DateTime.tryParse(timeString)
+          : DateTime.now();
 
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(isSubtract ? "Subtract Sale" : "Add Sale"),
-        content: TextField(
-          controller: amountController,
-          keyboardType: TextInputType.number,
-          decoration: const InputDecoration(labelText: "Enter amount"),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text("Cancel"),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              final amount = double.tryParse(amountController.text) ?? 0.0;
-              if (amount > 0) {
-                addSale(amount, isSubtract: isSubtract);
-              }
-              Navigator.pop(context);
-            },
-            child: const Text("Save"),
-          ),
-        ],
-      ),
-    );
+      if (dateKey.isNotEmpty && time != null) {
+        final data = currentsalesBox.get(dateKey, defaultValue: []);
+        List sales = (data is List) ? data : [];
+        sales.add({
+          "amount": amount,
+          "time": time.toIso8601String(),
+        });
+        currentsalesBox.put(dateKey, sales);
+      }
+    }
+
+    _loadDailySales();
   }
 
   @override
@@ -176,6 +143,18 @@ class _DailySaleReportState extends State<Currentsale> {
         ),
         centerTitle: true,
         backgroundColor: const Color(0xFF008000),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.download),
+            tooltip: "Export to Excel",
+            onPressed: _exportSales,
+          ),
+          IconButton(
+            icon: const Icon(Icons.upload),
+            tooltip: "Import from Excel",
+            onPressed: _importSales,
+          ),
+        ],
       ),
       body: ListView.builder(
         itemCount: sortedKeys.length,
@@ -214,6 +193,38 @@ class _DailySaleReportState extends State<Currentsale> {
             backgroundColor: Colors.red,
             onPressed: () => _showSaleDialog(isSubtract: true),
             child: const Icon(Icons.remove),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showSaleDialog({bool isSubtract = false}) {
+    final TextEditingController amountController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(isSubtract ? "Subtract Sale" : "Add Sale"),
+        content: TextField(
+          controller: amountController,
+          keyboardType: TextInputType.number,
+          decoration: const InputDecoration(labelText: "Enter amount"),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Cancel"),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              final amount = double.tryParse(amountController.text) ?? 0.0;
+              if (amount > 0) {
+                addSale(amount, isSubtract: isSubtract);
+              }
+              Navigator.pop(context);
+            },
+            child: const Text("Save"),
           ),
         ],
       ),
@@ -287,6 +298,69 @@ class _DailySaleReportState extends State<Currentsale> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  void _editSale(String dateKey, int index, double oldAmount) {
+    final TextEditingController amountController =
+        TextEditingController(text: oldAmount.toString());
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Edit Sale"),
+        content: TextField(
+          controller: amountController,
+          keyboardType: TextInputType.number,
+          decoration: const InputDecoration(labelText: "Enter new amount"),
+        ),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("Cancel")),
+          ElevatedButton(
+              onPressed: () {
+                final newAmount = double.tryParse(amountController.text) ?? 0.0;
+                if (newAmount != oldAmount && newAmount > 0) {
+                  final data = currentsalesBox.get(dateKey, defaultValue: []);
+                  if (data is List && index < data.length) {
+                    data[index]['amount'] = newAmount;
+                    currentsalesBox.put(dateKey, data);
+                    _loadDailySales();
+                  }
+                }
+                Navigator.pop(context);
+              },
+              child: const Text("Save")),
+        ],
+      ),
+    );
+  }
+
+  void _deleteSale(String dateKey, int index) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Delete Sale"),
+        content: const Text("Are you sure you want to delete this sale?"),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("Cancel")),
+          ElevatedButton(
+            onPressed: () {
+              final data = currentsalesBox.get(dateKey, defaultValue: []);
+              if (data is List && index < data.length) {
+                data.removeAt(index);
+                currentsalesBox.put(dateKey, data);
+                _loadDailySales();
+              }
+              Navigator.pop(context);
+            },
+            child: const Text("Delete"),
+          ),
+        ],
       ),
     );
   }
