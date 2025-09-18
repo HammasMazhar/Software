@@ -42,6 +42,7 @@ Future<void> main() async {
   await Hive.openBox('sessionBox');
   await Hive.openBox('printedBox');
   await Hive.openBox('currentPurchaseBox');
+  await Hive.openBox('addPurchaseBox');
 
   var passwordBox = Hive.box('passwordBox');
   if (!passwordBox.containsKey('password')) {
