@@ -14,6 +14,7 @@ import 'package:software/screens/discount.dart';
 import 'package:software/stocks/availablestocks.dart';
 import 'package:software/stocks/expiredstocks.dart';
 import 'package:software/purchaserecord/addpurchase.dart';
+import 'package:software/stocks/nonretailstockesprices.dart';
 import 'package:software/stocks/requiredstocks.dart';
 import 'package:software/screens/tasks_to_do.dart';
 import 'package:software/stocks/nonpaidstock.dart';
@@ -45,6 +46,7 @@ class _DashboardState extends State<Dashboard> {
   bool _isHoveredMedicineInvoiced = false;
   bool _isDiscount = false;
   bool _isHoveredlogout = false;
+  bool _isHoveredNonRetailStock = false;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -324,6 +326,29 @@ class _DashboardState extends State<Dashboard> {
                           },
                         ),
                       ),
+                    ),
+                    SizedBox(height: 5),
+                    MouseRegion(
+                      onEnter: (_) => setState(() {
+                        _isHoveredNonRetailStock = true;
+                      }),
+                      onExit: (_) => setState(() {
+                        _isHoveredNonRetailStock = false;
+                      }),
+                      child: Container(
+                          color: _isHoveredNonRetailStock
+                              ? Color(0xFF008000)
+                              : Colors.white,
+                          child: ListTile(
+                              title: const Text("Non Retail Stocks"),
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          const NonRetailStockPrices()),
+                                );
+                              })),
                     ),
                   ],
                 ),
