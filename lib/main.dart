@@ -63,7 +63,7 @@ class PharmacySoftware extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: Dashboard(),
+      home: Signin(),
       // initialRoute: '/dashboard',
       // routes: {
       //   '/dashboard': (context) => const Dashboard(),
