@@ -85,9 +85,9 @@ class _AvailablestocksState extends State<Availablestocks> {
           final stock = {
             "Medicine Name": row[0]?.value.toString() ?? "",
             "Company": row[1]?.value.toString() ?? "",
-            "Distributor": row[3]?.value.toString() ?? "",
-            "Tablets": row[4]?.value.toString() ?? "",
-            "Pack Price": row[5]?.value.toString() ?? "",
+            "Distributor": row[2]?.value.toString() ?? "",
+            "Tablets": row[3]?.value.toString() ?? "",
+            "Pack Price": row[4]?.value.toString() ?? "",
           };
           availableBox.add(stock);
         }
