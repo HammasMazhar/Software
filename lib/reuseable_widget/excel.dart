@@ -61,10 +61,8 @@ class ExcelHelper {
     Sheet sheet = excel[sheetName];
     excel.setDefaultSheet(sheetName);
 
-    // Add headers
     sheet.appendRow(headers.map((h) => TextCellValue(h)).toList());
 
-    // Add rows
     for (var row in rows) {
       sheet.appendRow(row.map((cell) => TextCellValue(cell)).toList());
     }
@@ -154,7 +152,6 @@ class ExcelHelper {
     return importedData;
   }
 
-  /// Save helper
   static Future<void> _saveFile(
       BuildContext context, Excel excel, String fileName) async {
     String? outputFile = await FilePicker.platform.saveFile(

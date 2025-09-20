@@ -18,7 +18,6 @@ class _InvoiceScreenState extends State<InvoiceScreen>
   @override
   bool get wantKeepAlive => true;
 
-  // ✅ Correct structure: each bill holds metadata + cart
   final Map<String, Map<String, dynamic>> bills = {};
   String activeBill = "Bill_1";
 
@@ -52,7 +51,6 @@ class _InvoiceScreenState extends State<InvoiceScreen>
   @override
   void initState() {
     super.initState();
-    // ✅ Initialize first bill properly with null-safe structure
     bills[activeBill] = {
       "customer": "",
       "counterPerson": "",
@@ -83,7 +81,6 @@ class _InvoiceScreenState extends State<InvoiceScreen>
     super.dispose();
   }
 
-  // ✅ Enhanced null-safe cart getter
   List<Map<String, dynamic>> get cart {
     final billData = bills[activeBill];
     if (billData == null) return <Map<String, dynamic>>[];
@@ -109,7 +106,6 @@ class _InvoiceScreenState extends State<InvoiceScreen>
     }
 
     if (!isManualRate) {
-      // ✅ Null-safe stock validation
       try {
         final stockList = availableBox.values.cast<Map>();
         final stock = stockList.firstWhere(
@@ -135,7 +131,6 @@ class _InvoiceScreenState extends State<InvoiceScreen>
     }
 
     setState(() {
-      // ✅ Add to active bill's cart with null safety
       final currentCart = cart;
       currentCart.add({
         "name": name,
@@ -144,13 +139,11 @@ class _InvoiceScreenState extends State<InvoiceScreen>
         "price": totalPrice,
       });
 
-      // ✅ Update bill's total with null safety
       final currentBill = bills[activeBill];
       if (currentBill != null) {
         currentBill["total"] = grandTotal;
       }
 
-      // ✅ Update totalController so UI refreshes
       totalController.text = grandTotal.toStringAsFixed(2);
 
       _clearInputs();
@@ -170,7 +163,7 @@ class _InvoiceScreenState extends State<InvoiceScreen>
 
   void _createNewBill() {
     final newKey = "Bill_${bills.length + 1}";
-    _saveBillData(); // ✅ Save current bill first
+    _saveBillData();
     setState(() {
       bills[newKey] = {
         "customer": "",
@@ -182,8 +175,7 @@ class _InvoiceScreenState extends State<InvoiceScreen>
       };
 
       activeBill = newKey;
-      _loadBillData(newKey); // ✅ Restore selected bill values
-      // Clear controllers so UI is empty
+      _loadBillData(newKey);
       customerController.clear();
       counterPersonController.clear();
       discountAmountController.clear();
@@ -221,12 +213,11 @@ class _InvoiceScreenState extends State<InvoiceScreen>
   }
 
   void _switchBill(String key) {
-    _saveBillData(); // ✅ Save the current bill first
+    _saveBillData();
 
     setState(() {
       activeBill = key;
 
-      // ✅ Load the selected bill's data into controllers with null safety
       final bill = bills[key];
       if (bill != null) {
         customerController.text = bill["customer"]?.toString() ?? "";
@@ -472,7 +463,7 @@ class _InvoiceScreenState extends State<InvoiceScreen>
         appBar: AppBar(
           title: Text('Invoice - $activeBill'),
           centerTitle: true,
-          backgroundColor: const Color(0xFF2E7D32), // Darker green
+          backgroundColor: const Color(0xFF2E7D32),
           foregroundColor: Colors.white,
           elevation: 2,
           actions: [
@@ -541,8 +532,8 @@ class _InvoiceScreenState extends State<InvoiceScreen>
             child: SingleChildScrollView(
                 padding: const EdgeInsets.all(16),
                 child: Column(children: [
-                  // Medicine Entry Card
                   Card(
+                    //ENTER MEDICINE IN CONTAINER PORTION
                     elevation: 4,
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12)),
@@ -1078,7 +1069,6 @@ class _InvoiceScreenState extends State<InvoiceScreen>
         "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')} "
         "${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}";
 
-    // ✅ prepare sale data
     final saleData = {
       "billNo": viewsalesBox.length + 1,
       "customer":
@@ -1086,7 +1076,7 @@ class _InvoiceScreenState extends State<InvoiceScreen>
       "soldBy": counterPersonController.text,
       "date": DateFormat("yyyy-MM-dd").format(now),
       "time": DateFormat("HH:mm").format(now),
-      "dateTime": formattedDateTime, // ✅ added combined date+time
+      "dateTime": formattedDateTime,
       "items": cart,
       "subtotal": cart.fold(
           0.0,
@@ -1097,7 +1087,6 @@ class _InvoiceScreenState extends State<InvoiceScreen>
           cart.fold(0.0, (sum, item) => sum + (item['price'] as double)),
     };
 
-    // ✅ save to Hive
     await viewsalesBox.add(saleData);
 
     final Object? grandTotal = saleData["grandTotal"];
@@ -1201,12 +1190,11 @@ class _InvoiceScreenState extends State<InvoiceScreen>
                     child: pw.Text('$i', style: pw.TextStyle(fontSize: 9))),
                 pw.Expanded(
                     flex: 5,
-                    child: pw.Text(
-                        '${item['name'] ?? ''}', // ✅ fallback empty string
+                    child: pw.Text('${item['name'] ?? ''}',
                         style: pw.TextStyle(fontSize: 9))),
                 pw.Expanded(
                     flex: 2,
-                    child: pw.Text('${item['qty'] ?? 0}', // ✅ fallback 0
+                    child: pw.Text('${item['qty'] ?? 0}',
                         style: pw.TextStyle(fontSize: 9))),
                 pw.Expanded(
                     flex: 3,
@@ -1234,7 +1222,7 @@ class _InvoiceScreenState extends State<InvoiceScreen>
             mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
             children: [
               pw.Text(
-                'Total items: ${cart?.length ?? 0}', // ✅ fallback to 0 if cart is null
+                'Total items: ${cart?.length ?? 0}',
                 style: pw.TextStyle(fontSize: 9),
               ),
             ],
