@@ -14,7 +14,6 @@ class _ExpiredstocksState extends State<Expiredstocks> {
   late Box expiredBox;
 
   final List<String> fieldNames = [
-    "id",
     "Batch",
     "Name",
     "Quantity",
@@ -34,23 +33,25 @@ class _ExpiredstocksState extends State<Expiredstocks> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text("Add Expired Stock"),
-          content: DynamicForm(
-            fieldNames: fieldNames,
-            onSubmit: (values) {
-              expiredBox.add({
-                "id": int.tryParse(values["id"] ?? "0") ?? 0,
-                "Batch": values["Batch"] ?? "",
-                "Name": values["Name"] ?? "",
-                "Quantitiy": int.tryParse(values["Quantity"] ?? "0") ?? 0,
-                "Price": double.tryParse(values["Price"] ?? "0") ?? 0.0,
-                "ExpiryDate": values["ExpiryDate"] ?? "",
-                "Distributor": values["Distributor"] ?? "",
-              });
-              Navigator.pop(context);
-            },
-          ),
-        );
+            title: const Text("Add Expired Stock"),
+            content: SizedBox(
+              width: 500,
+              height: 450,
+              child: DynamicForm(
+                fieldNames: fieldNames,
+                onSubmit: (values) {
+                  expiredBox.add({
+                    "Batch": values["Batch"] ?? "",
+                    "Name": values["Name"] ?? "",
+                    "Quantitiy": int.tryParse(values["Quantity"] ?? "0") ?? 0,
+                    "Price": double.tryParse(values["Price"] ?? "0") ?? 0.0,
+                    "ExpiryDate": values["ExpiryDate"] ?? "",
+                    "Distributor": values["Distributor"] ?? "",
+                  });
+                  Navigator.pop(context);
+                },
+              ),
+            ));
       },
     );
   }
@@ -61,30 +62,30 @@ class _ExpiredstocksState extends State<Expiredstocks> {
       builder: (context) {
         return AlertDialog(
           title: const Text("Edit Expired Stock"),
-          content: DynamicForm(
-            fieldNames: fieldNames,
-            initialValues: {
-              "id": sale["id"].toString(),
-              "Batch": sale["Batch"] ?? "",
-              "Name": sale["Name"] ?? "",
-              "Quantity": sale["Quantitiy"].toString(),
-              "Price": sale["Price"].toString(),
-              "ExpiryDate": sale["ExpiryDate"] ?? "",
-              "Distributor": sale["Distributor"] ?? "",
-            },
-            onSubmit: (values) {
-              expiredBox.put(key, {
-                "id": int.tryParse(values["id"] ?? "0") ?? 0,
-                "Batch": values["Batch"] ?? "",
-                "Name": values["Name"] ?? "",
-                "Quantitiy": int.tryParse(values["Quantity"] ?? "0") ?? 0,
-                "Price": double.tryParse(values["Price"] ?? "0") ?? 0.0,
-                "ExpiryDate": values["ExpiryDate"] ?? "",
-                "Distributor": values["Distributor"] ?? "",
-              });
-              // Navigator.pop(context); // close edit dialog
-            },
-          ),
+          content: SizedBox(
+              width: 500,
+              height: 450,
+              child: DynamicForm(
+                fieldNames: fieldNames,
+                initialValues: {
+                  "Batch": sale["Batch"] ?? "",
+                  "Name": sale["Name"] ?? "",
+                  "Quantity": sale["Quantitiy"].toString(),
+                  "Price": sale["Price"].toString(),
+                  "ExpiryDate": sale["ExpiryDate"] ?? "",
+                  "Distributor": sale["Distributor"] ?? "",
+                },
+                onSubmit: (values) {
+                  expiredBox.put(key, {
+                    "Batch": values["Batch"] ?? "",
+                    "Name": values["Name"] ?? "",
+                    "Quantitiy": int.tryParse(values["Quantity"] ?? "0") ?? 0,
+                    "Price": double.tryParse(values["Price"] ?? "0") ?? 0.0,
+                    "ExpiryDate": values["ExpiryDate"] ?? "",
+                    "Distributor": values["Distributor"] ?? "",
+                  });
+                },
+              )),
         );
       },
     );
@@ -117,73 +118,66 @@ class _ExpiredstocksState extends State<Expiredstocks> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-          title: const Text("Expired Stocks"),
-          backgroundColor: Colors.green,
-          centerTitle: true,
-          actions: [
-            IconButton(
-              tooltip: "Export to Excel",
-              onPressed: () {
-                ExcelHelper.exportToExcel(
-                  context: context,
-                  boxes: [expiredBox],
-                  sheetName: " Expired Stocks ",
-                  fileName: " Expired Stocks",
-                  headers: [
-                    "id",
-                    "Batch",
-                    "Name",
-                    "Quantity",
-                    "Price",
-                    "ExpiryDate",
-                    "Distributor",
-                  ],
-                );
-              },
-              icon: const Icon(Icons.file_upload),
-            ),
-            IconButton(
-              tooltip: "Import from Excel",
-              onPressed: () {
-                ExcelHelper.importFromExcel(
-                  context: context,
-                  boxes: [expiredBox],
-                  headers: [
-                    "id",
-                    "Batch",
-                    "Name",
-                    "Quantity",
-                    "Price",
-                    "ExpiryDate",
-                    "Distributor",
-                  ],
-                );
-              },
-              icon: const Icon(Icons.file_download),
-            ),
-          ]),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            ElevatedButton(
-              onPressed: _addSale,
-              child: const Text("+ Add Expired Stock"),
-            ),
-            const SizedBox(height: 10),
-            Expanded(
-              child: ValueListenableBuilder(
-                valueListenable: expiredBox.listenable(),
-                builder: (context, Box box, _) {
-                  if (box.isEmpty) {
-                    return const Center(child: Text("No expired stocks found"));
-                  }
+      appBar: AppBar(title: const Text("Expired Stocks"), actions: [
+        IconButton(
+          tooltip: "Export to Excel",
+          onPressed: () {
+            ExcelHelper.exportToExcel(
+              context: context,
+              boxes: [expiredBox],
+              sheetName: "Expired Stocks",
+              fileName: "Expired_Stocks",
+              headers: [
+                "Batch",
+                "Name",
+                "Quantity",
+                "Price",
+                "ExpiryDate",
+                "Distributor",
+              ],
+            );
+          },
+          icon: const Icon(Icons.file_upload),
+        ),
+        IconButton(
+          tooltip: "Import from Excel",
+          onPressed: () {
+            ExcelHelper.importFromExcel(
+              context: context,
+              boxes: [expiredBox],
+              headers: [
+                "Batch",
+                "Name",
+                "Quantity",
+                "Price",
+                "ExpiryDate",
+                "Distributor",
+              ],
+            );
+          },
+          icon: const Icon(Icons.file_download),
+        ),
+      ]),
+      body: Column(
+        children: [
+          ElevatedButton(
+            onPressed: _addSale,
+            child: const Text("+ Add Expired Stock"),
+          ),
+          const SizedBox(height: 10),
+          Expanded(
+            child: ValueListenableBuilder(
+              valueListenable: expiredBox.listenable(),
+              builder: (context, Box box, _) {
+                if (box.isEmpty) {
+                  return const Center(child: Text("No expired stocks found"));
+                }
 
-                  final keys = box.keys.toList();
+                final keys = box.keys.toList().reversed.toList();
 
-                  return SingleChildScrollView(
-                    scrollDirection: Axis.vertical,
+                return SingleChildScrollView(
+                  scrollDirection: Axis.vertical,
+                  child: Center(
                     child: SingleChildScrollView(
                       scrollDirection: Axis.horizontal,
                       child: DataTable(
@@ -227,12 +221,12 @@ class _ExpiredstocksState extends State<Expiredstocks> {
                         }).toList(),
                       ),
                     ),
-                  );
-                },
-              ),
+                  ),
+                );
+              },
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

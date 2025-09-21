@@ -28,16 +28,19 @@ class _SchedulePageState extends State<SchedulePage> {
       builder: (context) {
         return AlertDialog(
           title: const Text('Add Schedule'),
-          content: DynamicForm(
-            fieldNames: fieldNames,
-            onSubmit: (values) {
-              final newSchedule = {
-                'name': values["Distributor Name"] ?? "",
-                'day': values["Day"] ?? "",
-              };
-              scheduleBox.add(newSchedule);
-            },
-          ),
+          content: SizedBox(
+              width: 500,
+              height: 400,
+              child: DynamicForm(
+                fieldNames: fieldNames,
+                onSubmit: (values) {
+                  final newSchedule = {
+                    'name': values["Distributor Name"] ?? "",
+                    'day': values["Day"] ?? "",
+                  };
+                  scheduleBox.add(newSchedule);
+                },
+              )),
         );
       },
     );
@@ -51,20 +54,23 @@ class _SchedulePageState extends State<SchedulePage> {
       builder: (context) {
         return AlertDialog(
           title: const Text("Edit Schedule"),
-          content: DynamicForm(
-            fieldNames: fieldNames,
-            initialValues: {
-              "Distributor Name": schedule['name'] ?? "",
-              "Day": schedule['day'] ?? "",
-            },
-            onSubmit: (values) {
-              final updatedSchedule = {
-                'name': values["Distributor Name"] ?? "",
-                'day': values["Day"] ?? "",
-              };
-              scheduleBox.put(key, updatedSchedule);
-            },
-          ),
+          content: SizedBox(
+              width: 500,
+              height: 400,
+              child: DynamicForm(
+                fieldNames: fieldNames,
+                initialValues: {
+                  "Distributor Name": schedule['name'] ?? "",
+                  "Day": schedule['day'] ?? "",
+                },
+                onSubmit: (values) {
+                  final updatedSchedule = {
+                    'name': values["Distributor Name"] ?? "",
+                    'day': values["Day"] ?? "",
+                  };
+                  scheduleBox.put(key, updatedSchedule);
+                },
+              )),
         );
       },
     );
@@ -98,42 +104,38 @@ class _SchedulePageState extends State<SchedulePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-          title: const Text("Booking Schedule"),
-          centerTitle: true,
-          backgroundColor: Colors.green,
-          actions: [
-            IconButton(
-              tooltip: "Export to Excel",
-              onPressed: () {
-                ExcelHelper.exportToExcel(
-                  context: context,
-                  boxes: [scheduleBox],
-                  sheetName: " Booking Schedule",
-                  fileName: " Booking Schedule",
-                  headers: [
-                    "name",
-                    "day",
-                  ],
-                );
-              },
-              icon: const Icon(Icons.file_upload),
-            ),
-            IconButton(
-              tooltip: "Import from Excel",
-              onPressed: () {
-                ExcelHelper.importFromExcel(
-                  context: context,
-                  boxes: [scheduleBox],
-                  headers: [
-                    "name",
-                    "day",
-                  ],
-                );
-              },
-              icon: const Icon(Icons.file_download),
-            ),
-          ]),
+      appBar: AppBar(title: const Text("Booking Schedule"), actions: [
+        IconButton(
+          tooltip: "Export to Excel",
+          onPressed: () {
+            ExcelHelper.exportToExcel(
+              context: context,
+              boxes: [scheduleBox],
+              sheetName: " Booking Schedule",
+              fileName: " Booking Schedule",
+              headers: [
+                "name",
+                "day",
+              ],
+            );
+          },
+          icon: const Icon(Icons.file_upload),
+        ),
+        IconButton(
+          tooltip: "Import from Excel",
+          onPressed: () {
+            ExcelHelper.importFromExcel(
+              context: context,
+              boxes: [scheduleBox],
+              headers: [
+                "name",
+                "day",
+              ],
+            );
+          },
+          icon: const Icon(Icons.file_download),
+        ),
+      ]),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(

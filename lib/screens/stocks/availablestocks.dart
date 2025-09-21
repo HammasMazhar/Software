@@ -5,7 +5,6 @@ import 'package:software/screens/global_widgets/dynamic_form.dart';
 import 'package:excel/excel.dart';
 import 'package:file_picker/file_picker.dart';
 
-//this without the excel widget
 class Availablestocks extends StatefulWidget {
   const Availablestocks({super.key});
 
@@ -113,19 +112,58 @@ class _AvailablestocksState extends State<Availablestocks> {
       builder: (context) {
         return AlertDialog(
           title: const Text("Add Stocks"),
-          content: DynamicForm(
-            fieldNames: fieldNames,
-            onSubmit: (values) {
-              final newStock = {
-                "Medicine Name": values["Medicine Name"] ?? "",
-                "Company": values["Company"] ?? "",
-                "Distributor": values["Distributor"] ?? "",
-                "Tablets": values["Tablets"] ?? "",
-                "Pack Price": values["Pack Price"] ?? "",
-              };
-              availableBox.add(newStock);
-            },
-          ),
+          content: SizedBox(
+              width: 500,
+              height: 400,
+              child: DynamicForm(
+                fieldNames: fieldNames,
+                onSubmit: (values) {
+                  if ((values["Medicine Name"] ?? "").trim().isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                          content: Text("Medicine Name is required")),
+                    );
+                    return;
+                  }
+                  if ((values["Tablets"] ?? "").trim().isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text("Tablets is required")),
+                    );
+                    return;
+                  }
+                  if ((values["Pack Price"] ?? "").trim().isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text("Pack Price is required")),
+                    );
+                    return;
+                  }
+
+                  if (int.tryParse(values["Tablets"] ?? "") == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                          content: Text("Tablets must be digits only")),
+                    );
+                    return;
+                  }
+                  if (double.tryParse(values["Pack Price"] ?? "") == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                          content: Text("Pack Price must be a valid number")),
+                    );
+                    return;
+                  }
+
+                  final newStock = {
+                    "Medicine Name": values["Medicine Name"]!,
+                    "Company": values["Company"] ?? "",
+                    "Distributor": values["Distributor"] ?? "",
+                    "Tablets": values["Tablets"]!,
+                    "Pack Price": values["Pack Price"]!,
+                  };
+                  availableBox.add(newStock);
+                  Navigator.pop(context);
+                },
+              )),
         );
       },
     );
@@ -144,26 +182,65 @@ class _AvailablestocksState extends State<Availablestocks> {
       builder: (context) {
         return AlertDialog(
           title: const Text("Edit Stocks"),
-          content: DynamicForm(
-            fieldNames: fieldNames,
-            initialValues: {
-              "Medicine Name": stock["Medicine Name"] ?? "",
-              "Company": stock["Company"] ?? "",
-              "Distributor": stock["Distributor"] ?? "",
-              "Tablets": stock["Tablets"] ?? "",
-              "Pack Price": stock["Pack Price"] ?? "",
-            },
-            onSubmit: (values) {
-              final updatedStock = {
-                "Medicine Name": values["Medicine Name"] ?? "",
-                "Company": values["Company"] ?? "",
-                "Distributor": values["Distributor"] ?? "",
-                "Tablets": values["Tablets"] ?? "",
-                "Pack Price": values["Pack Price"] ?? "",
-              };
-              availableBox.put(key, updatedStock);
-            },
-          ),
+          content: SizedBox(
+              width: 500,
+              height: 400,
+              child: DynamicForm(
+                fieldNames: fieldNames,
+                initialValues: {
+                  "Medicine Name": stock["Medicine Name"] ?? "",
+                  "Company": stock["Company"] ?? "",
+                  "Distributor": stock["Distributor"] ?? "",
+                  "Tablets": stock["Tablets"] ?? "",
+                  "Pack Price": stock["Pack Price"] ?? "",
+                },
+                onSubmit: (values) {
+                  if ((values["Medicine Name"] ?? "").trim().isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                          content: Text("Medicine Name is required")),
+                    );
+                    return;
+                  }
+                  if ((values["Tablets"] ?? "").trim().isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text("Tablets is required")),
+                    );
+                    return;
+                  }
+                  if ((values["Pack Price"] ?? "").trim().isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text("Pack Price is required")),
+                    );
+                    return;
+                  }
+
+                  if (int.tryParse(values["Tablets"] ?? "") == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                          content: Text("Tablets must be digits only")),
+                    );
+                    return;
+                  }
+                  if (double.tryParse(values["Pack Price"] ?? "") == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                          content: Text("Pack Price must be a valid number")),
+                    );
+                    return;
+                  }
+
+                  final updatedStock = {
+                    "Medicine Name": values["Medicine Name"]!,
+                    "Company": values["Company"] ?? "",
+                    "Distributor": values["Distributor"] ?? "",
+                    "Tablets": values["Tablets"]!,
+                    "Pack Price": values["Pack Price"]!,
+                  };
+                  availableBox.put(key, updatedStock);
+                  Navigator.pop(context);
+                },
+              )),
         );
       },
     );
@@ -202,7 +279,7 @@ class _AvailablestocksState extends State<Availablestocks> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Available Stocks"),
-        backgroundColor: Colors.green,
+        //   backgroundColor: Colors.green,
         centerTitle: true,
         actions: [
           IconButton(

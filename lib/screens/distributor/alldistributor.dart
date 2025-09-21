@@ -32,12 +32,15 @@ class _AlldistributorState extends State<Alldistributor> {
       builder: (context) {
         return AlertDialog(
           title: const Text("Add Distributor"),
-          content: DynamicForm(
-            fieldNames: distributorFields,
-            onSubmit: (values) {
-              distributorBox.add(values);
-            },
-          ),
+          content: SizedBox(
+              width: 500,
+              height: 400,
+              child: DynamicForm(
+                fieldNames: distributorFields,
+                onSubmit: (values) {
+                  distributorBox.add(values);
+                },
+              )),
         );
       },
     );
@@ -49,13 +52,16 @@ class _AlldistributorState extends State<Alldistributor> {
       builder: (context) {
         return AlertDialog(
           title: const Text("Edit Distributor"),
-          content: DynamicForm(
-            fieldNames: distributorFields,
-            initialValues: Map<String, String>.from(distributor),
-            onSubmit: (values) {
-              distributorBox.put(key, values);
-            },
-          ),
+          content: SizedBox(
+              width: 500,
+              height: 400,
+              child: DynamicForm(
+                fieldNames: distributorFields,
+                initialValues: Map<String, String>.from(distributor),
+                onSubmit: (values) {
+                  distributorBox.put(key, values);
+                },
+              )),
         );
       },
     );
@@ -94,8 +100,7 @@ class _AlldistributorState extends State<Alldistributor> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Distributors"),
-        centerTitle: true,
-        backgroundColor: Colors.green,
+        // backgroundColor: Colors.green,
         actions: [
           IconButton(
             tooltip: "Export to Excel",
@@ -147,7 +152,7 @@ class _AlldistributorState extends State<Alldistributor> {
               },
             ),
             const SizedBox(height: 10),
-            Expanded(
+            Center(
               child: SingleChildScrollView(
                 scrollDirection: Axis.vertical,
                 child: SingleChildScrollView(

@@ -32,16 +32,20 @@ class _NonpaidstockState extends State<Nonpaidstock> {
       builder: (context) {
         return AlertDialog(
           title: const Text("Add Non Paid Stock"),
-          content: DynamicForm(
-            fieldNames: fieldNames,
-            onSubmit: (values) {
-              nonpaidBox.add({
-                "Name": values["Name"] ?? "",
-                "Quantity": int.tryParse(values["Quantity"] ?? "0") ?? 0,
-                "Distributor": values["Distributor"] ?? "",
-              });
-            },
-          ),
+          content: SizedBox(
+              width: 500,
+              height: 280,
+              child: DynamicForm(
+                fieldNames: fieldNames,
+                onSubmit: (values) {
+                  nonpaidBox.add({
+                    "Name": values["Name"] ?? "",
+                    "Quantity": int.tryParse(values["Quantity"] ?? "0") ?? 0,
+                    "Distributor": values["Distributor"] ?? "",
+                  });
+                  Navigator.pop(context);
+                },
+              )),
         );
       },
     );
@@ -53,21 +57,24 @@ class _NonpaidstockState extends State<Nonpaidstock> {
       builder: (context) {
         return AlertDialog(
           title: const Text("Edit Non Paid Stock"),
-          content: DynamicForm(
-            fieldNames: fieldNames,
-            initialValues: {
-              "Name": stock["Name"] ?? "",
-              "Quantity": stock["Quantity"].toString(),
-              "Distributor": stock["Distributor"] ?? "",
-            },
-            onSubmit: (values) {
-              nonpaidBox.putAt(index, {
-                "Name": values["Name"] ?? "",
-                "Quantity": int.tryParse(values["Quantity"] ?? "0") ?? 0,
-                "Distributor": values["Distributor"] ?? "",
-              });
-            },
-          ),
+          content: SizedBox(
+              width: 500,
+              height: 280,
+              child: DynamicForm(
+                fieldNames: fieldNames,
+                initialValues: {
+                  "Name": stock["Name"] ?? "",
+                  "Quantity": stock["Quantity"].toString(),
+                  "Distributor": stock["Distributor"] ?? "",
+                },
+                onSubmit: (values) {
+                  nonpaidBox.putAt(index, {
+                    "Name": values["Name"] ?? "",
+                    "Quantity": int.tryParse(values["Quantity"] ?? "0") ?? 0,
+                    "Distributor": values["Distributor"] ?? "",
+                  });
+                },
+              )),
         );
       },
     );
@@ -107,8 +114,7 @@ class _NonpaidstockState extends State<Nonpaidstock> {
     return Scaffold(
       appBar: AppBar(
           title: const Text("Non Paid Stocks"),
-          backgroundColor: Colors.green,
-          centerTitle: true,
+          //    backgroundColor: Colors.green,
           actions: [
             IconButton(
               tooltip: "Export to Excel",
@@ -161,46 +167,48 @@ class _NonpaidstockState extends State<Nonpaidstock> {
                     return const Center(child: Text("No Required Stocks"));
                   }
 
-                  return SingleChildScrollView(
-                    scrollDirection: Axis.vertical,
+                  return Center(
                     child: SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: DataTable(
-                        columns: const [
-                          DataColumn(label: Text("Name")),
-                          DataColumn(label: Text("Quantity")),
-                          DataColumn(label: Text("Distributor")),
-                          DataColumn(label: Text("Actions")),
-                        ],
-                        rows: List.generate(
-                          box.length,
-                          (index) {
-                            final stock = box.getAt(index) as Map;
-                            return DataRow(
-                              cells: [
-                                DataCell(Text(stock["Name"] ?? "")),
-                                DataCell(Text(stock["Quantity"].toString())),
-                                DataCell(Text(stock["Distributor"] ?? "")),
-                                DataCell(
-                                  Row(
-                                    children: [
-                                      IconButton(
-                                        icon: const Icon(Icons.edit,
-                                            color: Colors.blue),
-                                        onPressed: () =>
-                                            _editStocks(index, stock),
-                                      ),
-                                      IconButton(
-                                        icon: const Icon(Icons.delete,
-                                            color: Colors.red),
-                                        onPressed: () => _deleteStocks(index),
-                                      ),
-                                    ],
+                      scrollDirection: Axis.vertical,
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: DataTable(
+                          columns: const [
+                            DataColumn(label: Text("Name")),
+                            DataColumn(label: Text("Quantity")),
+                            DataColumn(label: Text("Distributor")),
+                            DataColumn(label: Text("Actions")),
+                          ],
+                          rows: List.generate(
+                            box.length,
+                            (index) {
+                              final stock = box.getAt(index) as Map;
+                              return DataRow(
+                                cells: [
+                                  DataCell(Text(stock["Name"] ?? "")),
+                                  DataCell(Text(stock["Quantity"].toString())),
+                                  DataCell(Text(stock["Distributor"] ?? "")),
+                                  DataCell(
+                                    Row(
+                                      children: [
+                                        IconButton(
+                                          icon: const Icon(Icons.edit,
+                                              color: Colors.blue),
+                                          onPressed: () =>
+                                              _editStocks(index, stock),
+                                        ),
+                                        IconButton(
+                                          icon: const Icon(Icons.delete,
+                                              color: Colors.red),
+                                          onPressed: () => _deleteStocks(index),
+                                        ),
+                                      ],
+                                    ),
                                   ),
-                                ),
-                              ],
-                            );
-                          },
+                                ],
+                              );
+                            },
+                          ),
                         ),
                       ),
                     ),

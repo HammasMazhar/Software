@@ -31,18 +31,21 @@ class _NonRetailStockPrices extends State<NonRetailStockPrices> {
       builder: (context) {
         return AlertDialog(
           title: const Text("Add Non Retail Stock Price"),
-          content: DynamicForm(
-            fieldNames: fieldNames,
-            onSubmit: (values) {
-              nonretailstockBox.add({
-                "Name": values["Name"] ?? "",
-                "Net Price": int.tryParse(values["Net Price"] ?? "0") ?? 0,
-                "Retail Price":
-                    double.tryParse(values["Retail Price"] ?? "0") ?? 0.0,
-              });
-              Navigator.pop(context);
-            },
-          ),
+          content: SizedBox(
+              width: 500,
+              height: 250,
+              child: DynamicForm(
+                fieldNames: fieldNames,
+                onSubmit: (values) {
+                  nonretailstockBox.add({
+                    "Name": values["Name"] ?? "",
+                    "Net Price": int.tryParse(values["Net Price"] ?? "0") ?? 0,
+                    "Retail Price":
+                        double.tryParse(values["Retail Price"] ?? "0") ?? 0.0,
+                  });
+                  Navigator.pop(context);
+                },
+              )),
         );
       },
     );
@@ -54,23 +57,27 @@ class _NonRetailStockPrices extends State<NonRetailStockPrices> {
       builder: (context) {
         return AlertDialog(
           title: const Text("Edit Non Retail Stock Stock"),
-          content: DynamicForm(
-            fieldNames: fieldNames,
-            initialValues: {
-              "Name": sale["Name"] ?? "",
-              "Net Price": sale[" Net Price"].toString(),
-              "Retail Price": sale["Retail Price"].toString(),
-            },
-            onSubmit: (values) {
-              nonretailstockBox.put(key, {
-                "Name": values["Name"] ?? "",
-                "Net Price": double.tryParse(values["Net Price"] ?? "0") ?? 0.0,
-                "Retail Price":
-                    double.tryParse(values["Retail Price"] ?? "0") ?? 0.0,
-              });
-              // Navigator.pop(context); // close edit dialog
-            },
-          ),
+          content: SizedBox(
+              width: 500,
+              height: 250,
+              child: DynamicForm(
+                fieldNames: fieldNames,
+                initialValues: {
+                  "Name": sale["Name"] ?? "",
+                  "Net Price": sale[" Net Price"].toString(),
+                  "Retail Price": sale["Retail Price"].toString(),
+                },
+                onSubmit: (values) {
+                  nonretailstockBox.put(key, {
+                    "Name": values["Name"] ?? "",
+                    "Net Price":
+                        double.tryParse(values["Net Price"] ?? "0") ?? 0.0,
+                    "Retail Price":
+                        double.tryParse(values["Retail Price"] ?? "0") ?? 0.0,
+                  });
+                  // Navigator.pop(context); // close edit dialog
+                },
+              )),
         );
       },
     );
@@ -104,8 +111,7 @@ class _NonRetailStockPrices extends State<NonRetailStockPrices> {
     return Scaffold(
       appBar: AppBar(
           title: const Text("Non Retail Stocks"),
-          backgroundColor: Colors.green,
-          centerTitle: true,
+          //    backgroundColor: Colors.green,
           actions: [
             IconButton(
               tooltip: "Export to Excel",
@@ -151,50 +157,52 @@ class _NonRetailStockPrices extends State<NonRetailStockPrices> {
 
                   final keys = box.keys.toList();
 
-                  return SingleChildScrollView(
-                    scrollDirection: Axis.vertical,
+                  return Center(
                     child: SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: DataTable(
-                        columns: const [
-                          DataColumn(label: Text("Name")),
-                          DataColumn(label: Text("Net Price")),
-                          DataColumn(label: Text("Retail Price")),
-                          DataColumn(label: Text("Actions")),
-                        ],
-                        rows: keys.map((key) {
-                          final sale = box.get(key) as Map;
-                          return DataRow(
-                            cells: [
-                              DataCell(Text(sale["Name"]?.toString() ?? "")),
-                              DataCell(Text(sale["Net Price"] != null
-                                  ? double.parse(sale["Net Price"].toString())
-                                      .toStringAsFixed(2)
-                                  : "")),
-                              DataCell(Text(sale["Retail Price"] != null
-                                  ? double.parse(
-                                          sale["Retail Price"].toString())
-                                      .toStringAsFixed(2)
-                                  : "")),
-                              DataCell(
-                                Row(
-                                  children: [
-                                    IconButton(
-                                      icon: const Icon(Icons.edit,
-                                          color: Colors.blue),
-                                      onPressed: () => _editSale(key, sale),
-                                    ),
-                                    IconButton(
-                                      icon: const Icon(Icons.delete,
-                                          color: Colors.red),
-                                      onPressed: () => _deleteSale(key),
-                                    ),
-                                  ],
+                      scrollDirection: Axis.vertical,
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: DataTable(
+                          columns: const [
+                            DataColumn(label: Text("Name")),
+                            DataColumn(label: Text("Net Price")),
+                            DataColumn(label: Text("Retail Price")),
+                            DataColumn(label: Text("Actions")),
+                          ],
+                          rows: keys.map((key) {
+                            final sale = box.get(key) as Map;
+                            return DataRow(
+                              cells: [
+                                DataCell(Text(sale["Name"]?.toString() ?? "")),
+                                DataCell(Text(sale["Net Price"] != null
+                                    ? double.parse(sale["Net Price"].toString())
+                                        .toStringAsFixed(2)
+                                    : "")),
+                                DataCell(Text(sale["Retail Price"] != null
+                                    ? double.parse(
+                                            sale["Retail Price"].toString())
+                                        .toStringAsFixed(2)
+                                    : "")),
+                                DataCell(
+                                  Row(
+                                    children: [
+                                      IconButton(
+                                        icon: const Icon(Icons.edit,
+                                            color: Colors.blue),
+                                        onPressed: () => _editSale(key, sale),
+                                      ),
+                                      IconButton(
+                                        icon: const Icon(Icons.delete,
+                                            color: Colors.red),
+                                        onPressed: () => _deleteSale(key),
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                              ),
-                            ],
-                          );
-                        }).toList(),
+                              ],
+                            );
+                          }).toList(),
+                        ),
                       ),
                     ),
                   );

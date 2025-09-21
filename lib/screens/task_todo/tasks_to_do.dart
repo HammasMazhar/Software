@@ -50,8 +50,6 @@ class _TasksToDoState extends State<TasksToDo> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Tasks To-Do'),
-        backgroundColor: const Color(0xFF008000),
-        centerTitle: true,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),

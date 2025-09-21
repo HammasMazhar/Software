@@ -50,7 +50,7 @@ class _DashboardState extends State<Dashboard> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFF008000),
+      //backgroundColor: Color(0xFF008000),
       body: Row(
         children: [
           Container(
@@ -65,14 +65,14 @@ class _DashboardState extends State<Dashboard> {
                       Icon(
                         Icons.local_pharmacy,
                         size: 50,
-                        color: Color(0xFF008000),
+                        // color: Color(0xFF008000),
                       ),
                       Text(
                         "Al-Shifa ",
                         style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
-                          color: Colors.black,
+                          //color: Colors.black,
                         ),
                       ),
                       Text(
@@ -80,7 +80,7 @@ class _DashboardState extends State<Dashboard> {
                         style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
-                          color: Colors.black,
+                          // color: Colors.black,
                         ),
                       ),
                     ],
@@ -567,8 +567,14 @@ class _DashboardState extends State<Dashboard> {
                   onExit: (_) => setState(() {
                     _isHoveredlogout = false;
                   }),
-                  child: Container(
-                    color: _isHoveredlogout ? Color(0xFF008000) : Colors.white,
+                  child: ElevatedButton(
+                    onPressed: () {},
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor:
+                          _isHoveredlogout ? Color(0xFF008000) : Colors.white,
+                      elevation: 0,
+                      shadowColor: Colors.transparent,
+                    ),
                     child: ListTile(
                       title: const Text("Log Out"),
                       leading: Icon(Icons.logout),

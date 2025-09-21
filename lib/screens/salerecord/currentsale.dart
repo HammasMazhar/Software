@@ -69,7 +69,6 @@ class _DailySaleReportState extends State<Currentsale> {
     _loadDailySales();
   }
 
-  /// -------------------- EXPORT --------------------
   void _exportSales() async {
     final headers = ["Date", "Amount", "Time"];
     List<List<String>> rows = [];
@@ -102,7 +101,6 @@ class _DailySaleReportState extends State<Currentsale> {
     );
   }
 
-  /// -------------------- IMPORT --------------------
   void _importSales() async {
     final headers = ["Date", "Amount", "Time"];
     final importedData = await ExcelHelper.importRowsFromExcel(
@@ -142,7 +140,7 @@ class _DailySaleReportState extends State<Currentsale> {
           style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
-        backgroundColor: const Color(0xFF008000),
+        //   backgroundColor: const Color(0xFF008000),
         actions: [
           IconButton(
             icon: const Icon(Icons.download),
@@ -170,12 +168,22 @@ class _DailySaleReportState extends State<Currentsale> {
                   .entries
                   .where((entry) => entry.value is Map)
                   .toList();
-
-          return _saleCard(
-            "$dayName ($formattedDate)",
-            dailyTotals[key] ?? 0.0,
-            key,
-            salesOfDay,
+          return Column(
+            children: [
+              _saleCard(
+                "$dayName ($formattedDate)",
+                dailyTotals[key] ?? 0.0,
+                key,
+                salesOfDay,
+              ),
+              if (index != sortedKeys.length - 1)
+                const Divider(
+                  thickness: 2,
+                  color: Colors.grey,
+                  indent: 20,
+                  endIndent: 20,
+                ),
+            ],
           );
         },
       ),
@@ -190,7 +198,7 @@ class _DailySaleReportState extends State<Currentsale> {
           const SizedBox(height: 10),
           FloatingActionButton(
             heroTag: "subtract",
-            backgroundColor: Colors.red,
+            // backgroundColor: Colors.red,
             onPressed: () => _showSaleDialog(isSubtract: true),
             child: const Icon(Icons.remove),
           ),
@@ -206,10 +214,14 @@ class _DailySaleReportState extends State<Currentsale> {
       context: context,
       builder: (context) => AlertDialog(
         title: Text(isSubtract ? "Subtract Sale" : "Add Sale"),
-        content: TextField(
-          controller: amountController,
-          keyboardType: TextInputType.number,
-          decoration: const InputDecoration(labelText: "Enter amount"),
+        content: SizedBox(
+          width: 500,
+          height: 100,
+          child: TextField(
+            controller: amountController,
+            keyboardType: TextInputType.number,
+            decoration: const InputDecoration(labelText: "Enter amount"),
+          ),
         ),
         actions: [
           TextButton(
@@ -243,7 +255,9 @@ class _DailySaleReportState extends State<Currentsale> {
         width: double.infinity,
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10), color: Colors.green),
+          borderRadius: BorderRadius.circular(10),
+          //color: Colors.green
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

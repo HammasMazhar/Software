@@ -411,8 +411,6 @@ class _StoreMedicineInvoiceState extends State<StoreMedicineInvoice> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Store Medicine Invoice'),
-        centerTitle: true,
-        backgroundColor: const Color(0xFF008000),
         actions: [
           IconButton(
             tooltip: "Export to Excel",

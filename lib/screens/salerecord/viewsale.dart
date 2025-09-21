@@ -21,7 +21,6 @@ class _ViewsaleState extends State<Viewsale> {
     viewsalesBox = Hive.box('viewsalesBox');
   }
 
-  // Add a manual sale
   void _addManualSale() {
     showDialog(
       context: context,
@@ -31,47 +30,50 @@ class _ViewsaleState extends State<Viewsale> {
             borderRadius: BorderRadius.zero,
           ),
           title: const Text("Add Manual Sale"),
-          content: DynamicForm(
-            fieldNames: [
-              "Customer Name",
-              "Medicine Name",
-              "Subtotal",
-              "Discount"
-            ],
-            onSubmit: (values) {
-              final subtotal =
-                  double.tryParse(values["Subtotal"] ?? "0") ?? 0.0;
-              final discount =
-                  double.tryParse(values["Discount"] ?? "0") ?? 0.0;
-              final grandTotal = subtotal - discount;
-
-              final bill = {
-                "billNo": viewsalesBox.length + 1,
-                "customer": values["Customer Name"]!.isEmpty
-                    ? "Random"
-                    : values["Customer Name"],
-                "date": DateFormat("yyyy-MM-dd").format(DateTime.now()),
-                "time": DateFormat("HH:mm").format(DateTime.now()),
-
-                //  "date": DateFormat("yyyy-MM-dd HH:mm").format(DateTime.now()),
-                "items": [
-                  {
-                    "name": values["Medicine Name"]!.isEmpty
-                        ? "Manual Sale"
-                        : values["Medicine Name"],
-                    "qty": 1,
-                    "price": grandTotal,
-                  }
+          content: SizedBox(
+              width: 500,
+              height: 320,
+              child: DynamicForm(
+                fieldNames: [
+                  "Customer Name",
+                  "Medicine Name",
+                  "Subtotal",
+                  "Discount"
                 ],
-                "subtotal": subtotal,
-                "discount": discount,
-                "grandTotal": grandTotal,
-              };
+                onSubmit: (values) {
+                  final subtotal =
+                      double.tryParse(values["Subtotal"] ?? "0") ?? 0.0;
+                  final discount =
+                      double.tryParse(values["Discount"] ?? "0") ?? 0.0;
+                  final grandTotal = subtotal - discount;
 
-              viewsalesBox.add(bill);
-              setState(() {});
-            },
-          ),
+                  final bill = {
+                    "billNo": viewsalesBox.length + 1,
+                    "customer": values["Customer Name"]!.isEmpty
+                        ? "Random"
+                        : values["Customer Name"],
+                    "date": DateFormat("yyyy-MM-dd").format(DateTime.now()),
+                    "time": DateFormat("HH:mm").format(DateTime.now()),
+
+                    //  "date": DateFormat("yyyy-MM-dd HH:mm").format(DateTime.now()),
+                    "items": [
+                      {
+                        "name": values["Medicine Name"]!.isEmpty
+                            ? "Manual Sale"
+                            : values["Medicine Name"],
+                        "qty": 1,
+                        "price": grandTotal,
+                      }
+                    ],
+                    "subtotal": subtotal,
+                    "discount": discount,
+                    "grandTotal": grandTotal,
+                  };
+
+                  viewsalesBox.add(bill);
+                  setState(() {});
+                },
+              )),
         );
       },
     );
@@ -83,48 +85,51 @@ class _ViewsaleState extends State<Viewsale> {
       builder: (ctx) {
         return AlertDialog(
           title: const Text("Edit Sale"),
-          content: DynamicForm(
-            fieldNames: [
-              "Customer Name",
-              "Medicine Name",
-              "Subtotal",
-              "Discount"
-            ],
-            initialValues: {
-              "Customer Name": bill["customer"] ?? "",
-              "Medicine Name": bill["items"][0]["name"] ?? "",
-              "Subtotal": bill["subtotal"].toString(),
-              "Discount": bill["discount"].toString(),
-            },
-            onSubmit: (values) {
-              final subtotal =
-                  double.tryParse(values["Subtotal"] ?? "0") ?? 0.0;
-              final discount =
-                  double.tryParse(values["Discount"] ?? "0") ?? 0.0;
-              final grandTotal = subtotal - discount;
-
-              final updatedBill = {
-                // "billNo": bill["billNo"],
-                "customer": values["Customer Name"],
-                // "date": bill["date"], "time": bill["time"],
-                "date": DateFormat("yyyy-MM-dd").format(DateTime.now()),
-                "time": DateFormat("HH:mm").format(DateTime.now()),
-                "items": [
-                  {
-                    "name": values["Medicine Name"],
-                    "qty": 1,
-                    "price": grandTotal,
-                  }
+          content: SizedBox(
+              width: 500,
+              height: 320,
+              child: DynamicForm(
+                fieldNames: [
+                  "Customer Name",
+                  "Medicine Name",
+                  "Subtotal",
+                  "Discount"
                 ],
-                "subtotal": subtotal,
-                "discount": discount,
-                "grandTotal": grandTotal,
-              };
+                initialValues: {
+                  "Customer Name": bill["customer"] ?? "",
+                  "Medicine Name": bill["items"][0]["name"] ?? "",
+                  "Subtotal": bill["subtotal"].toString(),
+                  "Discount": bill["discount"].toString(),
+                },
+                onSubmit: (values) {
+                  final subtotal =
+                      double.tryParse(values["Subtotal"] ?? "0") ?? 0.0;
+                  final discount =
+                      double.tryParse(values["Discount"] ?? "0") ?? 0.0;
+                  final grandTotal = subtotal - discount;
 
-              viewsalesBox.putAt(index, updatedBill);
-              setState(() {});
-            },
-          ),
+                  final updatedBill = {
+                    // "billNo": bill["billNo"],
+                    "customer": values["Customer Name"],
+                    // "date": bill["date"], "time": bill["time"],
+                    "date": DateFormat("yyyy-MM-dd").format(DateTime.now()),
+                    "time": DateFormat("HH:mm").format(DateTime.now()),
+                    "items": [
+                      {
+                        "name": values["Medicine Name"],
+                        "qty": 1,
+                        "price": grandTotal,
+                      }
+                    ],
+                    "subtotal": subtotal,
+                    "discount": discount,
+                    "grandTotal": grandTotal,
+                  };
+
+                  viewsalesBox.putAt(index, updatedBill);
+                  setState(() {});
+                },
+              )),
         );
       },
     );
@@ -164,7 +169,7 @@ class _ViewsaleState extends State<Viewsale> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("View Sales"),
-        backgroundColor: const Color(0xFF008000),
+        // backgroundColor: const Color(0xFF008000),
         actions: [
           IconButton(
             tooltip: "Export to Excel",
@@ -239,7 +244,7 @@ class _ViewsaleState extends State<Viewsale> {
                       final index = searchFiltered[i]["index"];
 
                       return Card(
-                        color: const Color(0xFF008000),
+                        // color: const Color(0xFF008000),
                         margin: const EdgeInsets.all(8),
                         child: ExpansionTile(
                           title: Text(

@@ -5,19 +5,6 @@ import 'package:software/screens/dashboard.dart';
 import 'package:software/screens/invoice.dart';
 import 'package:software/services/hive_service.dart';
 
-// import 'package:software/distributor/schedule.dart';
-// import 'package:software/invoice.dart';
-// import 'package:software/distributor/alldistributor.dart';
-// import 'package:software/purchaserecord/currentpurchase.dart';
-// import 'package:software/purchaserecord/addpurchase.dart';
-// import 'package:software/reports.dart';
-// import 'package:software/salerecord/currentsale.dart';
-// import 'package:software/salerecord/viewsale.dart';
-// import 'package:software/screens/bussines_details.dart';
-// import 'package:software/stocks/availablestocks.dart';
-// import 'package:software/stocks/expiredstocks.dart';
-// import 'package:software/stocks/requiredstocks.dart';
-
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -42,7 +29,7 @@ class PharmacySoftware extends StatelessWidget {
         colorSchemeSeed: Colors.green,
       ),
       debugShowCheckedModeBanner: false,
-      home: SignIn(),
+      home: Dashboard(),
     );
   }
 }
