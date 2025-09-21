@@ -288,9 +288,9 @@
 // }
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:software/reuseable_widget/dynamic_form.dart';
+import 'package:software/screens/global_widgets/dynamic_form.dart';
 import 'package:hive/hive.dart';
-import 'package:software/reuseable_widget/excel.dart';
+import 'package:software/screens/global_widgets/excel.dart';
 
 class StoreMedicineInvoice extends StatefulWidget {
   const StoreMedicineInvoice({super.key});

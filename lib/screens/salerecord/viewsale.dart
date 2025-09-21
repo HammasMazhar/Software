@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:intl/intl.dart';
-import 'package:software/reuseable_widget/excel.dart';
-import '../reuseable_widget/dynamic_form.dart';
+import 'package:software/screens/global_widgets/excel.dart';
+import '../global_widgets/dynamic_form.dart';
 
 class Viewsale extends StatefulWidget {
   const Viewsale({super.key});

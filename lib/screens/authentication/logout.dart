@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
-import 'package:software/authentication/signin.dart';
+import 'package:software/screens/authentication/signin.dart';
 
 class LogoutDialog {
   static void show(BuildContext context) {
@@ -21,7 +21,7 @@ class LogoutDialog {
               Hive.box('sessionBox').put('isLoggedIn', false);
               //    Hive.box('sessionBox').delete('currentUserEmail');
               Navigator.push(
-                  context, MaterialPageRoute(builder: (context) => Signin()));
+                  context, MaterialPageRoute(builder: (context) => SignIn()));
             },
             child: const Text('Yes'),
           ),

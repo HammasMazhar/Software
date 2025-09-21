@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:software/reuseable_widget/dynamic_form.dart';
+import 'package:software/screens/global_widgets/dynamic_form.dart';
 import 'package:excel/excel.dart';
 import 'package:file_picker/file_picker.dart';
 

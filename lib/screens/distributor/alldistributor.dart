@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:software/reuseable_widget/excel.dart';
-import 'package:software/reuseable_widget/dynamic_form.dart';
+import 'package:software/screens/global_widgets/excel.dart';
+import 'package:software/screens/global_widgets/dynamic_form.dart';
 
 class Alldistributor extends StatefulWidget {
   const Alldistributor({super.key});

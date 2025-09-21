@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:software/reuseable_widget/dynamic_form.dart';
-import 'package:software/reuseable_widget/excel.dart';
+import 'package:software/screens/global_widgets/dynamic_form.dart';
+import 'package:software/screens/global_widgets/excel.dart';
 
-class Nonpaidstock extends StatefulWidget {
-  const Nonpaidstock({super.key});
+class Requiredstocks extends StatefulWidget {
+  const Requiredstocks({super.key});
 
   @override
-  State<Nonpaidstock> createState() => _NonpaidstockState();
+  State<Requiredstocks> createState() => _RequiredstocksState();
 }
 
-class _NonpaidstockState extends State<Nonpaidstock> {
+class _RequiredstocksState extends State<Requiredstocks> {
 //  static const String routeName = '/requiredstocks';
-  late Box nonpaidBox;
+  late Box requiredBox;
 
   final List<String> fieldNames = [
     "Name",
@@ -23,7 +23,7 @@ class _NonpaidstockState extends State<Nonpaidstock> {
   @override
   void initState() {
     super.initState();
-    nonpaidBox = Hive.box('nonpaidBox');
+    requiredBox = Hive.box('requiredBox');
   }
 
   void _addStocks() {
@@ -31,11 +31,11 @@ class _NonpaidstockState extends State<Nonpaidstock> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text("Add Non Paid Stock"),
+          title: const Text("Add Required Stock"),
           content: DynamicForm(
             fieldNames: fieldNames,
             onSubmit: (values) {
-              nonpaidBox.add({
+              requiredBox.add({
                 "Name": values["Name"] ?? "",
                 "Quantity": int.tryParse(values["Quantity"] ?? "0") ?? 0,
                 "Distributor": values["Distributor"] ?? "",
@@ -52,7 +52,7 @@ class _NonpaidstockState extends State<Nonpaidstock> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text("Edit Non Paid Stock"),
+          title: const Text("Edit Required Stock"),
           content: DynamicForm(
             fieldNames: fieldNames,
             initialValues: {
@@ -61,7 +61,7 @@ class _NonpaidstockState extends State<Nonpaidstock> {
               "Distributor": stock["Distributor"] ?? "",
             },
             onSubmit: (values) {
-              nonpaidBox.putAt(index, {
+              requiredBox.putAt(index, {
                 "Name": values["Name"] ?? "",
                 "Quantity": int.tryParse(values["Quantity"] ?? "0") ?? 0,
                 "Distributor": values["Distributor"] ?? "",
@@ -79,8 +79,7 @@ class _NonpaidstockState extends State<Nonpaidstock> {
       builder: (context) {
         return AlertDialog(
           title: const Text("Are you sure?"),
-          content:
-              const Text("This Non paid stock will be deleted permanently."),
+          content: const Text("This stock will be deleted permanently."),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
@@ -88,10 +87,10 @@ class _NonpaidstockState extends State<Nonpaidstock> {
             ),
             ElevatedButton(
               onPressed: () {
-                nonpaidBox.deleteAt(index);
+                requiredBox.deleteAt(index);
                 Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Non Paid Stock deleted')),
+                  const SnackBar(content: Text('Stock deleted')),
                 );
               },
               child: const Text("Delete"),
@@ -106,7 +105,7 @@ class _NonpaidstockState extends State<Nonpaidstock> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          title: const Text("Non Paid Stocks"),
+          title: const Text("Required Stocks"),
           backgroundColor: Colors.green,
           centerTitle: true,
           actions: [
@@ -115,13 +114,12 @@ class _NonpaidstockState extends State<Nonpaidstock> {
               onPressed: () {
                 ExcelHelper.exportToExcel(
                   context: context,
-                  boxes: [nonpaidBox],
-                  sheetName: " Non Paid Stocks ",
-                  fileName: " Non Paid Stocks",
+                  boxes: [requiredBox],
+                  sheetName: " Required Stocks ",
+                  fileName: " Required Stocks",
                   headers: [
                     "Name",
                     "Quantity",
-                    "Price",
                     "Distributor",
                   ],
                 );
@@ -133,7 +131,7 @@ class _NonpaidstockState extends State<Nonpaidstock> {
               onPressed: () {
                 ExcelHelper.importFromExcel(
                   context: context,
-                  boxes: [nonpaidBox],
+                  boxes: [requiredBox],
                   headers: [
                     "Name",
                     "Quantity",
@@ -155,7 +153,7 @@ class _NonpaidstockState extends State<Nonpaidstock> {
             const SizedBox(height: 10),
             Expanded(
               child: ValueListenableBuilder(
-                valueListenable: nonpaidBox.listenable(),
+                valueListenable: requiredBox.listenable(),
                 builder: (context, Box box, _) {
                   if (box.isEmpty) {
                     return const Center(child: Text("No Required Stocks"));

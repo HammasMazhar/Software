@@ -1,23 +1,23 @@
 import 'package:flutter/material.dart';
-import 'package:software/authentication/logout.dart';
-import 'package:software/distributor/schedule.dart';
-import 'package:software/reuseable_widget/password.dart';
+import 'package:software/screens/authentication/logout.dart';
+import 'package:software/screens/distributor/schedule.dart';
+import 'package:software/screens/global_widgets/password.dart';
 import 'package:software/screens/medicine_invoices.dart';
-import 'package:software/purchaserecord/currentpurchase.dart';
+import 'package:software/screens/purchase_records/currentpurchase.dart';
 import 'package:software/screens/reports.dart';
-import 'package:software/salerecord/currentsale.dart';
-import 'package:software/salerecord/viewsale.dart';
+import 'package:software/screens/salerecord/currentsale.dart';
+import 'package:software/screens/salerecord/viewsale.dart';
 import 'package:software/screens/bussines_details.dart';
-import 'package:software/distributor/alldistributor.dart';
+import 'package:software/screens/distributor/alldistributor.dart';
 import 'package:software/screens/invoice.dart';
 import 'package:software/screens/discount.dart';
-import 'package:software/stocks/availablestocks.dart';
-import 'package:software/stocks/expiredstocks.dart';
-import 'package:software/purchaserecord/addpurchase.dart';
-import 'package:software/stocks/nonretailstockesprices.dart';
-import 'package:software/stocks/requiredstocks.dart';
-import 'package:software/screens/tasks_to_do.dart';
-import 'package:software/stocks/nonpaidstock.dart';
+import 'package:software/screens/stocks/availablestocks.dart';
+import 'package:software/screens/stocks/expiredstocks.dart';
+import 'package:software/screens/purchase_records/addpurchase.dart';
+import 'package:software/screens/stocks/nonretailstockesprices.dart';
+import 'package:software/screens/stocks/requiredstocks.dart';
+import 'package:software/screens/task_todo/tasks_to_do.dart';
+import 'package:software/screens/stocks/nonpaidstock.dart';
 
 class Dashboard extends StatefulWidget {
   const Dashboard({super.key});
