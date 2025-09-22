@@ -19,6 +19,32 @@ import 'package:software/screens/stocks/requiredstocks.dart';
 import 'package:software/screens/task_todo/tasks_to_do.dart';
 import 'package:software/screens/stocks/nonpaidstock.dart';
 
+enum SelectedPage {
+  none,
+  // Sale Record
+  viewSales,
+  currentSale,
+  // Purchase Record
+  addPurchases,
+  currentPurchase,
+  // Stocks
+  availableStock,
+  expiredStock,
+  requiredStocks,
+  nonPaidStocks,
+  nonRetailStocks,
+  // Distributor
+  allDistributors,
+  bookingSchedule,
+  // Others
+  invoice,
+  reports,
+  tasks,
+  discount,
+  businessDetails,
+  medicinesInvoice
+}
+
 class Dashboard extends StatefulWidget {
   const Dashboard({super.key});
 
@@ -29,32 +55,115 @@ class Dashboard extends StatefulWidget {
 class _DashboardState extends State<Dashboard> {
 //  static const String routeName = '/dashboard';
   TextEditingController searchController = TextEditingController();
-  bool _isHoveredViewSale = false;
-  bool _isHoveredCurrentSale = false;
-  bool _isHoveredViewPurchase = false;
-  bool _isHoveredAddPurchase = false;
-  bool _isHoveredAvailableStock = false;
-  bool _isHoveredExpiredStock = false;
-  bool _isHoveredRequiredStocks = false;
-  bool __isHoveredNonPaidStocks = false;
-  bool _isHoveredAllDistributor = false;
-  bool _isHoveredinvoiced = false;
-  bool _isHovereddetailed = false;
-  bool __isHoveredschedule = false;
-  bool __isHoveredReport = false;
-  bool __isHoveredTasks = false;
-  bool _isHoveredMedicineInvoiced = false;
-  bool _isDiscount = false;
+  SelectedPage _selectedPage = SelectedPage.none;
+  Widget _buildPageContent() {
+    switch (_selectedPage) {
+      case SelectedPage.viewSales:
+        return const Viewsale();
+      case SelectedPage.currentSale:
+        return const Currentsale();
+      case SelectedPage.addPurchases:
+        return const PurchaseScreen();
+      case SelectedPage.currentPurchase:
+        return const Currentpurchase();
+      case SelectedPage.availableStock:
+        return const Availablestocks();
+      case SelectedPage.expiredStock:
+        return const Expiredstocks();
+      case SelectedPage.requiredStocks:
+        return const Requiredstocks();
+      case SelectedPage.nonPaidStocks:
+        return const Nonpaidstock();
+      case SelectedPage.nonRetailStocks:
+        return const NonRetailStockPrices();
+      case SelectedPage.allDistributors:
+        return const Alldistributor();
+      case SelectedPage.bookingSchedule:
+        return const SchedulePage();
+      case SelectedPage.invoice:
+        return InvoiceScreen();
+      case SelectedPage.reports:
+        return const Reports();
+      case SelectedPage.tasks:
+        return const TasksToDo();
+      case SelectedPage.discount:
+        return const Discount();
+      case SelectedPage.businessDetails:
+        return const BussinesDetails();
+      case SelectedPage.medicinesInvoice:
+        return const StoreMedicineInvoice();
+      case SelectedPage.none:
+      default:
+        return const Center(
+          child: Text(
+            'Welcome to Dashboard',
+            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          ),
+        );
+    }
+  }
+
   bool _isHoveredlogout = false;
-  bool _isHoveredNonRetailStock = false;
+
+  Widget _buildExpansionTile({
+    required String title,
+    required IconData icon,
+    required List<Map<String, dynamic>> items,
+  }) {
+    return ExpansionTile(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+      ),
+      collapsedShape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(0),
+      ),
+      title: Text(title),
+      leading: Icon(icon),
+      children: items.map((item) {
+        bool isHovered = false;
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return _buildHoverableTile(
+              isHovered: isHovered,
+              onHover: (value) => setState(() => isHovered = value),
+              title: item['title'],
+              onTap: item['onTap'],
+              icon: item['icon'],
+            );
+          },
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _buildHoverableTile({
+    required bool isHovered,
+    required Function(bool) onHover,
+    required String title,
+    required VoidCallback onTap,
+    IconData? icon,
+  }) {
+    return MouseRegion(
+      onEnter: (_) => onHover(true),
+      onExit: (_) => onHover(false),
+      child: ColoredBox(
+        color: isHovered ? Theme.of(context).hoverColor : Colors.transparent,
+        child: ListTile(
+          title: Text(title),
+          leading: icon != null ? Icon(icon) : null,
+          onTap: onTap,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      //backgroundColor: Color(0xFF008000),
       body: Row(
         children: [
           Container(
-            width: 220,
+            width: 300,
             color: Colors.white,
             child: ListView(
               children: [
@@ -65,14 +174,12 @@ class _DashboardState extends State<Dashboard> {
                       Icon(
                         Icons.local_pharmacy,
                         size: 50,
-                        // color: Color(0xFF008000),
                       ),
                       Text(
                         "Al-Shifa ",
                         style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
-                          //color: Colors.black,
                         ),
                       ),
                       Text(
@@ -80,493 +187,187 @@ class _DashboardState extends State<Dashboard> {
                         style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
-                          // color: Colors.black,
                         ),
                       ),
                     ],
                   ),
                 ),
-
-                //color: _isHovered ? Color(0xFF008000) : Colors.white,
-                ExpansionTile(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  collapsedShape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                  title: const Text("Sale Record"),
-                  leading: Icon(Icons.point_of_sale),
-                  children: [
-                    MouseRegion(
-                      onEnter: (_) => setState(() {
-                        _isHoveredViewSale = true;
-                      }),
-                      onExit: (_) => setState(() {
-                        _isHoveredViewSale = false;
-                      }),
-                      child: Container(
-                        color: _isHoveredViewSale
-                            ? Color(0xFF008000)
-                            : Colors.white,
-                        child: ListTile(
-                          // tileColor:
-                          //     _isHovered ? Color(0xFF008000) : Colors.white,
-                          title: const Text("View Sales"),
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const Viewsale(),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: 5),
-                    MouseRegion(
-                      onEnter: (_) => setState(() {
-                        _isHoveredCurrentSale = true;
-                      }),
-                      onExit: (_) => setState(() {
-                        _isHoveredCurrentSale = false;
-                      }),
-                      child: Container(
-                        color: _isHoveredCurrentSale
-                            ? Color(0xFF008000)
-                            : Colors.white,
-                        child: ListTile(
-                            title: const Text("Current Sale"),
-                            onTap: () async {
-                              bool canOpen = await checkPassword(context);
-
-                              if (canOpen && context.mounted) {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) =>
-                                          const Currentsale()),
-                                );
-                              }
-                            }),
-                      ),
-                    ),
+                _buildExpansionTile(
+                  title: "Sale Record",
+                  icon: Icons.point_of_sale,
+                  items: [
+                    {
+                      'title': "View Sales",
+                      'onTap': () => setState(
+                          () => _selectedPage = SelectedPage.viewSales),
+                    },
+                    {
+                      'title': "Current Sale",
+                      'onTap': () async {
+                        bool canOpen = await checkPassword(context);
+                        if (canOpen && context.mounted) {
+                          setState(
+                              () => _selectedPage = SelectedPage.currentSale);
+                        }
+                      },
+                    },
                   ],
                 ),
-
-                ExpansionTile(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  collapsedShape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                  title: const Text("Purchase Record"),
-                  leading: Icon(Icons.shopping_bag),
-                  children: [
-                    MouseRegion(
-                      onEnter: (_) => setState(() {
-                        _isHoveredViewPurchase = true;
-                      }),
-                      onExit: (_) => setState(() {
-                        _isHoveredViewPurchase = false;
-                      }),
-                      child: Container(
-                        color: _isHoveredViewPurchase
-                            ? Color(0xFF008000)
-                            : Colors.white,
-                        child: ListTile(
-                          title: const Text("Add Purchases"),
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const PurchaseScreen(),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: 5),
-                    MouseRegion(
-                      onEnter: (_) => setState(() {
-                        _isHoveredAddPurchase = true;
-                      }),
-                      onExit: (_) => setState(() {
-                        _isHoveredAddPurchase = false;
-                      }),
-                      child: Container(
-                        color: _isHoveredAddPurchase
-                            ? Color(0xFF008000)
-                            : Colors.white,
-                        child: ListTile(
-                            title: const Text("Current Purchase"),
-                            onTap: () async {
-                              bool canOpen = await checkPassword(context);
-                              if (canOpen && context.mounted) {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) =>
-                                          const Currentpurchase()),
-                                );
-                              }
-                            }),
-                      ),
-                    ),
+                _buildExpansionTile(
+                  title: "Purchase Record",
+                  icon: Icons.shopping_bag,
+                  items: [
+                    {
+                      'title': "Add Purchases",
+                      'onTap': () => setState(
+                          () => _selectedPage = SelectedPage.addPurchases),
+                    },
+                    {
+                      'title': "Current Purchase",
+                      'onTap': () async {
+                        bool canOpen = await checkPassword(context);
+                        if (canOpen && context.mounted) {
+                          setState(() =>
+                              _selectedPage = SelectedPage.currentPurchase);
+                        }
+                      },
+                    },
                   ],
                 ),
-                ExpansionTile(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  collapsedShape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                  title: const Text("Stocks"),
-                  leading: Icon(Icons.inventory_rounded),
-                  children: [
-                    MouseRegion(
-                      onEnter: (_) => setState(() {
-                        _isHoveredAvailableStock = true;
-                      }),
-                      onExit: (_) => setState(() {
-                        _isHoveredAvailableStock = false;
-                      }),
-                      child: Container(
-                        color: _isHoveredAvailableStock
-                            ? Color(0xFF008000)
-                            : Colors.white,
-                        child: ListTile(
-                          title: const Text("Available Stock"),
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const Availablestocks(),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: 5),
-                    MouseRegion(
-                      onEnter: (_) => setState(() {
-                        _isHoveredExpiredStock = true;
-                      }),
-                      onExit: (_) => setState(() {
-                        _isHoveredExpiredStock = false;
-                      }),
-                      child: Container(
-                        color: _isHoveredExpiredStock
-                            ? Color(0xFF008000)
-                            : Colors.white,
-                        child: ListTile(
-                          title: const Text("Expired Stock"),
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const Expiredstocks(),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: 5),
-                    MouseRegion(
-                      onEnter: (_) => setState(() {
-                        _isHoveredRequiredStocks = true;
-                      }),
-                      onExit: (_) => setState(() {
-                        _isHoveredRequiredStocks = false;
-                      }),
-                      child: Container(
-                        color: _isHoveredRequiredStocks
-                            ? Color(0xFF008000)
-                            : Colors.white,
-                        child: ListTile(
-                          title: const Text("Required Stocks"),
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const Requiredstocks(),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: 5),
-                    MouseRegion(
-                      onEnter: (_) => setState(() {
-                        __isHoveredNonPaidStocks = true;
-                      }),
-                      onExit: (_) => setState(() {
-                        __isHoveredNonPaidStocks = false;
-                      }),
-                      child: Container(
-                        color: __isHoveredNonPaidStocks
-                            ? Color(0xFF008000)
-                            : Colors.white,
-                        child: ListTile(
-                          title: const Text("Non Paid Stocks"),
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const Nonpaidstock(),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: 5),
-                    MouseRegion(
-                      onEnter: (_) => setState(() {
-                        _isHoveredNonRetailStock = true;
-                      }),
-                      onExit: (_) => setState(() {
-                        _isHoveredNonRetailStock = false;
-                      }),
-                      child: Container(
-                          color: _isHoveredNonRetailStock
-                              ? Color(0xFF008000)
-                              : Colors.white,
-                          child: ListTile(
-                              title: const Text("Non Retail Stocks"),
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) =>
-                                          const NonRetailStockPrices()),
-                                );
-                              })),
-                    ),
+                _buildExpansionTile(
+                  title: "Stocks",
+                  icon: Icons.inventory_rounded,
+                  items: [
+                    {
+                      'title': "Available Stock",
+                      'onTap': () => setState(
+                          () => _selectedPage = SelectedPage.availableStock),
+                    },
+                    {
+                      'title': "Expired Stock",
+                      'onTap': () => setState(
+                          () => _selectedPage = SelectedPage.expiredStock),
+                    },
+                    {
+                      'title': "Required Stocks",
+                      'onTap': () => setState(
+                          () => _selectedPage = SelectedPage.requiredStocks),
+                    },
+                    {
+                      'title': "Non Paid Stocks",
+                      'onTap': () => setState(
+                          () => _selectedPage = SelectedPage.nonPaidStocks),
+                    },
+                    {
+                      'title': "Non Retail Stocks",
+                      'onTap': () => setState(
+                          () => _selectedPage = SelectedPage.nonRetailStocks),
+                    },
                   ],
                 ),
-                ExpansionTile(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  collapsedShape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                  title: const Text("Distributor"),
-                  leading: Icon(Icons.local_shipping),
-                  children: [
-                    MouseRegion(
-                      onEnter: (_) => setState(() {
-                        _isHoveredAllDistributor = true;
-                      }),
-                      onExit: (_) => setState(() {
-                        _isHoveredAllDistributor = false;
-                      }),
-                      child: Container(
-                        color: _isHoveredAllDistributor
-                            ? Color(0xFF008000)
-                            : Colors.white,
-                        child: ListTile(
-                          title: const Text("All Distributors"),
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const Alldistributor(),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: 5),
-                    MouseRegion(
-                      onEnter: (_) => setState(() {
-                        __isHoveredschedule = true;
-                      }),
-                      onExit: (_) => setState(() {
-                        __isHoveredschedule = false;
-                      }),
-                      child: Container(
-                        color: __isHoveredschedule
-                            ? Color(0xFF008000)
-                            : Colors.white,
-                        child: ListTile(
-                          // tileColor:
-                          title: const Text("Booking Schedule"),
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const SchedulePage(),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                    ),
+                _buildExpansionTile(
+                  title: "Distributor",
+                  icon: Icons.local_shipping,
+                  items: [
+                    {
+                      'title': "All Distributors",
+                      'onTap': () => setState(
+                          () => _selectedPage = SelectedPage.allDistributors),
+                    },
+                    {
+                      'title': "Booking Schedule",
+                      'onTap': () => setState(
+                          () => _selectedPage = SelectedPage.bookingSchedule),
+                    },
                   ],
                 ),
-                MouseRegion(
-                  onEnter: (_) => setState(() {
-                    _isHoveredinvoiced = true;
-                  }),
-                  onExit: (_) => setState(() {
-                    _isHoveredinvoiced = false;
-                  }),
-                  child: Container(
-                    color:
-                        _isHoveredinvoiced ? Color(0xFF008000) : Colors.white,
-                    child: ListTile(
-                      title: const Text("Invoice"),
-                      leading: Icon(Icons.receipt_long),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => InvoiceScreen(),
-                          ),
-                        );
+                StatefulBuilder(
+                  builder: (context, setState) {
+                    bool isHovered = false;
+                    return _buildHoverableTile(
+                      isHovered: isHovered,
+                      onHover: (value) => setState(() => isHovered = value),
+                      title: "Invoice",
+                      icon: Icons.receipt_long,
+                      onTap: () => this
+                          .setState(() => _selectedPage = SelectedPage.invoice),
+                    );
+                  },
+                ),
+                StatefulBuilder(
+                  builder: (context, setState) {
+                    bool isHovered = false;
+                    return _buildHoverableTile(
+                      isHovered: isHovered,
+                      onHover: (value) => setState(() => isHovered = value),
+                      title: "Reports",
+                      icon: Icons.info_outline,
+                      onTap: () async {
+                        bool canOpen = await checkPassword(context);
+                        if (!mounted) return;
+                        if (canOpen && context.mounted) {
+                          this.setState(
+                              () => _selectedPage = SelectedPage.reports);
+                        }
                       },
-                    ),
-                  ),
+                    );
+                  },
                 ),
-
-                MouseRegion(
-                  onEnter: (_) => setState(() {
-                    __isHoveredReport = true;
-                  }),
-                  onExit: (_) => setState(() {
-                    __isHoveredReport = false;
-                  }),
-                  child: Container(
-                    color: __isHoveredReport ? Color(0xFF008000) : Colors.white,
-                    child: ListTile(
-                        title: const Text("Reports"),
-                        leading: Icon(Icons.info_outline),
-                        onTap: () async {
-                          bool canOpen = await checkPassword(context);
-                          if (!mounted) return;
-
-                          if (canOpen && context.mounted) {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => const Reports()),
-                            );
-                          }
-                        }),
-                  ),
+                StatefulBuilder(
+                  builder: (context, setState) {
+                    bool isHovered = false;
+                    return _buildHoverableTile(
+                      isHovered: isHovered,
+                      onHover: (value) => setState(() => isHovered = value),
+                      title: "Tasks",
+                      icon: Icons.assignment,
+                      onTap: () => this
+                          .setState(() => _selectedPage = SelectedPage.tasks),
+                    );
+                  },
                 ),
-                MouseRegion(
-                  onEnter: (_) => setState(() {
-                    __isHoveredTasks = true;
-                  }),
-                  onExit: (_) => setState(() {
-                    __isHoveredTasks = false;
-                  }),
-                  child: Container(
-                    color: __isHoveredTasks ? Color(0xFF008000) : Colors.white,
-                    child: ListTile(
-                      title: const Text("Tasks"),
-                      leading: Icon(Icons.assignment),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const TasksToDo(),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
+                StatefulBuilder(
+                  builder: (context, setState) {
+                    bool isHovered = false;
+                    return _buildHoverableTile(
+                      isHovered: isHovered,
+                      onHover: (value) => setState(() => isHovered = value),
+                      title: "Discount",
+                      icon: Icons.money_off_csred_rounded,
+                      onTap: () => this.setState(
+                          () => _selectedPage = SelectedPage.discount),
+                    );
+                  },
                 ),
-                MouseRegion(
-                  onEnter: (_) => setState(() {
-                    _isDiscount = true;
-                  }),
-                  onExit: (_) => setState(() {
-                    _isDiscount = false;
-                  }),
-                  child: Container(
-                    color: _isDiscount ? Color(0xFF008000) : Colors.white,
-                    child: ListTile(
-                      title: const Text("Discount"),
-                      leading: Icon(Icons.money_off_csred_rounded),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const Discount(),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
+                StatefulBuilder(
+                  builder: (context, setState) {
+                    bool isHovered = false;
+                    return _buildHoverableTile(
+                      isHovered: isHovered,
+                      onHover: (value) => setState(() => isHovered = value),
+                      title: "Bussiness Details",
+                      icon: Icons.info_rounded,
+                      onTap: () => this.setState(
+                          () => _selectedPage = SelectedPage.businessDetails),
+                    );
+                  },
+                ),
+                StatefulBuilder(
+                  builder: (context, setState) {
+                    bool isHovered = false;
+                    return _buildHoverableTile(
+                      isHovered: isHovered,
+                      onHover: (value) => setState(() => isHovered = value),
+                      title: "Medicines Invoice",
+                      icon: Icons.numbers,
+                      onTap: () => this.setState(
+                          () => _selectedPage = SelectedPage.medicinesInvoice),
+                    );
+                  },
                 ),
                 MouseRegion(
-                  onEnter: (_) => setState(() {
-                    _isHovereddetailed = true;
-                  }),
-                  onExit: (_) => setState(() {
-                    _isHovereddetailed = false;
-                  }),
-                  child: Container(
-                    color:
-                        _isHovereddetailed ? Color(0xFF008000) : Colors.white,
-                    child: ListTile(
-                      title: const Text("Bussiness Details"),
-                      leading: Icon(Icons.info_rounded),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const BussinesDetails(),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                ),
-                MouseRegion(
-                  onEnter: (_) => setState(() {
-                    _isHoveredMedicineInvoiced = true;
-                  }),
-                  onExit: (_) => setState(() {
-                    _isHoveredMedicineInvoiced = false;
-                  }),
-                  child: Container(
-                    color: _isHoveredMedicineInvoiced
-                        ? Color(0xFF008000)
-                        : Colors.white,
-                    child: ListTile(
-                      title: const Text("Medicines Invoice"),
-                      leading: Icon(Icons.numbers),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const StoreMedicineInvoice(),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                ),
-                MouseRegion(
-                  onEnter: (_) => setState(() {
-                    _isHoveredlogout = true;
-                  }),
-                  onExit: (_) => setState(() {
-                    _isHoveredlogout = false;
-                  }),
+                  onEnter: (_) => setState(() => _isHoveredlogout = true),
+                  onExit: (_) => setState(() => _isHoveredlogout = false),
                   child: ElevatedButton(
                     onPressed: () {},
                     style: ElevatedButton.styleFrom(
@@ -587,80 +388,51 @@ class _DashboardState extends State<Dashboard> {
               ],
             ),
           ),
+          // Dashboard area here
           Expanded(
             child: Column(
               children: [
+                // Header with profile
                 Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Padding(
-                      padding: const EdgeInsets.only(left: 150, top: 60),
+                      padding: const EdgeInsets.all(20),
                       child: CircleAvatar(
                         backgroundImage: AssetImage('asset/Hammas.jpg'),
                         radius: 60,
                       ),
                     ),
                     const SizedBox(width: 10),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
-                        Padding(
-                          padding: EdgeInsets.only(top: 80),
-                          child: Text(
+                    Expanded(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: const [
+                          Text(
                             'Hi Hammas,',
                             style: TextStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                        ),
-                        Padding(
-                          padding: EdgeInsets.only(top: 10),
-                          child: Text(
+                          Text(
                             'Welcome Back!',
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                    // const SizedBox(width: 200),
-                    // Padding(
-                    //   padding: const EdgeInsets.only(top: 80, left: 50),
-                    //   child: SizedBox(
-                    //     width: 300,
-                    //     height: 50,
-                    //     child: TextFormField(
-                    //       controller: searchController,
-                    //       onChanged: (value) {},
-                    //       style: const TextStyle(
-                    //         fontSize: 18,
-                    //         color: Colors.black,
-                    //       ),
-                    //       decoration: InputDecoration(
-                    //         hintText: 'Search Medicine',
-                    //         hintStyle: const TextStyle(
-                    //           fontSize: 18,
-                    //           color: Colors.black,
-                    //           fontWeight: FontWeight.w500,
-                    //         ),
-                    //         prefixIcon: const Icon(
-                    //           Icons.search,
-                    //           color: Colors.red,
-                    //         ),
-                    //         border: OutlineInputBorder(
-                    //           borderRadius: BorderRadius.circular(10),
-                    //           borderSide: BorderSide.none,
-                    //         ),
-                    //         filled: true,
-                    //         fillColor: Colors.white,
-                    //       ),
-                    //     ),
-                    //   ),
-                    // ),
                   ],
+                ),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: _buildPageContent(),
+                  ),
                 ),
               ],
             ),
