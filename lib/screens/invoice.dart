@@ -333,10 +333,6 @@ class _InvoiceScreenState extends State<InvoiceScreen>
           suffixIcon: isMedicineField && filteredMedicines.isNotEmpty
               ? const Icon(Icons.keyboard_arrow_down)
               : null,
-          helperText: isMedicineField
-              ? '↑↓: Navigate, Enter: Select (then enter Qty), Esc: Close'
-              : '← → : Move between fields',
-          helperMaxLines: 2,
         ),
         onChanged: onChanged,
         onSubmitted: (_) {

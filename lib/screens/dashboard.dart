@@ -7,7 +7,6 @@ import 'package:software/screens/purchase_records/currentpurchase.dart';
 import 'package:software/screens/reports.dart';
 import 'package:software/screens/salerecord/currentsale.dart';
 import 'package:software/screens/salerecord/viewsale.dart';
-import 'package:software/screens/bussines_details.dart';
 import 'package:software/screens/distributor/alldistributor.dart';
 import 'package:software/screens/invoice.dart';
 import 'package:software/screens/discount.dart';
@@ -88,8 +87,6 @@ class _DashboardState extends State<Dashboard> {
         return const TasksToDo();
       case SelectedPage.discount:
         return const Discount();
-      case SelectedPage.businessDetails:
-        return const BussinesDetails();
       case SelectedPage.medicinesInvoice:
         return const StoreMedicineInvoice();
       case SelectedPage.none:
@@ -146,8 +143,11 @@ class _DashboardState extends State<Dashboard> {
     return MouseRegion(
       onEnter: (_) => onHover(true),
       onExit: (_) => onHover(false),
-      child: ColoredBox(
-        color: isHovered ? Theme.of(context).hoverColor : Colors.transparent,
+      child: Material(
+        // ignore: deprecated_member_use
+        color: isHovered
+            ? Theme.of(context).colorScheme.primary.withOpacity(0.06)
+            : Colors.transparent,
         child: ListTile(
           title: Text(title),
           leading: icon != null ? Icon(icon) : null,
@@ -163,7 +163,7 @@ class _DashboardState extends State<Dashboard> {
       body: Row(
         children: [
           Container(
-            width: 300,
+            width: 260,
             color: Colors.white,
             child: ListView(
               children: [
@@ -345,10 +345,10 @@ class _DashboardState extends State<Dashboard> {
                     return _buildHoverableTile(
                       isHovered: isHovered,
                       onHover: (value) => setState(() => isHovered = value),
-                      title: "Bussiness Details",
-                      icon: Icons.info_rounded,
+                      title: "Medicines Invoice",
+                      icon: Icons.numbers,
                       onTap: () => this.setState(
-                          () => _selectedPage = SelectedPage.businessDetails),
+                          () => _selectedPage = SelectedPage.medicinesInvoice),
                     );
                   },
                 ),
@@ -358,33 +358,32 @@ class _DashboardState extends State<Dashboard> {
                     return _buildHoverableTile(
                       isHovered: isHovered,
                       onHover: (value) => setState(() => isHovered = value),
-                      title: "Medicines Invoice",
-                      icon: Icons.numbers,
-                      onTap: () => this.setState(
-                          () => _selectedPage = SelectedPage.medicinesInvoice),
+                      title: "Log Out",
+                      icon: Icons.logout,
+                      onTap: () => LogoutDialog.show(context),
                     );
                   },
                 ),
-                MouseRegion(
-                  onEnter: (_) => setState(() => _isHoveredlogout = true),
-                  onExit: (_) => setState(() => _isHoveredlogout = false),
-                  child: ElevatedButton(
-                    onPressed: () {},
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor:
-                          _isHoveredlogout ? Color(0xFF008000) : Colors.white,
-                      elevation: 0,
-                      shadowColor: Colors.transparent,
-                    ),
-                    child: ListTile(
-                      title: const Text("Log Out"),
-                      leading: Icon(Icons.logout),
-                      onTap: () {
-                        LogoutDialog.show(context);
-                      },
-                    ),
-                  ),
-                ),
+                // MouseRegion(
+                //   onEnter: (_) => setState(() => _isHoveredlogout = true),
+                //   onExit: (_) => setState(() => _isHoveredlogout = false),
+                //   child: ElevatedButton(
+                //     onPressed: () {},
+                //     style: ElevatedButton.styleFrom(
+                //       backgroundColor:
+                //           _isHoveredlogout ? Color(0xFF008000) : Colors.white,
+                //       elevation: 0,
+                //       shadowColor: Colors.transparent,
+                //     ),
+                //     child: ListTile(
+                //       title: const Text("Log Out"),
+                //       leading: Icon(Icons.logout),
+                //       onTap: () {
+                //         LogoutDialog.show(context);
+                //       },
+                //     ),
+                //   ),
+                // ),
               ],
             ),
           ),
@@ -429,10 +428,7 @@ class _DashboardState extends State<Dashboard> {
                   ],
                 ),
                 Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: _buildPageContent(),
-                  ),
+                  child: _buildPageContent(),
                 ),
               ],
             ),
