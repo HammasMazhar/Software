@@ -152,6 +152,8 @@ class _InvoiceScreenState extends State<InvoiceScreen>
   }
 
   void _clearInputs() {
+    totalController
+        .clear(); //////////////////////////////////////////////////////
     nameController.clear();
     qtyController.clear();
     priceController.clear();
@@ -459,8 +461,8 @@ class _InvoiceScreenState extends State<InvoiceScreen>
         appBar: AppBar(
           title: Text('Invoice - $activeBill'),
           centerTitle: true,
-          backgroundColor: const Color(0xFF2E7D32),
-          foregroundColor: Colors.white,
+          //   backgroundColor: const Color(0xFF2E7D32),
+          // foregroundColor: Colors.white,
           elevation: 2,
           actions: [
             PopupMenuButton<String>(
@@ -545,7 +547,7 @@ class _InvoiceScreenState extends State<InvoiceScreen>
                                 .titleLarge
                                 ?.copyWith(
                                   fontWeight: FontWeight.bold,
-                                  color: Colors.green.shade700,
+                                  //  color: Colors.green.shade700,
                                 ),
                           ),
                           const SizedBox(height: 16),
@@ -675,6 +677,7 @@ class _InvoiceScreenState extends State<InvoiceScreen>
                                   controller: totalController,
                                   readOnly: true,
                                   decoration: const InputDecoration(
+                                    ////////////////////////////////////
                                     isDense: true,
                                     border: OutlineInputBorder(),
                                     contentPadding: EdgeInsets.symmetric(
@@ -688,13 +691,13 @@ class _InvoiceScreenState extends State<InvoiceScreen>
                               const SizedBox(width: 12),
                               Column(
                                 children: [
-                                  ElevatedButton.icon(
+                                  OutlinedButton.icon(
                                     onPressed: addMedicine,
                                     icon: const Icon(Icons.add, size: 18),
                                     label: const Text('Add'),
                                     style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.green,
-                                      foregroundColor: Colors.white,
+                                      // backgroundColor: Colors.green,
+                                      // foregroundColor: Colors.white,
                                       shape: RoundedRectangleBorder(
                                           borderRadius:
                                               BorderRadius.circular(8)),
@@ -709,10 +712,10 @@ class _InvoiceScreenState extends State<InvoiceScreen>
                                         priceFocus.requestFocus();
                                       });
                                     },
-                                    icon: const Icon(Icons.edit, size: 16),
+                                    icon: const Icon(Icons.edit, size: 18),
                                     label: const Text('Manual'),
                                     style: OutlinedButton.styleFrom(
-                                      foregroundColor: Colors.blue,
+                                      //   foregroundColor: Colors.blue,
                                       shape: RoundedRectangleBorder(
                                           borderRadius:
                                               BorderRadius.circular(8)),
@@ -725,38 +728,14 @@ class _InvoiceScreenState extends State<InvoiceScreen>
                           const SizedBox(height: 16),
                           Row(
                             children: [
-                              Checkbox(
-                                value: isManualRate,
-                                onChanged: (value) {
-                                  setState(() {
-                                    isManualRate = value ?? false;
-                                    if (!isManualRate) {
-                                      priceController.clear();
-                                    }
-                                  });
-                                },
-                              ),
-                              const Text('Manual Rate Entry'),
-                              const Spacer(),
-                              if (currentPerTabletRate > 0 && !isManualRate)
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 12, vertical: 4),
-                                  decoration: BoxDecoration(
-                                    color: Colors.green.shade50,
-                                    borderRadius: BorderRadius.circular(16),
-                                    border: Border.all(
-                                        color: Colors.green.shade200),
-                                  ),
-                                  child: Text(
-                                    'Auto Rate: Rs. ${currentPerTabletRate.toStringAsFixed(2)} per unit',
-                                    style: TextStyle(
-                                      color: Colors.green.shade700,
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
+                              Text(
+                                'Auto Rate: Rs. ${currentPerTabletRate.toStringAsFixed(2)} per unit',
+                                style: TextStyle(
+                                  //  color: Colors.green.shade700,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w500,
                                 ),
+                              ),
                             ],
                           ),
                         ],
@@ -783,7 +762,7 @@ class _InvoiceScreenState extends State<InvoiceScreen>
                                 .titleLarge
                                 ?.copyWith(
                                   fontWeight: FontWeight.bold,
-                                  color: Colors.green.shade700,
+                                  //color: Colors.green.shade700,
                                 ),
                           ),
                         ),
@@ -793,8 +772,8 @@ class _InvoiceScreenState extends State<InvoiceScreen>
                             child: SingleChildScrollView(
                               child: DataTable(
                                 columnSpacing: 16,
-                                headingRowColor: MaterialStateProperty.all(
-                                    Colors.grey.shade100),
+                                // headingRowColor: MaterialStateProperty.all(
+                                //     Colors.grey.shade100),
                                 columns: const [
                                   DataColumn(
                                       label: Text('S.No',
@@ -854,7 +833,7 @@ class _InvoiceScreenState extends State<InvoiceScreen>
                                               children: [
                                                 IconButton(
                                                   icon: const Icon(Icons.edit,
-                                                      color: Colors.blue,
+                                                      // color: Colors.blue,
                                                       size: 18),
                                                   onPressed: () {
                                                     setState(() {
@@ -950,8 +929,8 @@ class _InvoiceScreenState extends State<InvoiceScreen>
                                           CrossAxisAlignment.start,
                                       children: [
                                         Text('Items: ${cart.length}'),
-                                        Text(
-                                            'Total Qty: ${cart.fold<int>(0, (sum, item) => sum + (item['qty'] as int))}'),
+                                        // Text(
+                                        //     'Total Qty: ${cart.fold<int>(0, (sum, item) => sum + (item['qty'] as int))}'),
                                       ],
                                     ),
                                     Column(
@@ -1016,9 +995,9 @@ class _InvoiceScreenState extends State<InvoiceScreen>
                               icon: const Icon(Icons.print),
                               label: const Text('Save & Print Invoice'),
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.green,
-                                foregroundColor: Colors.white,
-                              ),
+                                  // backgroundColor: Colors.green,
+                                  // foregroundColor: Colors.white,
+                                  ),
                             ),
                             const SizedBox(width: 16),
                             ElevatedButton.icon(
@@ -1044,9 +1023,9 @@ class _InvoiceScreenState extends State<InvoiceScreen>
                               icon: const Icon(Icons.clear),
                               label: const Text('Clear All'),
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.orange,
-                                foregroundColor: Colors.white,
-                              ),
+                                  // backgroundColor: Colors.orange,
+                                  // foregroundColor: Colors.white,
+                                  ),
                             ),
                           ],
                         ),

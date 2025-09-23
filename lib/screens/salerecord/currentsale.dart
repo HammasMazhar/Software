@@ -139,7 +139,7 @@ class _DailySaleReportState extends State<Currentsale> {
           'Daily Sale Report',
           style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         ),
-        centerTitle: true,
+        // centerTitle: true,
         //   backgroundColor: const Color(0xFF008000),
         actions: [
           IconButton(

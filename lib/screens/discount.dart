@@ -100,9 +100,19 @@ class _DiscountState extends State<Discount> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Discounts'),
+        title: const Text('Discounts',
+            style: TextStyle(
+              fontSize: 23,
+              fontWeight: FontWeight.bold,
+            )),
         //backgroundColor: const Color(0xFF008000),
         actions: [
+          ElevatedButton(
+              onPressed: _showDiscountDialog,
+              child: Text('+Add Discount',
+                  style: TextStyle(
+                    color: Colors.black,
+                  ))),
           IconButton(
             tooltip: "Export to Excel",
             onPressed: () {
@@ -182,18 +192,17 @@ class _DiscountState extends State<Discount> {
                   itemBuilder: (context, index) {
                     final discount = discounts[index];
                     return Card(
-                      //    color: const Color(0Xff008000),
                       margin: const EdgeInsets.all(8),
                       child: ListTile(
                         title: Text(
                           discount['Customer Name'].toString(),
-                          style: const TextStyle(color: Colors.white),
+                          //   style: const TextStyle(color: Colors.white),
                         ),
                         subtitle: Text(
                           'Amount: Rs.${discount['Amount']}\n'
                           'Date: ${discount['Date']}\n'
                           'Time: ${discount['Time']}',
-                          style: const TextStyle(color: Colors.white70),
+                          // style: const TextStyle(color: Colors.white70),
                         ),
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,
@@ -226,10 +235,10 @@ class _DiscountState extends State<Discount> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _showDiscountDialog(),
-        child: const Icon(Icons.add),
-      ),
+      // floatingActionButton: FloatingActionButton(
+      //   onPressed: () => _showDiscountDialog(),
+      //   child: const Icon(Icons.add),
+      // ),
     );
   }
 }

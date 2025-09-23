@@ -168,9 +168,19 @@ class _ViewsaleState extends State<Viewsale> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("View Sales"),
+        title: const Text(
+          "View Sales",
+          style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+        ),
         // backgroundColor: const Color(0xFF008000),
         actions: [
+          ElevatedButton(
+            onPressed: _addManualSale,
+            child: Text(
+              '+Add Sale Manual',
+              style: TextStyle(color: Colors.black),
+            ),
+          ),
           IconButton(
             tooltip: "Export to Excel",
             onPressed: () {
@@ -248,7 +258,9 @@ class _ViewsaleState extends State<Viewsale> {
                         margin: const EdgeInsets.all(8),
                         child: ExpansionTile(
                           title: Text(
-                              "Bill: ${bill['billNo']} - Rs. ${bill['grandTotal']}"),
+                            "Bill: ${bill['billNo']} - Rs. ${bill['grandTotal']}",
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
                           subtitle: Text(
                               "Customer: ${bill['customer']} | Date: ${bill['date']} | Time: ${bill['time']}"),
                           children: [
@@ -295,10 +307,10 @@ class _ViewsaleState extends State<Viewsale> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _addManualSale,
-        child: const Icon(Icons.add),
-      ),
+      // floatingActionButton: FloatingActionButton(
+      //   onPressed: _addManualSale,
+      //   child: const Icon(Icons.add),
+      // ),
     );
   }
 }

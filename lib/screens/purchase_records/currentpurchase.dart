@@ -185,7 +185,7 @@ class _DailyPurchaseReportState extends State<Currentpurchase> {
           'Daily Purchase Report',
           style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         ),
-        centerTitle: true,
+        // centerTitle: true,
         // backgroundColor: Color(0xFF008000),
         actions: [
           IconButton(

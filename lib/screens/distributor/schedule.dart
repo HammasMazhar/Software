@@ -1,247 +1,3 @@
-// import 'package:flutter/material.dart';
-// import 'package:hive_flutter/hive_flutter.dart';
-// import 'package:software/screens/global_widgets/dynamic_form.dart';
-// import 'package:software/screens/global_widgets/excel.dart';
-
-// class SchedulePage extends StatefulWidget {
-//   const SchedulePage({super.key});
-
-//   @override
-//   State<SchedulePage> createState() => _SchedulePageState();
-// }
-
-// class _SchedulePageState extends State<SchedulePage> {
-//   late Box scheduleBox;
-//   String searchQuery = "";
-
-//   @override
-//   void initState() {
-//     super.initState();
-//     scheduleBox = Hive.box('scheduleBox');
-//   }
-
-//   void _addSchedule() {
-//     final fieldNames = ["Distributor Name", "Day"];
-
-//     showDialog(
-//       context: context,
-//       builder: (context) {
-//         return AlertDialog(
-//           title: const Text('Add Schedule'),
-//           content: SizedBox(
-//               width: 500,
-//               height: 400,
-//               child: DynamicForm(
-//                 fieldNames: fieldNames,
-//                 onSubmit: (values) {
-//                   final newSchedule = {
-//                     'name': values["Distributor Name"] ?? "",
-//                     'day': values["Day"] ?? "",
-//                   };
-//                   scheduleBox.add(newSchedule);
-//                 },
-//               )),
-//         );
-//       },
-//     );
-//   }
-
-//   void _editSchedule(int key, Map schedule) {
-//     final fieldNames = ["Distributor Name", "Day"];
-
-//     showDialog(
-//       context: context,
-//       builder: (context) {
-//         return AlertDialog(
-//           title: const Text("Edit Schedule"),
-//           content: SizedBox(
-//               width: 500,
-//               height: 400,
-//               child: DynamicForm(
-//                 fieldNames: fieldNames,
-//                 initialValues: {
-//                   "Distributor Name": schedule['name'] ?? "",
-//                   "Day": schedule['day'] ?? "",
-//                 },
-//                 onSubmit: (values) {
-//                   final updatedSchedule = {
-//                     'name': values["Distributor Name"] ?? "",
-//                     'day': values["Day"] ?? "",
-//                   };
-//                   scheduleBox.put(key, updatedSchedule);
-//                 },
-//               )),
-//         );
-//       },
-//     );
-//   }
-
-//   void _deleteSchedule(int key) {
-//     showDialog(
-//       context: context,
-//       builder: (context) {
-//         return AlertDialog(
-//           title: const Text("Are you sure?"),
-//           content: const Text("This schedule will be deleted permanently."),
-//           actions: [
-//             TextButton(
-//               onPressed: () => Navigator.pop(context),
-//               child: const Text("Cancel"),
-//             ),
-//             ElevatedButton(
-//               onPressed: () {
-//                 scheduleBox.delete(key);
-//                 Navigator.pop(context);
-//               },
-//               child: const Text("Delete"),
-//             ),
-//           ],
-//         );
-//       },
-//     );
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(title: const Text("Booking Schedule"), actions: [
-//         IconButton(
-//           tooltip: "Export to Excel",
-//           onPressed: () {
-//             ExcelHelper.exportToExcel(
-//               context: context,
-//               boxes: [scheduleBox],
-//               sheetName: " Booking Schedule",
-//               fileName: " Booking Schedule",
-//               headers: [
-//                 "name",
-//                 "day",
-//               ],
-//             );
-//           },
-//           icon: const Icon(Icons.file_upload),
-//         ),
-//         IconButton(
-//           tooltip: "Import from Excel",
-//           onPressed: () {
-//             ExcelHelper.importFromExcel(
-//               context: context,
-//               boxes: [scheduleBox],
-//               headers: [
-//                 "name",
-//                 "day",
-//               ],
-//             );
-//           },
-//           icon: const Icon(Icons.file_download),
-//         ),
-//       ]),
-//       body: Padding(
-//         padding: const EdgeInsets.all(16.0),
-//         child: Column(
-//           children: [
-//             TextField(
-//               decoration: InputDecoration(
-//                 labelText: "Search Distributor or Day",
-//                 prefixIcon: const Icon(Icons.search),
-//                 border: OutlineInputBorder(
-//                   borderRadius: BorderRadius.circular(10),
-//                 ),
-//               ),
-//               onChanged: (value) {
-//                 setState(() {
-//                   searchQuery = value.toLowerCase();
-//                 });
-//               },
-//             ),
-//             const SizedBox(height: 10),
-//             ElevatedButton(
-//               onPressed: _addSchedule,
-//               child: const Text("+ Add Schedule"),
-//             ),
-//             const SizedBox(height: 10),
-//             Expanded(
-//               child: SingleChildScrollView(
-//                 scrollDirection: Axis.vertical,
-//                 child: SingleChildScrollView(
-//                   scrollDirection: Axis.horizontal,
-//                   child: ValueListenableBuilder(
-//                     valueListenable: scheduleBox.listenable(),
-//                     builder: (context, Box box, _) {
-//                       if (box.isEmpty) {
-//                         return const Padding(
-//                           padding: EdgeInsets.all(16.0),
-//                           child: Center(child: Text("No schedules available")),
-//                         );
-//                       }
-
-//                       final filteredKeys = box.keys.where((key) {
-//                         final data = box.get(key);
-
-//                         if (data is! Map) return false;
-
-//                         final schedule = Map<String, dynamic>.from(data);
-
-//                         final name =
-//                             (schedule['name'] ?? "").toString().toLowerCase();
-//                         final day =
-//                             (schedule['day'] ?? "").toString().toLowerCase();
-
-//                         return name.contains(searchQuery) ||
-//                             day.contains(searchQuery);
-//                       }).toList();
-
-//                       if (filteredKeys.isEmpty) {
-//                         return const Padding(
-//                           padding: EdgeInsets.all(16.0),
-//                           child: Center(child: Text("No matching schedules")),
-//                         );
-//                       }
-
-//                       return DataTable(
-//                         columns: const [
-//                           DataColumn(label: Text("Distributor Name")),
-//                           DataColumn(label: Text("Day")),
-//                           DataColumn(label: Text("Actions")),
-//                         ],
-//                         rows: filteredKeys.map((key) {
-//                           final schedule =
-//                               Map<String, dynamic>.from(box.get(key));
-
-//                           return DataRow(
-//                             cells: [
-//                               DataCell(Text(schedule['name'] ?? "")),
-//                               DataCell(Text(schedule['day'] ?? "")),
-//                               DataCell(
-//                                 Row(
-//                                   children: [
-//                                     IconButton(
-//                                       icon: const Icon(Icons.edit,
-//                                           color: Colors.blue),
-//                                       onPressed: () =>
-//                                           _editSchedule(key, schedule),
-//                                     ),
-//                                     IconButton(
-//                                       icon: const Icon(Icons.delete,
-//                                           color: Colors.red),
-//                                       onPressed: () => _deleteSchedule(key),
-//                                     ),
-//                                   ],
-//                                 ),
-//                               ),
-//                             ],
-//                           );
-//                         }).toList(),
-//                       );
-//                     },
-//                   ),
-//                 ),
-//               ),
-//             ),
-//           ],
-//         ),
-//       ),
-//     );
 //   }
 // }
 import 'dart:io';
@@ -267,6 +23,40 @@ class _SchedulePageState extends State<SchedulePage> {
   void initState() {
     super.initState();
     scheduleBox = Hive.box('scheduleBox');
+  }
+
+  Future<void> _deleteAllStocks() async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text("Confirm Delete"),
+        content: const Text(
+            "Are you sure you want to delete All Schedule? This action cannot be undone."),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text("Cancel"),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text("Delete All"),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      await scheduleBox.clear();
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("All stocks deleted successfully!")),
+      );
+      setState(() {}); // refresh UI
+    }
   }
 
   // Export to Excel
@@ -432,9 +222,20 @@ class _SchedulePageState extends State<SchedulePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Booking Schedule"),
-        centerTitle: true,
+        title: const Text("Booking Schedule",
+            style: TextStyle(
+              fontSize: 23,
+              fontWeight: FontWeight.bold,
+            )),
+        // centerTitle: true,
         actions: [
+          ElevatedButton(
+            onPressed: _addSchedule,
+            child: const Text("+ Add Shcedule",
+                style: TextStyle(
+                  color: Colors.black,
+                )),
+          ),
           IconButton(
             icon: const Icon(Icons.file_upload),
             tooltip: "Export to Excel",
@@ -444,6 +245,11 @@ class _SchedulePageState extends State<SchedulePage> {
             tooltip: "Import from Excel",
             icon: const Icon(Icons.file_download),
             onPressed: _importFromExcel,
+          ),
+          IconButton(
+            tooltip: " Delete all Schedule",
+            icon: const Icon(Icons.delete),
+            onPressed: _deleteAllStocks,
           ),
         ],
       ),
@@ -467,10 +273,10 @@ class _SchedulePageState extends State<SchedulePage> {
               },
             ),
           ),
-          ElevatedButton(
-            onPressed: _addSchedule,
-            child: const Text("+ Add Schedule"),
-          ),
+          // ElevatedButton(
+          //   onPressed: _addSchedule,
+          //   child: const Text("+ Add Schedule"),
+          // ),
 
           // Paginated DataTable
           Expanded(
@@ -508,13 +314,45 @@ class _SchedulePageState extends State<SchedulePage> {
                 return LayoutBuilder(
                   builder: (context, constraints) {
                     final totalWidth = constraints.maxWidth;
-                    final fractions = [0.4, 0.4, 0.2];
+                    final fractions = [0.35, 0.4, 0.2];
                     final colWidths =
                         fractions.map((f) => totalWidth * f).toList();
 
                     return SingleChildScrollView(
                       child: PaginatedDataTable(
-                        header: const Text("Booking Schedule"),
+                        //header: const Text("Booking Schedule"),
+                        header: Row(
+                          mainAxisAlignment:
+                              MainAxisAlignment.spaceBetween, // spread out
+                          children: [
+                            const Text("Booking Schedule",
+                                style: TextStyle(
+                                  fontSize: 23,
+                                  fontWeight: FontWeight.bold,
+                                )),
+                            Row(
+                              children: [
+                                ElevatedButton(
+                                  onPressed: _addSchedule,
+                                  child: const Text("+ Add Schedule",
+                                      style: TextStyle(
+                                        color: Colors.black,
+                                      )),
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.file_upload),
+                                  tooltip: "Export to Excel",
+                                  onPressed: _exportToExcel,
+                                ),
+                                IconButton(
+                                  tooltip: "Import from Excel",
+                                  icon: const Icon(Icons.file_download),
+                                  onPressed: _importFromExcel,
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
                         rowsPerPage: _rowsPerPage,
                         availableRowsPerPage: const [10, 20, 50, 100],
                         onRowsPerPageChanged: (value) {

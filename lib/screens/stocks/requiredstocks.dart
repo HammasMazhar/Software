@@ -236,6 +236,40 @@ class Requiredstocks extends StatefulWidget {
 }
 
 class _RequiredstocksState extends State<Requiredstocks> {
+  Future<void> _deleteAllStocks() async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text("Confirm Delete"),
+        content: const Text(
+            "Are you sure you want to delete ALL stocks? This action cannot be undone."),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text("Cancel"),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text("Delete All"),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      await requiredBox.clear();
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("All stocks deleted successfully!")),
+      );
+      setState(() {}); // refresh UI
+    }
+  }
+
   late Box requiredBox;
   String searchQuery = "";
   int _rowsPerPage = 20; // default rows per page
@@ -460,9 +494,20 @@ class _RequiredstocksState extends State<Requiredstocks> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Required Stocks"),
-        centerTitle: true,
+        title: const Text("Required Stocks",
+            style: TextStyle(
+              fontSize: 23,
+              fontWeight: FontWeight.bold,
+            )),
+        // centerTitle: true,
         actions: [
+          ElevatedButton(
+            onPressed: _addStocks,
+            child: const Text("+ Add Required Stock",
+                style: TextStyle(
+                  color: Colors.black,
+                )),
+          ),
           IconButton(
             icon: const Icon(Icons.file_upload),
             tooltip: "Export to Excel",
@@ -472,6 +517,11 @@ class _RequiredstocksState extends State<Requiredstocks> {
             tooltip: "Import from Excel",
             icon: const Icon(Icons.file_download),
             onPressed: _importFromExcel,
+          ),
+          IconButton(
+            tooltip: " Delete all stocks",
+            icon: const Icon(Icons.delete),
+            onPressed: _deleteAllStocks,
           ),
         ],
       ),
@@ -496,10 +546,10 @@ class _RequiredstocksState extends State<Requiredstocks> {
             ),
           ),
 
-          ElevatedButton(
-            onPressed: _addStocks,
-            child: const Text("+ Add Required Stock"),
-          ),
+          // ElevatedButton(
+          //   onPressed: _addStocks,
+          //   child: const Text("+ Add Required Stock"),
+          // ),
 
           // Paginated DataTable
           Expanded(
@@ -555,13 +605,44 @@ class _RequiredstocksState extends State<Requiredstocks> {
                 return LayoutBuilder(
                   builder: (context, constraints) {
                     final totalWidth = constraints.maxWidth;
-                    final fractions = [0.35, 0.2, 0.25, 0.2];
+                    final fractions = [0.30, 0.2, 0.20, 0.2];
                     final colWidths =
                         fractions.map((f) => totalWidth * f).toList();
 
                     return SingleChildScrollView(
                       child: PaginatedDataTable(
-                        header: const Text("Required Stocks"),
+                        // header: Row(
+                        //   mainAxisAlignment:
+                        //       MainAxisAlignment.spaceBetween, // spread out
+                        //   children: [
+                        //     Text("Required Stocks",
+                        //         style: TextStyle(
+                        //           fontSize: 23,
+                        //           fontWeight: FontWeight.bold,
+                        //         )),
+                        //     Row(
+                        //       children: [
+                        //         ElevatedButton(
+                        //           onPressed: _addStocks,
+                        //           child: const Text("+ Required Stocks",
+                        //               style: TextStyle(
+                        //                 color: Colors.black,
+                        //               )),
+                        //         ),
+                        //         IconButton(
+                        //           icon: const Icon(Icons.file_upload),
+                        //           tooltip: "Export to Excel",
+                        //           onPressed: _exportToExcel,
+                        //         ),
+                        //         IconButton(
+                        //           tooltip: "Import from Excel",
+                        //           icon: const Icon(Icons.file_download),
+                        //           onPressed: _importFromExcel,
+                        //         ),
+                        //       ],
+                        //     ),
+                        //   ],
+                        // ),
                         rowsPerPage: _rowsPerPage,
                         availableRowsPerPage: const [10, 20, 50, 100],
                         onRowsPerPageChanged: (value) {

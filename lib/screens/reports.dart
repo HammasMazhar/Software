@@ -201,28 +201,34 @@ class _ReportsState extends State<Reports> {
           //   end: Alignment.bottomCenter,
           // ),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(weekRange,
-                style:
-                    const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 10),
-            Text("Total Purchases: Rs. ${purchase.toStringAsFixed(2)}",
-                style: const TextStyle(fontSize: 16)),
-            Text("Total Sales: Rs. ${sales.toStringAsFixed(2)}",
-                style: const TextStyle(fontSize: 16)),
-            const SizedBox(height: 10),
-            Text(
-              isProfit
-                  ? "Profit: Rs. ${profit.toStringAsFixed(2)}"
-                  : "Loss: Rs. ${profit.abs().toStringAsFixed(2)}",
-              style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: isProfit ? Colors.green[800] : Colors.red[800]),
-            ),
-          ],
+        child: SizedBox(
+          height: 125,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(weekRange,
+                  style: const TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 10),
+              Text("Total Purchases: Rs. ${purchase.toStringAsFixed(2)}",
+                  style: const TextStyle(fontSize: 16)),
+              Text("Total Sales: Rs. ${sales.toStringAsFixed(2)}",
+                  style: const TextStyle(fontSize: 16)),
+              const SizedBox(height: 10),
+              Text(
+                isProfit
+                    ? "Profit: Rs. ${profit.toStringAsFixed(2)}"
+                    : "Loss: Rs. ${profit.abs().toStringAsFixed(2)}",
+                style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: isProfit ? Colors.green[800] : Colors.red[800]),
+              ),
+              Divider(
+                height: 5,
+              ),
+            ],
+          ),
         ),
       ),
     );

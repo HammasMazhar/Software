@@ -3,6 +3,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:software/screens/global_widgets/dynamic_form.dart';
 import 'package:software/screens/global_widgets/excel.dart';
+import 'package:win32/win32.dart';
 
 class PurchaseScreen extends StatefulWidget {
   const PurchaseScreen({super.key});
@@ -106,48 +107,61 @@ class _PurchaseScreenState extends State<PurchaseScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Purchases"), actions: [
-        IconButton(
-          tooltip: "Export to Excel",
-          onPressed: () {
-            ExcelHelper.exportToExcel(
-              context: context,
-              boxes: [addPurchaseBox],
-              sheetName: "Add Purchase",
-              fileName: "Add Purchase",
-              headers: [
-                "Distributor",
-                "Product Name",
-                "Invoice Number",
-                "Expiri",
-                "date",
-                "day",
-                "Amount",
-              ],
-            );
-          },
-          icon: const Icon(Icons.file_upload),
-        ),
-        IconButton(
-          tooltip: "Import from Excel",
-          onPressed: () {
-            ExcelHelper.importFromExcel(
-              context: context,
-              boxes: [addPurchaseBox],
-              headers: [
-                "Distributor",
-                "Product Name",
-                "Invoice Number",
-                "Expiri",
-                "date",
-                "day",
-                "Amount",
-              ],
-            );
-          },
-          icon: const Icon(Icons.file_download),
-        ),
-      ]),
+      appBar: AppBar(
+          title: Text(
+            "Purchases",
+            style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+          ),
+          actions: [
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: ElevatedButton.icon(
+                icon: const Icon(Icons.add),
+                label: const Text("Add Purchase"),
+                onPressed: () => _addPurchaseDialog(),
+              ),
+            ),
+            IconButton(
+              tooltip: "Export to Excel",
+              onPressed: () {
+                ExcelHelper.exportToExcel(
+                  context: context,
+                  boxes: [addPurchaseBox],
+                  sheetName: "Add Purchase",
+                  fileName: "Add Purchase",
+                  headers: [
+                    "Distributor",
+                    "Product Name",
+                    "Invoice Number",
+                    "Expiri",
+                    "date",
+                    "day",
+                    "Amount",
+                  ],
+                );
+              },
+              icon: const Icon(Icons.file_upload),
+            ),
+            IconButton(
+              tooltip: "Import from Excel",
+              onPressed: () {
+                ExcelHelper.importFromExcel(
+                  context: context,
+                  boxes: [addPurchaseBox],
+                  headers: [
+                    "Distributor",
+                    "Product Name",
+                    "Invoice Number",
+                    "Expiri",
+                    "date",
+                    "day",
+                    "Amount",
+                  ],
+                );
+              },
+              icon: const Icon(Icons.file_download),
+            ),
+          ]),
       body: Column(
         children: [
           Padding(
@@ -165,15 +179,15 @@ class _PurchaseScreenState extends State<PurchaseScreen> {
               },
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: ElevatedButton.icon(
-              icon: const Icon(Icons.add),
-              label: const Text("Add Purchase"),
-              onPressed: () => _addPurchaseDialog(),
-            ),
-          ),
-          const Divider(),
+          // Padding(
+          //   padding: const EdgeInsets.all(16),
+          //   child: ElevatedButton.icon(
+          //     icon: const Icon(Icons.add),
+          //     label: const Text("Add Purchase"),
+          //     onPressed: () => _addPurchaseDialog(),
+          //   ),
+          // ),
+          //const Divider(),
           Expanded(
             child: ValueListenableBuilder(
               valueListenable: addPurchaseBox.listenable(),

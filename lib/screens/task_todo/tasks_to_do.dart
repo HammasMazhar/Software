@@ -49,7 +49,11 @@ class _TasksToDoState extends State<TasksToDo> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Tasks To-Do'),
+        title: const Text('Tasks To-Do',
+            style: TextStyle(
+              fontSize: 23,
+              fontWeight: FontWeight.bold,
+            )),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -74,7 +78,10 @@ class _TasksToDoState extends State<TasksToDo> {
                       _addTask(task);
                     }
                   },
-                  child: const Text('Add'),
+                  child: const Text('+Add',
+                      style: TextStyle(
+                        color: Colors.black,
+                      )),
                 ),
               ],
             ),

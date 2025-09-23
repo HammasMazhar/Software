@@ -13,18 +13,47 @@ class Alldistributor extends StatefulWidget {
 class _AlldistributorState extends State<Alldistributor> {
   final distributorBox = Hive.box('distributorBox');
   String searchQuery = "";
+  int _rowsPerPage = 10;
 
   final List<String> distributorFields = [
     "Name",
-    "ManagerName",
-    "ManagerNumber",
-    "BookingMan1",
-    "BookingMan1Number",
-    "BookingMan2",
-    "BookingMan2Number",
-    "SupplyManName",
-    "SupplyManNumber"
+    "Manager",
+    "Booking Man",
+    "Supply Man",
   ];
+  Future<void> _deleteAllStocks() async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text("Confirm Delete"),
+        content: const Text(
+            "Are you sure you want to delete ALL Distributor? This action cannot be undone."),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text("Cancel"),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text("Delete All"),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      await distributorBox.clear();
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("All stocks deleted successfully!")),
+      );
+      setState(() {}); // refresh UI
+    }
+  }
 
   void _addDistributor() {
     showDialog(
@@ -33,14 +62,16 @@ class _AlldistributorState extends State<Alldistributor> {
         return AlertDialog(
           title: const Text("Add Distributor"),
           content: SizedBox(
-              width: 500,
-              height: 400,
-              child: DynamicForm(
-                fieldNames: distributorFields,
-                onSubmit: (values) {
-                  distributorBox.add(values);
-                },
-              )),
+            width: 400,
+            height: 300,
+            child: DynamicForm(
+              fieldNames: distributorFields,
+              onSubmit: (values) {
+                distributorBox.add(values);
+                Navigator.pop(context); // close dialog after submit
+              },
+            ),
+          ),
         );
       },
     );
@@ -53,15 +84,17 @@ class _AlldistributorState extends State<Alldistributor> {
         return AlertDialog(
           title: const Text("Edit Distributor"),
           content: SizedBox(
-              width: 500,
-              height: 400,
-              child: DynamicForm(
-                fieldNames: distributorFields,
-                initialValues: Map<String, String>.from(distributor),
-                onSubmit: (values) {
-                  distributorBox.put(key, values);
-                },
-              )),
+            width: 400,
+            height: 300,
+            child: DynamicForm(
+              fieldNames: distributorFields,
+              initialValues: Map<String, String>.from(distributor),
+              onSubmit: (values) {
+                distributorBox.put(key, values);
+                Navigator.pop(context);
+              },
+            ),
+          ),
         );
       },
     );
@@ -99,9 +132,19 @@ class _AlldistributorState extends State<Alldistributor> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Distributors"),
-        // backgroundColor: Colors.green,
+        title: const Text("Distributors",
+            style: TextStyle(
+              fontSize: 23,
+              fontWeight: FontWeight.bold,
+            )),
         actions: [
+          ElevatedButton(
+            onPressed: _addDistributor,
+            child: const Text("+ Add Distributor",
+                style: TextStyle(
+                  color: Colors.black,
+                )),
+          ),
           IconButton(
             tooltip: "Export to Excel",
             onPressed: () {
@@ -126,17 +169,22 @@ class _AlldistributorState extends State<Alldistributor> {
             },
             icon: const Icon(Icons.file_download),
           ),
+          IconButton(
+            tooltip: " Delete all Distributor",
+            icon: const Icon(Icons.delete),
+            onPressed: _deleteAllStocks,
+          ),
         ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            ElevatedButton(
-              onPressed: _addDistributor,
-              child: const Text("+ Add Distributor"),
-            ),
-            const SizedBox(height: 10),
+            // ElevatedButton(
+            //   onPressed: _addDistributor,
+            //   child: const Text("+ Add Distributor"),
+            // ),
+            //  const SizedBox(height: 10),
             TextField(
               decoration: InputDecoration(
                 labelText: "Search by name",
@@ -152,88 +200,97 @@ class _AlldistributorState extends State<Alldistributor> {
               },
             ),
             const SizedBox(height: 10),
-            Center(
-              child: SingleChildScrollView(
-                scrollDirection: Axis.vertical,
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: ValueListenableBuilder(
-                    valueListenable: distributorBox.listenable(),
-                    builder: (context, Box box, _) {
-                      if (box.isEmpty) {
-                        return const Center(
-                          child: Padding(
-                            padding: EdgeInsets.all(16.0),
-                            child: Text("No Distributors Added"),
-                          ),
-                        );
-                      }
+            Expanded(
+              child: ValueListenableBuilder(
+                valueListenable: distributorBox.listenable(),
+                builder: (context, Box box, _) {
+                  if (box.isEmpty) {
+                    return const Center(child: Text("No Distributors Added"));
+                  }
 
-                      final distributors = box.keys
-                          .map((key) => {"key": key, "data": box.get(key)})
-                          .where((entry) {
-                        final data = entry["data"] as Map;
-                        final name =
-                            (data["Name"] ?? "").toString().toLowerCase();
-                        return name.contains(searchQuery);
-                      }).toList();
+                  final distributors = box.keys
+                      .map((key) => {"key": key, "data": box.get(key)})
+                      .where((entry) {
+                    final data = entry["data"] as Map;
+                    final name = (data["Name"] ?? "").toString().toLowerCase();
+                    return name.contains(searchQuery);
+                  }).toList();
 
-                      distributors.sort((a, b) {
-                        final aName =
-                            (a["data"]["Name"] ?? "").toString().toLowerCase();
-                        final bName =
-                            (b["data"]["Name"] ?? "").toString().toLowerCase();
-                        return aName.compareTo(bName);
-                      });
-
-                      return DataTable(
-                        columns: const [
-                          DataColumn(label: Text("Name")),
-                          DataColumn(label: Text("Manager Name")),
-                          DataColumn(label: Text("Manager Number")),
-                          DataColumn(label: Text("Booking Man1")),
-                          DataColumn(label: Text("Booking Man1 Number")),
-                          DataColumn(label: Text("Booking Man2")),
-                          DataColumn(label: Text("Booking Man2 Number")),
-                          DataColumn(label: Text("Supply Man Name")),
-                          DataColumn(label: Text("Supply Man Number")),
-                          DataColumn(label: Text("Actions")),
-                        ],
-                        rows: distributors.map((entry) {
-                          final distributor = entry["data"] as Map;
-                          final key = entry["key"];
-                          return DataRow(cells: [
-                            DataCell(Text(distributor["Name"] ?? "")),
-                            DataCell(Text(distributor["ManagerName"] ?? "")),
-                            DataCell(Text(distributor["ManagerNumber"] ?? "")),
-                            DataCell(Text(distributor["BookingMan1"] ?? "")),
-                            DataCell(
-                                Text(distributor["BookingMan1Number"] ?? "")),
-                            DataCell(Text(distributor["BookingMan2"] ?? "")),
-                            DataCell(
-                                Text(distributor["BookingMan2Number"] ?? "")),
-                            DataCell(Text(distributor["SupplyManName"] ?? "")),
-                            DataCell(
-                                Text(distributor["SupplyManNumber"] ?? "")),
-                            DataCell(Row(children: [
-                              IconButton(
-                                icon:
-                                    const Icon(Icons.edit, color: Colors.blue),
-                                onPressed: () =>
-                                    _editDistributor(key, distributor),
-                              ),
-                              IconButton(
-                                icon:
-                                    const Icon(Icons.delete, color: Colors.red),
-                                onPressed: () => _deleteDistributor(key),
-                              ),
-                            ])),
-                          ]);
-                        }).toList(),
-                      );
-                    },
-                  ),
-                ),
+                  return SingleChildScrollView(
+                    child: PaginatedDataTable(
+                      //  header: const Text("All Distributors"),
+                      // header: Row(
+                      //   mainAxisAlignment:
+                      //       MainAxisAlignment.spaceBetween, // spread out
+                      //   children: [
+                      //     const Text("All Distributors",
+                      //         style: TextStyle(
+                      //           fontSize: 23,
+                      //           fontWeight: FontWeight.bold,
+                      //         )),
+                      //     Row(
+                      //       children: [
+                      //         ElevatedButton(
+                      //           onPressed: _addDistributor,
+                      //           child: const Text("+ Add Distributor",
+                      //               style: TextStyle(
+                      //                 color: Colors.black,
+                      //               )),
+                      //         ),
+                      //         IconButton(
+                      //           tooltip: "Export to Excel",
+                      //           onPressed: () {
+                      //             ExcelHelper.exportToExcel(
+                      //               context: context,
+                      //               boxes: [distributorBox],
+                      //               sheetName: "All Distributor",
+                      //               fileName: "All Distributor",
+                      //               headers: distributorFields,
+                      //             );
+                      //           },
+                      //           icon: const Icon(Icons.file_upload),
+                      //         ),
+                      //         IconButton(
+                      //           tooltip: "Import from Excel",
+                      //           onPressed: () {
+                      //             ExcelHelper.importFromExcel(
+                      //               context: context,
+                      //               boxes: [distributorBox],
+                      //               headers: distributorFields,
+                      //             );
+                      //           },
+                      //           icon: const Icon(Icons.file_download),
+                      //         ),
+                      //       ],
+                      //     ),
+                      //   ],
+                      // ),
+                      rowsPerPage: _rowsPerPage,
+                      availableRowsPerPage: const [5, 10, 20, 50],
+                      onRowsPerPageChanged: (value) {
+                        if (value != null) {
+                          setState(() {
+                            _rowsPerPage = value;
+                          });
+                        }
+                      },
+                      columnSpacing: 20,
+                      horizontalMargin: 10,
+                      columns: const [
+                        DataColumn(label: Text("Name")),
+                        DataColumn(label: Text("Manager")),
+                        DataColumn(label: Text("Booking Man")),
+                        DataColumn(label: Text("Supply Man")),
+                        DataColumn(label: Text("Actions")),
+                      ],
+                      source: _DistributorDataSource(
+                        distributors,
+                        _editDistributor,
+                        _deleteDistributor,
+                      ),
+                    ),
+                  );
+                },
               ),
             ),
           ],
@@ -241,4 +298,49 @@ class _AlldistributorState extends State<Alldistributor> {
       ),
     );
   }
+}
+
+// Custom DataTableSource
+class _DistributorDataSource extends DataTableSource {
+  final List<dynamic> distributors;
+  final Function(dynamic, Map) onEdit;
+  final Function(dynamic) onDelete;
+
+  _DistributorDataSource(this.distributors, this.onEdit, this.onDelete);
+
+  @override
+  DataRow? getRow(int index) {
+    if (index >= distributors.length) return null;
+    final entry = distributors[index];
+    final distributor = entry["data"] as Map;
+    final key = entry["key"];
+
+    return DataRow(cells: [
+      DataCell(Text(distributor["Name"] ?? "")),
+      DataCell(Text(distributor["Manager"] ?? "")),
+      DataCell(Text(distributor["Booking Man"] ?? "")),
+      DataCell(Text(distributor["Supply Man"] ?? "")),
+      DataCell(Row(
+        children: [
+          IconButton(
+            icon: const Icon(Icons.edit, color: Colors.blue),
+            onPressed: () => onEdit(key, distributor),
+          ),
+          IconButton(
+            icon: const Icon(Icons.delete, color: Colors.red),
+            onPressed: () => onDelete(key),
+          ),
+        ],
+      )),
+    ]);
+  }
+
+  @override
+  bool get isRowCountApproximate => false;
+
+  @override
+  int get rowCount => distributors.length;
+
+  @override
+  int get selectedRowCount => 0;
 }

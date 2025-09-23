@@ -230,6 +230,40 @@ class NonRetailStockPrices extends StatefulWidget {
 }
 
 class _NonRetailStockPricesState extends State<NonRetailStockPrices> {
+  Future<void> _deleteAllStocks() async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text("Confirm Delete"),
+        content: const Text(
+            "Are you sure you want to delete ALL stocks? This action cannot be undone."),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text("Cancel"),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text("Delete All"),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      await nonRetailBox.clear();
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("All stocks deleted successfully!")),
+      );
+      setState(() {}); // refresh UI
+    }
+  }
+
   late Box nonRetailBox;
   String searchQuery = "";
   int _rowsPerPage = 20;
@@ -437,9 +471,20 @@ class _NonRetailStockPricesState extends State<NonRetailStockPrices> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Non Retail Stocks"),
-        centerTitle: true,
+        title: const Text("Non paid Stocks",
+            style: TextStyle(
+              fontSize: 23,
+              fontWeight: FontWeight.bold,
+            )),
+        // centerTitle: true,
         actions: [
+          ElevatedButton(
+            onPressed: _addStocks,
+            child: const Text("+ Add Non Paid Stock",
+                style: TextStyle(
+                  color: Colors.black,
+                )),
+          ),
           IconButton(
             icon: const Icon(Icons.file_upload),
             tooltip: "Export to Excel",
@@ -449,6 +494,11 @@ class _NonRetailStockPricesState extends State<NonRetailStockPrices> {
             tooltip: "Import from Excel",
             icon: const Icon(Icons.file_download),
             onPressed: _importFromExcel,
+          ),
+          IconButton(
+            tooltip: " Delete all stocks",
+            icon: const Icon(Icons.delete),
+            onPressed: _deleteAllStocks,
           ),
         ],
       ),
@@ -472,10 +522,10 @@ class _NonRetailStockPricesState extends State<NonRetailStockPrices> {
               },
             ),
           ),
-          ElevatedButton(
-            onPressed: _addStocks, // ✅ now it exists
-            child: const Text("+ Add Non Retail Stock"),
-          ),
+          // ElevatedButton(
+          //   onPressed: _addStocks,
+          //   child: const Text("+ Add Non Retail Stock"),
+          // ),
 
           // Paginated DataTable
           Expanded(
@@ -510,13 +560,45 @@ class _NonRetailStockPricesState extends State<NonRetailStockPrices> {
                 return LayoutBuilder(
                   builder: (context, constraints) {
                     final totalWidth = constraints.maxWidth;
-                    final fractions = [0.35, 0.25, 0.25, 0.15];
+                    final fractions = [0.30, 0.20, 0.20, 0.15];
                     final colWidths =
                         fractions.map((f) => totalWidth * f).toList();
 
                     return SingleChildScrollView(
                       child: PaginatedDataTable(
-                        header: const Text("Non Retail Stocks"),
+                        //  header: const Text("Non Retail Stocks"),
+                        header: Row(
+                          mainAxisAlignment:
+                              MainAxisAlignment.spaceBetween, // spread out
+                          children: [
+                            const Text("Non Retail Stocks",
+                                style: TextStyle(
+                                  fontSize: 23,
+                                  fontWeight: FontWeight.bold,
+                                )),
+                            Row(
+                              children: [
+                                ElevatedButton(
+                                  onPressed: _addStocks,
+                                  child: const Text("+ Add Non Retail Stocks",
+                                      style: TextStyle(
+                                        color: Colors.black,
+                                      )),
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.file_upload),
+                                  tooltip: "Export to Excel",
+                                  onPressed: _exportToExcel,
+                                ),
+                                IconButton(
+                                  tooltip: "Import from Excel",
+                                  icon: const Icon(Icons.file_download),
+                                  onPressed: _importFromExcel,
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
                         rowsPerPage: _rowsPerPage,
                         availableRowsPerPage: const [10, 20, 50, 100],
                         onRowsPerPageChanged: (value) {
