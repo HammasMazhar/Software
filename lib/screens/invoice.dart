@@ -1,7 +1,10 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
@@ -675,7 +678,7 @@ class _InvoiceScreenState extends State<InvoiceScreen>
                                 flex: 1,
                                 child: TextField(
                                   controller: totalController,
-                                  readOnly: true,
+                                  // readOnly: true,
                                   decoration: const InputDecoration(
                                     ////////////////////////////////////
                                     isDense: true,
@@ -743,7 +746,7 @@ class _InvoiceScreenState extends State<InvoiceScreen>
                     ),
                   ),
 
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 1),
 
                   // Cart Table
                   Card(
@@ -989,15 +992,27 @@ class _InvoiceScreenState extends State<InvoiceScreen>
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             const SizedBox(width: 16),
+                            // ElevatedButton.icon(
+                            //   onPressed:
+                            //       cart.isEmpty ? null : _saveAndPrintInvoice,
+                            //   icon: const Icon(Icons.print),
+                            //   label: const Text('Save & Print Invoice'),
+                            //   style: ElevatedButton.styleFrom(
+                            //       // backgroundColor: Colors.green,
+                            //       // foregroundColor: Colors.white,
+                            //       ),
+                            // ),
                             ElevatedButton.icon(
                               onPressed:
-                                  cart.isEmpty ? null : _saveAndPrintInvoice,
+                                  _saveAndPrintInvoice, // your existing print logic
                               icon: const Icon(Icons.print),
-                              label: const Text('Save & Print Invoice'),
-                              style: ElevatedButton.styleFrom(
-                                  // backgroundColor: Colors.green,
-                                  // foregroundColor: Colors.white,
-                                  ),
+                              label: const Text("Print Bill"),
+                            ),
+                            const SizedBox(width: 10),
+                            ElevatedButton.icon(
+                              onPressed: _saveBillAsPDF, // new save pdf logic
+                              icon: const Icon(Icons.picture_as_pdf),
+                              label: const Text("Save PDF"),
                             ),
                             const SizedBox(width: 16),
                             ElevatedButton.icon(
@@ -1035,7 +1050,7 @@ class _InvoiceScreenState extends State<InvoiceScreen>
                 ]))));
   }
 
-  Future<void> _saveAndPrintInvoice() async {
+  Future<void> _saveAndPrintInvoice({bool justSave = false}) async {
     final pdf = pw.Document();
     final fontUrdu = pw.Font.ttf(await rootBundle.load('asset/1.ttf'));
 
@@ -1063,6 +1078,9 @@ class _InvoiceScreenState extends State<InvoiceScreen>
     };
 
     await viewsalesBox.add(saleData);
+    if (justSave) {
+      return;
+    }
 
     final Object? grandTotal = saleData["grandTotal"];
 
@@ -1262,17 +1280,204 @@ class _InvoiceScreenState extends State<InvoiceScreen>
       ),
     );
 
+//     bool result =
+//         await Printing.layoutPdf(onLayout: (format) async => pdf.save());
+
+//     setState(() {
+//       if (result == true) {
+//         bills.remove(activeBill);
+//         _createNewBill();
+//         customerController.clear();
+//         counterPersonController.clear();
+//         priceController.clear();
+//         nameController.clear();
+//         qtyController.clear();
+//       }
+//       return;
+//     });
+//   }
+// }
     bool result =
         await Printing.layoutPdf(onLayout: (format) async => pdf.save());
 
-    setState(() {
-      if (result == true) {
+    // ✅ Only clear if print was successful
+    if (result == true) {
+      setState(() {
         bills.remove(activeBill);
         _createNewBill();
         customerController.clear();
         counterPersonController.clear();
-      }
-      return;
-    });
+        priceController.clear();
+        nameController.clear();
+        qtyController.clear();
+      });
+    }
+  }
+
+  Future<void> _saveBillAsPDF() async {
+    final pdf = pw.Document();
+    final fontUrdu = pw.Font.ttf(await rootBundle.load('asset/1.ttf'));
+
+    final now = DateTime.now();
+    final formattedDateTime =
+        "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')} "
+        "${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}";
+
+    final double grandTotal = cart.fold(
+      0.0,
+      (sum, item) => sum + (item['price'] as double? ?? 0.0),
+    );
+
+    // --- same builders as in print logic ---
+    pw.Widget boldUrduText(String text, {double fontSize = 12}) {
+      return pw.Text(
+        text,
+        style: pw.TextStyle(
+          font: fontUrdu,
+          fontSize: fontSize,
+          fontWeight: pw.FontWeight.bold,
+        ),
+        textDirection: pw.TextDirection.rtl,
+      );
+    }
+
+    pw.Widget buildHeader() => pw.Column(
+          crossAxisAlignment: pw.CrossAxisAlignment.center,
+          children: [
+            pw.Text('Al-Shifa Medical Store',
+                style:
+                    pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold)),
+            boldUrduText(' الشفاء میڈیکل سٹور', fontSize: 18),
+            pw.SizedBox(height: 2),
+            pw.Text('Jhanda Peer Road, Waris-pura (Faisalabad)',
+                style: pw.TextStyle(fontSize: 9)),
+            pw.Text('LIC#: 06-331-0166-87626M',
+                style: pw.TextStyle(fontSize: 9)),
+            pw.SizedBox(height: 5),
+            pw.Text("Date: $formattedDateTime",
+                style: pw.TextStyle(fontSize: 9)),
+            pw.Divider(),
+          ],
+        );
+
+    pw.Widget buildTableHeader() => pw.Row(children: [
+          pw.SizedBox(
+              width: 20,
+              child: pw.Text('#',
+                  style: pw.TextStyle(
+                      fontSize: 9, fontWeight: pw.FontWeight.bold))),
+          pw.Expanded(
+              flex: 5,
+              child: pw.Text('Item Name',
+                  style: pw.TextStyle(
+                      fontSize: 9, fontWeight: pw.FontWeight.bold))),
+          pw.Expanded(
+              flex: 2,
+              child: pw.Text('Qty',
+                  style: pw.TextStyle(
+                      fontSize: 9, fontWeight: pw.FontWeight.bold))),
+          pw.Expanded(
+              flex: 3,
+              child: pw.Text('Price',
+                  style: pw.TextStyle(
+                      fontSize: 9, fontWeight: pw.FontWeight.bold))),
+          pw.Expanded(
+              flex: 3,
+              child: pw.Text('Total',
+                  style: pw.TextStyle(
+                      fontSize: 9, fontWeight: pw.FontWeight.bold))),
+        ]);
+
+    pw.Widget buildTableRows() => pw.Column(
+          children: cart.asMap().entries.map((entry) {
+            final i = entry.key + 1;
+            final item = entry.value;
+            return pw.Row(children: [
+              pw.SizedBox(
+                  width: 20,
+                  child: pw.Text('$i', style: pw.TextStyle(fontSize: 9))),
+              pw.Expanded(
+                  flex: 5,
+                  child: pw.Text('${item['name'] ?? ''}',
+                      style: pw.TextStyle(fontSize: 9))),
+              pw.Expanded(
+                  flex: 2,
+                  child: pw.Text('${item['qty'] ?? 0}',
+                      style: pw.TextStyle(fontSize: 9))),
+              pw.Expanded(
+                  flex: 3,
+                  child: pw.Text(
+                      '${(item['unitPrice'] as num?)?.toStringAsFixed(2) ?? "0.00"}',
+                      style: pw.TextStyle(fontSize: 9))),
+              pw.Expanded(
+                  flex: 3,
+                  child: pw.Text(
+                      '${(item['price'] as num?)?.toStringAsFixed(2) ?? "0.00"}',
+                      style: pw.TextStyle(fontSize: 9))),
+            ]);
+          }).toList(),
+        );
+
+    pw.Widget buildTotals() => pw.Column(
+          crossAxisAlignment: pw.CrossAxisAlignment.end,
+          children: [
+            pw.SizedBox(height: 4),
+            pw.Text('Total items: ${cart.length}',
+                style: pw.TextStyle(fontSize: 9)),
+            pw.Text(
+              'Net Total: ${grandTotal.toStringAsFixed(2)}',
+              style: pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold),
+            ),
+          ],
+        );
+    pw.Widget buildFooter() => pw.Column(
+          crossAxisAlignment: pw.CrossAxisAlignment.start,
+          children: [
+            pw.SizedBox(height: 5),
+            pw.Text('Sold By: ${counterPersonController.text}',
+                style: pw.TextStyle(fontSize: 9)),
+            pw.Divider(),
+            boldUrduText(
+                ' بل کے ساتھ 15 دن کےاندرادویات کی واپسی ممکن ہےورنہ نہیں',
+                fontSize: 7),
+            boldUrduText('.فریج آئٹمز، کاسمیٹکس کی واپسی اور تبدیلی ممکن نہیں',
+                fontSize: 7),
+            boldUrduText('خریداری کے لئے شکریہ!', fontSize: 7),
+          ],
+        );
+
+    final customFormat = PdfPageFormat.roll80.copyWith(
+      marginTop: 0,
+      marginBottom: 5,
+      marginLeft: 10,
+      marginRight: 10,
+    );
+
+    pdf.addPage(
+      pw.Page(
+        pageFormat: customFormat,
+        build: (context) => pw.Column(
+          crossAxisAlignment: pw.CrossAxisAlignment.start,
+          children: [
+            buildHeader(),
+            buildTableHeader(),
+            pw.Divider(),
+            buildTableRows(),
+            pw.Divider(),
+            buildTotals(),
+            buildFooter(),
+          ],
+        ),
+      ),
+    );
+
+    // Save the PDF file locally
+    final downloads = await getDownloadsDirectory(); // Windows/macOS/Linux
+    final file =
+        File("${downloads!.path}/Bill_${now.millisecondsSinceEpoch}.pdf");
+    await file.writeAsBytes(await pdf.save());
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text("PDF saved at: ${file.path}")),
+    );
   }
 }

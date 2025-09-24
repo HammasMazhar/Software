@@ -142,6 +142,29 @@ class _ViewsaleState extends State<Viewsale> {
 
   @override
   Widget build(BuildContext context) {
+    // final sales = viewsalesBox.values.toList();
+
+    // final filteredSales = List.generate(sales.length, (i) {
+    //   final bill = sales[i];
+    //   if (bill is Map) {
+    //     return {"index": i, "bill": bill};
+    //   }
+    //   return null;
+    // }).whereType<Map<String, dynamic>>().toList();
+
+    // final searchFiltered = filteredSales.where((entry) {
+    //   final bill = entry["bill"];
+    //   final customer = (bill["customer"]?.toString() ?? "").toLowerCase();
+    //   final medicine =
+    //       (bill["items"][0]["name"]?.toString() ?? "").toLowerCase();
+    //   return customer.contains(searchQuery) || medicine.contains(searchQuery);
+    // }).toList();
+
+    // searchFiltered.sort((a, b) {
+    //   final billNoA = a["bill"]["billNo"] ?? 0;
+    //   final billNoB = b["bill"]["billNo"] ?? 0;
+    //   return billNoB.compareTo(billNoA);
+    // });
     final sales = viewsalesBox.values.toList();
 
     final filteredSales = List.generate(sales.length, (i) {
@@ -155,9 +178,17 @@ class _ViewsaleState extends State<Viewsale> {
     final searchFiltered = filteredSales.where((entry) {
       final bill = entry["bill"];
       final customer = (bill["customer"]?.toString() ?? "").toLowerCase();
-      final medicine =
-          (bill["items"][0]["name"]?.toString() ?? "").toLowerCase();
-      return customer.contains(searchQuery) || medicine.contains(searchQuery);
+
+      // ✅ Safely handle empty/null items
+      final items = (bill["items"] as List?) ?? [];
+      final medicines = items
+          .map((item) => (item["name"]?.toString() ?? "").toLowerCase())
+          .toList();
+
+      final matchesMedicine =
+          medicines.any((m) => m.contains(searchQuery.toLowerCase()));
+
+      return customer.contains(searchQuery.toLowerCase()) || matchesMedicine;
     }).toList();
 
     searchFiltered.sort((a, b) {

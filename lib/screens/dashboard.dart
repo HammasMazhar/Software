@@ -163,7 +163,7 @@ class _DashboardState extends State<Dashboard> {
       body: Row(
         children: [
           Container(
-            width: 260,
+            width: 200,
             color: Colors.white,
             child: ListView(
               children: [
