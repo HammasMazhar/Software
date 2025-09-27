@@ -1501,6 +1501,21 @@ class InvoiceScreen extends StatefulWidget {
 
 class _InvoiceScreenState extends State<InvoiceScreen>
     with AutomaticKeepAliveClientMixin {
+  double roundNetTotal(double gross) {
+    final int whole = gross.floor();
+    final double decimal = gross - whole;
+
+    double rounded;
+    if (decimal >= 0.50) {
+      rounded = (whole + 1).toDouble();
+    } else {
+      rounded = whole.toDouble();
+    }
+
+    // Always force .00 style (2 decimals)
+    return double.parse(rounded.toStringAsFixed(2));
+  }
+
   @override
   bool get wantKeepAlive => true;
 
@@ -2431,11 +2446,26 @@ class _InvoiceScreenState extends State<InvoiceScreen>
                                         //     'Subtotal: Rs. ${subtotal.toStringAsFixed(2)}'),
                                         Text(
                                             'Discount: Rs. ${discount.toStringAsFixed(2)}'),
+                                        // Text(
+                                        //   ' Total: Rs. ${grandTotal.toStringAsFixed(2)}',
+                                        //   style: const TextStyle(
+                                        //       fontWeight: FontWeight.bold,
+                                        //       fontSize: 18),
+                                        // ),
                                         Text(
-                                          ' Total: Rs. ${grandTotal.toStringAsFixed(2)}',
+                                          'Gross Total: Rs. ${grandTotal.toStringAsFixed(2)}',
                                           style: const TextStyle(
                                               fontWeight: FontWeight.bold,
                                               fontSize: 18),
+                                        ),
+                                        Text(
+                                          // 'Net Total: Rs. ${roundNetTotal(grandTotal).toStringAsFixed(0)}',
+                                          "Net Total: ${roundNetTotal(grandTotal)}",
+
+                                          style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 18,
+                                              color: Colors.green),
                                         ),
                                       ],
                                     ),
@@ -2479,16 +2509,6 @@ class _InvoiceScreenState extends State<InvoiceScreen>
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             const SizedBox(width: 16),
-                            // ElevatedButton.icon(
-                            //   onPressed:
-                            //       cart.isEmpty ? null : _saveAndPrintInvoice,
-                            //   icon: const Icon(Icons.print),
-                            //   label: const Text('Save & Print Invoice'),
-                            //   style: ElevatedButton.styleFrom(
-                            //       // backgroundColor: Colors.green,
-                            //       // foregroundColor: Colors.white,
-                            //       ),
-                            // ),
                             ElevatedButton.icon(
                               onPressed:
                                   _saveAndPrintInvoice, // your existing print logic
@@ -2524,10 +2544,7 @@ class _InvoiceScreenState extends State<InvoiceScreen>
                               },
                               icon: const Icon(Icons.clear),
                               label: const Text('Clear All'),
-                              style: ElevatedButton.styleFrom(
-                                  // backgroundColor: Colors.orange,
-                                  // foregroundColor: Colors.white,
-                                  ),
+                              style: ElevatedButton.styleFrom(),
                             ),
                           ],
                         ),
@@ -2569,7 +2586,9 @@ class _InvoiceScreenState extends State<InvoiceScreen>
       return;
     }
 
-    final Object? grandTotal = saleData["grandTotal"];
+    // final Object? grandTotal = saleData["grandTotal"];
+    final double grandTotal =
+        (saleData["grandTotal"] as num?)?.toDouble() ?? 0.0;
 
     pw.Widget boldUrduText(String text, {double fontSize = 12}) {
       return pw.Text(
@@ -2693,6 +2712,32 @@ class _InvoiceScreenState extends State<InvoiceScreen>
       );
     }
 
+    // pw.Widget buildTotals() {
+    //   return pw.Column(
+    //     crossAxisAlignment: pw.CrossAxisAlignment.end,
+    //     children: [
+    //       pw.SizedBox(height: 4),
+    //       pw.Row(
+    //         mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+    //         children: [
+    //           pw.Text(
+    //             'Total items: ${cart?.length ?? 0}',
+    //             style: pw.TextStyle(fontSize: 9),
+    //           ),
+
+    //         ],
+    //       ),
+    //       pw.Text(
+    //         'Net Total:${(grandTotal as num?)?.toStringAsFixed(2) ?? "0.00"}',
+    //         style: pw.TextStyle(
+    //           fontWeight: pw.FontWeight.bold,
+    //           fontSize: 11,
+    //         ),
+    //       ),
+
+    //     ],
+    //   );
+    // }
     pw.Widget buildTotals() {
       return pw.Column(
         crossAxisAlignment: pw.CrossAxisAlignment.end,
@@ -2702,17 +2747,18 @@ class _InvoiceScreenState extends State<InvoiceScreen>
             mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
             children: [
               pw.Text(
-                'Total items: ${cart?.length ?? 0}',
+                'Total items: ${cart.length}',
                 style: pw.TextStyle(fontSize: 9),
               ),
             ],
           ),
           pw.Text(
-            'Net Total:${(grandTotal as num?)?.toStringAsFixed(2) ?? "0.00"}',
-            style: pw.TextStyle(
-              fontWeight: pw.FontWeight.bold,
-              fontSize: 11,
-            ),
+            'Gross Total: ${grandTotal.toStringAsFixed(2)}',
+            style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 11),
+          ),
+          pw.Text(
+            'Net Total: ${roundNetTotal(grandTotal)}',
+            style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 11),
           ),
         ],
       );
@@ -2767,27 +2813,10 @@ class _InvoiceScreenState extends State<InvoiceScreen>
       ),
     );
 
-//     bool result =
-//         await Printing.layoutPdf(onLayout: (format) async => pdf.save());
-
-//     setState(() {
-//       if (result == true) {
-//         bills.remove(activeBill);
-//         _createNewBill();
-//         customerController.clear();
-//         counterPersonController.clear();
-//         priceController.clear();
-//         nameController.clear();
-//         qtyController.clear();
-//       }
-//       return;
-//     });
-//   }
 // }
     bool result =
         await Printing.layoutPdf(onLayout: (format) async => pdf.save());
 
-    // ✅ Only clear if print was successful
     if (result == true) {
       setState(() {
         bills.remove(activeBill);
@@ -2911,8 +2940,16 @@ class _InvoiceScreenState extends State<InvoiceScreen>
             pw.SizedBox(height: 4),
             pw.Text('Total items: ${cart.length}',
                 style: pw.TextStyle(fontSize: 9)),
+            // pw.Text(
+            //   'Net Total: ${grandTotal.toStringAsFixed(2)}',
+            //   style: pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold),
+            // ),
             pw.Text(
-              'Net Total: ${grandTotal.toStringAsFixed(2)}',
+              'Gross Total: ${grandTotal.toStringAsFixed(2)}',
+              style: pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold),
+            ),
+            pw.Text(
+              'Net Total: ${roundNetTotal(grandTotal)}',
               style: pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold),
             ),
           ],
